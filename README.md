@@ -1,5 +1,5 @@
 -----
-##rad 
+##rad
 rad is my vanilla javascript framework.
 -----
 ##use
