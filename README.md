@@ -1,9 +1,11 @@
 -----
 ##rad
+
 rad is my vanilla javascript framework.
 -----
 ##use
-include rad.js
+
+include rad.js 
 include includes.js
 ```
 <script type="text/javascript" language="Javascript" src="rad/rad.js"></script>
