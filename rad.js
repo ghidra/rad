@@ -5,13 +5,14 @@ rad.includes={
 	use_modules:[],
 	init_modules:function(path){
 		this.module_path=path;
-		//this.use_modules=[this.module_path+"rad_core.js"];
+		this.use_modules=[this.module_path+"core.js"];
 	},
 	modules:function(libs){
 		for(var i in libs){
-			libs[i]=this.module_path+libs[i];
+			libs[i]=this.module_path+libs[i]+".js";
 		}
-		this.use_modules.concat(libs);
+		this.use_modules = this.use_modules.concat(libs);
+		//this.use_modules=libs;
 	},
 	use_files:[],
 	source:function(files){

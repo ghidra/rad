@@ -15,7 +15,3 @@ rad.objhasprop=function(o){
   	}
   	return false;
 }
-rad.totype=function(obj){
-  //http://stackoverflow.com/questions/7390426/better-way-to-get-type-of-a-javascript-variable
-  return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
-}
