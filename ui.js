@@ -1,4 +1,26 @@
 // !!!! requires mouse module 
+
+//-----------base class
+rad.ui=function(){
+	return this;
+}
+rad.ui.prototype.init=function(d){
+	this.id = (d.id!=undefined)?d.id:"";
+	this.label = (d.label!=undefined)?d.label:"";
+	this.value = (d.value!=undefined)?d.value:"0";
+
+	this.width = (d.width)?d.width:10;
+	this.width_label = (d.width_label)?d.width_label:10;
+	this.margin = (d.margin)?d.margin:0;
+
+	this.fontsize = (d.fontsize)?d.fontsize:10;
+
+	this.element = document.createElement("DIV");
+}
+rad.ui.prototype.get_element=function(){
+	return this.element;
+}
+
 //-----------dropdown
 rad.dropdown=function(d){
 	/*{
@@ -12,31 +34,26 @@ rad.dropdown=function(d){
 		"fontsize":1,
 		"callback":function(){}
 	}*/
-	this.id = (d.id!=undefined)?d.id:"";
-	this.label = (d.label!=undefined)?d.label:"";
-	this.options = (d.options)?d.options:[];
-	this.val = (d.val!=undefined)?d.val:"0";
-	//this.is_object = object;
+	rad.ui.prototype.init.call(this,d);
 
-	this.element = document.createElement("DIV");
-	
+	this.options = (d.options)?d.options:[];
+
 	//label
-	var lw = (d.width_label)?d.width_label:0;
-	if(lw>0){
+	if(this.width_label>0){
 		var dd_label = document.createElement("DIV");
 		//dd_label.style.float = "left";
 		dd_label.className="dd_label_ui";
 		dd_label.innerHTML = "&nbsp;"+this.label;
-		dd_label.style.fontSize=(d.fontsize)?d.fontsize:10;
-		dd_label.style.maxWidth = lw+"px";
-		dd_label.style.margin = (d.margin)?d.margin:0+"px";
+		dd_label.style.fontSize=this.fontsize;
+		dd_label.style.maxWidth = this.width_label+"px";
+		dd_label.style.margin = this.margin+"px";
 	}
 
 	this.element.style.clear="both";
 
 	var dd = document.createElement("SELECT");
 	//dd.style.float = "right";
-	dd.style.width=(d.width)?d.width:10+"px";
+	dd.style.width=this.width+"px";
 	dd.id = "dd_"+this.id+"_"+this.label;
 	
 	//the function
@@ -54,12 +71,55 @@ rad.dropdown=function(d){
 		opt.innerHTML = d.options[option];
 		dd.appendChild(opt);
 	}
-	if(lw>0)this.element.appendChild(dd_label);
+	if(this.width_label>0)this.element.appendChild(dd_label);
 	this.element.appendChild(dd);
 	
 	//return this.element;
 	return this;
 }
+rad.dropdown.prototype=new rad.ui();
+rad.dropdown.prototype.constructor=rad.ui;
+//-----------textbox
+rad.textbox=function(d){
+	/*{
+		"id":"",
+		"label":"",
+		"value":"",
+		"width":1,
+		"width_label":0,
+		"margin":0,
+		"fontsize":1,
+		"callback":function(){}
+	}*/
+	rad.ui.prototype.init.call(this,d);
+	
+	if(this.width_label>0){
+		var s_label = document.createElement("DIV");
+		s_label.className="textbox_label_ui";
+		s_label.innerHTML = "&nbsp;"+this.label;
+		s_label.style.fontSize=this.fontsize;
+		s_label.style.maxWidth = this.width_label+"px";
+		s_label.style.margin = this.margin+"px";
+	}
+	this.element.style.clear="both";
+
+	var s = document.createElement("INPUT");
+	s.type = "text";
+	s.value=this.value;
+	//dd.style.float = "right";
+	s.style.width=this.width+"px";
+	//console.log(this.width_input+"px");
+	s.id = "tb_"+this.id+"_"+this.label;
+	var _this = this;
+	s.onchange=function(e){d.callback(_this)};
+
+	if(this.width_label>0)this.element.appendChild(s_label);
+	this.element.appendChild(s);
+
+	return this;
+}
+rad.textbox.prototype=new rad.ui();
+rad.textbox.prototype.constructor=rad.ui;
 
 //-----------slider
 rad.slider=function(d){
@@ -74,18 +134,17 @@ rad.slider=function(d){
 		"fontsize":1,
 		"callback":function(){}
 	}*/
-	this.id = (d.id!=undefined)?d.id:"";;
-	this.label = (d.label!=undefined)?d.label:"";;
-	this.value = (d.value!=undefined)?d.value:0;
+	rad.ui.prototype.init.call(this,d);
+
 	this.keep=false;//what is this shit?
 	this.width_in = (d.width_input)?d.width_input:40;//with of the input box
-	var margin = (d.margin)?d.margin:0;
-	var width = (d.width)?d.width:100;
-	this.width_max = (width-this.width_in-(margin*3));
+	//var margin = (d.margin)?d.margin:0;
+	//var width = (d.width)?d.width:100;
+	this.width_max = (this.width-this.width_in-(this.margin*3));
 
 	this.callback=d.callback;
 
-	this.element = document.createElement("DIV");
+	//this.element = document.createElement("DIV");
 	var s_label = document.createElement("DIV");
 	var s_con = document.createElement("DIV");
 	this.bg = document.createElement("DIV");
@@ -94,12 +153,11 @@ rad.slider=function(d){
 
 	this.element.style.clear="both";
 
-	var lw = (d.width_label)?d.width_label:0;
-	if(lw){
+	if(this.width_label){
 		s_label.className="slider_label_ui";
 		s_label.innerHTML = "&nbsp;"+this.label;
-		s_label.style.maxWidth = lw+"px";
-		s_label.style.margin = margin+"px";
+		s_label.style.maxWidth = this.width_label+"px";
+		s_label.style.margin = this.margin+"px";
 		s_label.style.fontSize=(d.fontsize)?d.fontsize:10;
 	}
 
@@ -112,9 +170,9 @@ rad.slider=function(d){
 	this.input.type="text";
 	this.input.value=this.value;
 
-	this.bg.style.width=(width-this.width_in-(margin*2))+"px";
-	this.bg.style.marginTop=margin+"px";
-	this.bg.style.marginRight=margin+"px";
+	this.bg.style.width=(this.width-this.width_in-(this.margin*2))+"px";
+	this.bg.style.marginTop=this.margin+"px";
+	this.bg.style.marginRight=this.margin+"px";
 
 	this.fg.style.width=(Math.round(this.width_max/2))+"px";//for debug
 	this.fg.style.maxWidth = this.width_max+"px"
@@ -122,7 +180,7 @@ rad.slider=function(d){
 
 	this.bg.appendChild(this.fg);
 	s_con.appendChild(this.bg);
-	if(lw)this.element.appendChild(s_label);
+	if(this.width_label)this.element.appendChild(s_label);
 	this.element.appendChild(this.input);
 	this.element.appendChild(s_con);
 
@@ -132,6 +190,9 @@ rad.slider=function(d){
 
 	return this;
 }
+
+rad.slider.prototype=new rad.ui();
+rad.slider.prototype.constructor=rad.ui
 
 rad.slider.prototype.mousedown=function(e){
 	if(!this.keep){
