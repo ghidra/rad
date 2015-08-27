@@ -17,7 +17,7 @@ rad.ui.prototype.init=function(d){
 
 	this.element = document.createElement("DIV");
 }
-rad.ui.prototype.get_element=function(){
+rad.ui.prototype.getelement=function(){
 	return this.element;
 }
 
