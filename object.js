@@ -15,3 +15,8 @@ rad.objhasprop=function(o){
   	}
   	return false;
 }
+rad.objclonefast=function(o){
+  //http://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-clone-an-object
+  //dones not clone functions.. this is just for simple data cases
+  return JSON.parse(JSON.stringify(o));
+}

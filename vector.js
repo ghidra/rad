@@ -23,6 +23,18 @@ rad.vector2.prototype.distance=function(v){
 	var n = this.sub(v);
 	return Math.sqrt( (n.x*n.x)+(n.y*n.y) );
 }
+rad.vector2.prototype.dot=function(v){
+	return ( this.x * v.x + this.y * v.y );
+}
+rad.vector2.prototype.len=function(){
+	return Math.sqrt( (this.x*this.x) + (this.y*this.y) );
+}
+rad.vector2.prototype.neg=function(){
+	return new rad.vector2(-this.x,-this.y);
+}
+rad.vector2.prototype.multscalar=function(s){
+	return new rad.vector2(this.x*s,this.y*s);
+}
 //-------
 rad.vector3=function(x,y,z){
 	this.x=(x)?x:0.0;
@@ -52,4 +64,19 @@ rad.vector3.prototype.sub=function(v){
 rad.vector3.prototype.distance=function(v){
 	var n = this.sub(v);
 	return Math.sqrt( (n.x*n.x)+(n.y*n.y)+(n.z*n.z) );
+}
+rad.vector3.prototype.dot=function(v){
+	return ( this.x * v.x + this.y * v.y + this.z * v.z );
+}
+rad.vector3.prototype.len=function(){
+	return Math.sqrt( (this.x*this.x) + (this.y*this.y) + (this.z*this.z) );
+}
+rad.vector3.prototype.cross=function(v){
+	return rad.vector3((this.y * v.z) - (this.z * v.y) ,(this.z * v.x) - (this.x * v.z) ,(this.x * v.y) - (this.y * v.x));
+}
+rad.vector3.prototype.neg=function(){
+	return new rad.vector3(-this.x,-this.y,-this.z);
+}
+rad.vector3.prototype.multscalar=function(s){
+	return new rad.vector3(this.x*s,this.y*s,this.z*s);
 }
