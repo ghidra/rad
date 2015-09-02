@@ -36,7 +36,10 @@ rad.vector2.prototype.multscalar=function(s){
 	return new rad.vector2(this.x*s,this.y*s);
 }
 rad.vector2.prototype.clone=function(v){
-	return new rad.vector2(v.x,v.y);
+	this.x = v.x;
+	this.y = v.y;
+	return this;
+	//return new rad.vector2(v.x,v.y);
 }
 //-------
 rad.vector3=function(x,y,z){
@@ -84,5 +87,8 @@ rad.vector3.prototype.multscalar=function(s){
 	return new rad.vector3(this.x*s,this.y*s,this.z*s);
 }
 rad.vector3.prototype.clone=function(v){
-	return new rad.vector2(v.x,v.y,v.z);
+	this.x = v.x;
+	this.y = v.y;
+	this.z = v.z;
+	return this;
 }
