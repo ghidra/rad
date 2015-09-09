@@ -9,13 +9,17 @@ rad.ui.prototype.init=function(d){
 	this.label = (d.label!=undefined)?d.label:"";
 	this.value = (d.value!=undefined)?d.value:"0";
 
+	this.dtype=(d.dtype!=undefined)?d.dtype:"px"
+
 	this.width = (d.width)?d.width:10;
+	this.height = (d.width)?d.height:10;
 	this.width_label = (d.width_label)?d.width_label:10;
 	this.margin = (d.margin)?d.margin:0;
 
 	this.fontsize = (d.fontsize)?d.fontsize:10;
 
 	this.element = document.createElement("DIV");
+	this.element.id = this.id;
 }
 rad.ui.prototype.getelement=function(){
 	return this.element;
@@ -28,7 +32,9 @@ rad.dropdown=function(d){
 		"label":"",
 		"options":[] || {},
 		"value":0 || "",
+		"dtype":"px",//dimension type
 		"width":1,
+		"height":1,
 		"width_label":0,
 		"margin":0,
 		"fontsize":1,
@@ -45,15 +51,15 @@ rad.dropdown=function(d){
 		dd_label.className="dd_label_ui";
 		dd_label.innerHTML = "&nbsp;"+this.label;
 		dd_label.style.fontSize=this.fontsize;
-		dd_label.style.maxWidth = this.width_label+"px";
-		dd_label.style.margin = this.margin+"px";
+		dd_label.style.maxWidth = this.width_label+this.dtype;
+		dd_label.style.margin = this.margin+this.dtype;
 	}
 
 	this.element.style.clear="both";
 
 	var dd = document.createElement("SELECT");
 	//dd.style.float = "right";
-	dd.style.width=this.width+"px";
+	dd.style.width=this.width+this.dtype;
 	dd.id = "dd_"+this.id+"_"+this.label;
 	
 	//the function
@@ -98,8 +104,8 @@ rad.textbox=function(d){
 		s_label.className="textbox_label_ui";
 		s_label.innerHTML = "&nbsp;"+this.label;
 		s_label.style.fontSize=this.fontsize;
-		s_label.style.maxWidth = this.width_label+"px";
-		s_label.style.margin = this.margin+"px";
+		s_label.style.maxWidth = this.width_label+this.dtype;
+		s_label.style.margin = this.margin+this.dtype;
 	}
 	this.element.style.clear="both";
 
@@ -107,7 +113,7 @@ rad.textbox=function(d){
 	s.type = "text";
 	s.value=this.value;
 	//dd.style.float = "right";
-	s.style.width=this.width+"px";
+	s.style.width=this.width+this.dtype;
 	//console.log(this.width_input+"px");
 	s.id = "tb_"+this.id+"_"+this.label;
 	var _this = this;
@@ -156,7 +162,7 @@ rad.slider=function(d){
 	if(this.width_label){
 		s_label.className="slider_label_ui";
 		s_label.innerHTML = "&nbsp;"+this.label;
-		s_label.style.maxWidth = this.width_label+"px";
+		s_label.style.maxWidth = this.width_label+this.dtype;
 		s_label.style.margin = this.margin+"px";
 		s_label.style.fontSize=(d.fontsize)?d.fontsize:10;
 	}
@@ -170,12 +176,12 @@ rad.slider=function(d){
 	this.input.type="text";
 	this.input.value=this.value;
 
-	this.bg.style.width=(this.width-this.width_in-(this.margin*2))+"px";
-	this.bg.style.marginTop=this.margin+"px";
-	this.bg.style.marginRight=this.margin+"px";
+	this.bg.style.width=(this.width-this.width_in-(this.margin*2))+this.dtype;
+	this.bg.style.marginTop=this.margin+this.dtype;
+	this.bg.style.marginRight=this.margin+this.dtype;
 
-	this.fg.style.width=(Math.round(this.width_max/2))+"px";//for debug
-	this.fg.style.maxWidth = this.width_max+"px"
+	this.fg.style.width=(Math.round(this.width_max/2))+this.dtype;//for debug
+	this.fg.style.maxWidth = this.width_max+this.dtype
 	//dd.id = "dd_node_"+id+"_"+parm;
 
 	this.bg.appendChild(this.fg);
@@ -211,7 +217,7 @@ rad.slider.prototype.input_changed=function(e){
 		//v.value=this.val;//the fuck is v?
 	}else{
 		var bounds = this.bounds(new_value);
-		this.fg.style.width = (this.width_max/2)+"px";
+		this.fg.style.width = (this.width_max/2)+this.dtype;
 		//now set the nodes value
 		this.value = new_value;
 		if (typeof this.callback === "function"){
