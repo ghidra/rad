@@ -25,7 +25,7 @@ rad.panels=function(parent){
 			"height":100,
 			"width_label":0,
 			"dtype":"%",
-			"parent":"NONE"
+			"parent":parent
 		})
 	];
 	
@@ -40,12 +40,14 @@ rad.panels.prototype.draw=function(){
 //my recursive draw function
 rad.panels.prototype.draw_partitions=function(part){
 	if(part.length>1){
+		//if the partition is split, we need to draw the both
 		for( var n in part ){
 			for(var o in part[n].p){
 				rad.panels.draw(part[n].p[o]);//recurviely draw all the way down
 			}
 		}
 	}else if(part.length===1){
+		//if we only have one part, then we need to just draw it by itself
 		part[0].draw();
 	}
 }
@@ -63,6 +65,7 @@ rad.panels.partition.prototype=new rad.ui();
 rad.panels.partition.prototype.constructor=rad.ui;
 
 rad.panels.partition.prototype.draw=function(){
+	console.log("we are drawing");
 	this.element.style.width=this.width+this.dtype;
 	this.element.style.height=this.height+this.dtype;
 	this.element.style.position="relative";
@@ -91,6 +94,8 @@ rad.panels.splitter=function(i,dir){
 	this.element.style.float="right";
 	this.element.style.outline="thin solid #000000";
 	this.element.style.margin="2px 2px 0px 1px";
+	_this=this;
+	this.element.onclick=function(e){_this.split(dir)};
 
 	//the icon to split this thing
 	var inside = document.createElement("DIV");
@@ -113,6 +118,9 @@ rad.panels.splitter=function(i,dir){
 	//this.element.onmousemove = function(e){_this.mousemove(e);};
 	
 	return this;
+}
+rad.panels.splitter.prototype.split=function(dir){
+	console.log(this.parent+":"+dir);
 }
 
 rad.panels.splitter.prototype.dragsplit=function(e){
