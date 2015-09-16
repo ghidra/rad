@@ -51,6 +51,25 @@ rad.panels.prototype.draw_partitions=function(part){
 		part[0].draw();
 	}
 }
+/*
+rad.panels.prototype.find=function(id){
+	return this.find_partition(this.p,id);
+}
+rad.panels.prototype.find_partition=function(part,id){
+	//use id to to return the partition that we are going to operate on
+	for( var n in part ){
+		for(var o in part[n].p){
+			var pid = part[n].p[o].id
+			if(pid===id){
+				return part[n].p[o];
+			}else{
+				rad.panels.find_partition(part[n].p[o],id);//recurviely draw all the way down
+			}
+		}
+	}
+}
+*/
+///////
 //partition object
 rad.panels.partition=function(d){
 	rad.ui.prototype.init.call(this,d);
@@ -72,23 +91,23 @@ rad.panels.partition.prototype.draw=function(){
 	this.element.style.outline="thin solid #000000";
 	
 	//make splitters, to split partitions
-	this.splitter_v = new rad.panels.splitter(this.id,0);
+	this.splitter_v = new rad.panels.splitter(this,0);
 	this.element.appendChild(this.splitter_v.element);
 
-	this.splitter_h = new rad.panels.splitter(this.id,1);
+	this.splitter_h = new rad.panels.splitter(this,1);
 	this.element.appendChild(this.splitter_h.element);
 
 	document.getElementById(this.parent).appendChild(this.element);
 }
 //splitter object
 //private should never be called from outside this class itself
-rad.panels.splitter=function(i,dir){
+rad.panels.splitter=function(part,dir){
 	//rad.ui.prototype.init.call(this,d);
-	this.parent=i
+	this.parent=part
 	this.dragging=false;
 
 	this.element = document.createElement("DIV");
-	this.element.id = i+"_splitter";
+	this.element.id = part.id+"_splitter";
 	this.element.style.width="10px";
 	this.element.style.height="10px";
 	this.element.style.float="right";
@@ -99,7 +118,7 @@ rad.panels.splitter=function(i,dir){
 
 	//the icon to split this thing
 	var inside = document.createElement("DIV");
-	inside.id = (dir===0)?i+"v_splitter":i+"h_splitter";
+	inside.id = (dir===0)?part.id+"v_splitter":part.id+"h_splitter";
 	inside.style.width=(dir===0)?"0px":"10px";
 	inside.style.height=(dir===0)?"10px":"0.px";
 	inside.style.position="relative";
@@ -120,7 +139,27 @@ rad.panels.splitter=function(i,dir){
 	return this;
 }
 rad.panels.splitter.prototype.split=function(dir){
-	console.log(this.parent+":"+dir);
+	//var part = rad.panels.find(this.parent);
+	//console.log(this.parent+":"+dir);
+	console.log(this.parent);
+	this.parent.p[0]=
+		new rad.panels.partition({
+			"id":"partition1",
+			"width":50,
+			"height":50,
+			"width_label":0,
+			"dtype":"%",
+			"parent":this.parent.parent
+		});
+	this.parent.p[1]=
+		new rad.panels.partition({
+			"id":"partition1",
+			"width":50,
+			"height":50,
+			"width_label":0,
+			"dtype":"%",
+			"parent":this.parent.parent
+		});
 }
 
 rad.panels.splitter.prototype.dragsplit=function(e){
