@@ -54,10 +54,18 @@ rad.panels.prototype.draw_partitions=function(part){
 			part[parts].draw(1);//draw it with the split boxes
 		}else{//if we DO have children, we need to iterate
 			//console.log("we have children")
-			part[parts].draw(0);
-			this.draw_partitions(part[parts].p)
+			//i also need to draw a dividing drag slider in the middle
+			part[parts].draw(0);//draw the container, with no splitters
+			this.draw_divider( part[parts] );
+			this.draw_partitions(part[parts].p);
+			
 		}
 	}
+}
+rad.panels.prototype.draw_divider=function(part){
+	//get the width of this layer, then get the width of the next layer to determine where to place this to begin with
+	console.log(part.p[0].id)
+	//console.log(document.getElementById(part[0].id).offsetWidth);
 }
 /*
 rad.panels.prototype.find=function(id){
