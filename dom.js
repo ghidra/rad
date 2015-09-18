@@ -1,4 +1,5 @@
-rad.position=function(obj){
+//needs vector.js
+rad.domposition=function(obj){
   Element.cumulativeScrollOffset
   var curleft= 0;
   var curtop= 0;
@@ -7,13 +8,13 @@ rad.position=function(obj){
       curleft += obj.offsetLeft;
       curtop += obj.offsetTop;
     }while (obj = obj.offsetParent);
-      return {x:curleft,y:curtop};
+      return rad.vector2(curleft,curtop);
   }
 }
-rad.size=function(obj){
+rad.domsize=function(obj){
   var w = obj.offsetWidth; 
   var h = obj.offsetHeight;
-  return {x:w,y:h};
+  return rad.vector2(w,h);
 }
 rad.remove=function(id){
   var element = document.getElementById(id);

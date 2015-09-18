@@ -27,7 +27,9 @@ rad.panels=function(parent){
 			"width_label":0,
 			"dtype":"%",
 			"parent_id":parent,
-			"panel":_this
+			"panel":_this,
+			"side":-1,
+			"orientation":-1
 		})
 	];
 	
@@ -56,16 +58,10 @@ rad.panels.prototype.draw_partitions=function(part){
 			//console.log("we have children")
 			//i also need to draw a dividing drag slider in the middle
 			part[parts].draw(0);//draw the container, with no splitters
-			this.draw_divider( part[parts] );
 			this.draw_partitions(part[parts].p);
 			
 		}
 	}
-}
-rad.panels.prototype.draw_divider=function(part){
-	//get the width of this layer, then get the width of the next layer to determine where to place this to begin with
-	console.log(part.p[0].id)
-	//console.log(document.getElementById(part[0].id).offsetWidth);
 }
 /*
 rad.panels.prototype.find=function(id){
@@ -91,10 +87,11 @@ rad.panels.partition=function(d){
 	rad.ui.prototype.init.call(this,d);
 
 	this.p=[];//the partitions, only 2 [0,1]
-	this.p_type=0; //partition type, horizontal=1 or vertical=0
 	this.parent_id=d.parent_id;
 	this.panel = d.panel;//give it the main panel object for calling draw
-	
+	this.side = d.side;//this is the side,basiaclly, if its the first or second partion under a parent
+	this.orientation = d.orientation;//partition type, horizontal=1 or vertical=0
+
 	return this;
 }
 rad.panels.partition.prototype=new rad.ui();
@@ -121,6 +118,16 @@ rad.panels.partition.prototype.draw=function(draw_splitters){
 	}
 
 	document.getElementById(this.parent_id).appendChild(this.element);
+
+	//make the divider
+	if(this.side && draw_splitters){
+		//get the width of this layer, then get the width of the next layer to determine where to place this to begin with
+		var part_width = this.element.offsetWidth;
+		var part_pos = rad.domposition(this.element);
+		//console.log(part.p[0].id)
+		console.log("width:"+part_width+" x:"+part_pos.x+" y:"+part_pos.y);
+		//console.log(document.getElementById(part[0].id).offsetWidth);
+	}
 }
 //splitter object
 //private should never be called from outside this class itself
@@ -177,7 +184,9 @@ rad.panels.splitter.prototype.split=function(dir){
 			"width_label":0,
 			"dtype":"%",
 			"parent_id":this.parent_partition.id,
-			"panel":this.parent_partition.panel
+			"panel":this.parent_partition.panel,
+			"side":0,
+			"orientation":1
 		});
 	this.parent_partition.p[1]=
 		new rad.panels.partition({
@@ -187,7 +196,9 @@ rad.panels.splitter.prototype.split=function(dir){
 			"width_label":0,
 			"dtype":"%",
 			"parent_id":this.parent_partition.id,
-			"panel":this.parent_partition.panel
+			"panel":this.parent_partition.panel,
+			"side":1,
+			"orientation":0
 		});
 	//console.log(this.parent_partition.id);
 	this.parent_partition.panel.count+=2;
