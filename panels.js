@@ -106,9 +106,11 @@ rad.panels.partition.prototype.draw=function(draw_splitters){
 	this.element.style.outline="thin solid #000000";
 	this.element.style.display="inline-block";
 	
+	var _this = this;
+
 	//make splitters, to split partitions
 	if(draw_splitters){
-		var _this = this;
+		
 		//console.log(this);
 		this.splitter_v = new rad.panels.splitter(_this,1);
 		this.element.appendChild(this.splitter_v.element);
@@ -120,14 +122,42 @@ rad.panels.partition.prototype.draw=function(draw_splitters){
 	document.getElementById(this.parent_id).appendChild(this.element);
 
 	//make the divider
-	if(this.side && draw_splitters){
+	if(this.side==0 && draw_splitters){
 		//get the width of this layer, then get the width of the next layer to determine where to place this to begin with
-		var part_width = this.element.offsetWidth;
-		var part_pos = rad.domposition(this.element);
+		//var part_width = this.element.offsetWidth;
+		//var part_pos = rad.domposition(this.element);
 		//console.log(part.p[0].id)
-		console.log("width:"+part_width+" x:"+part_pos.x+" y:"+part_pos.y);
+		//console.log("width:"+part_width+" x:"+part_pos.x+" y:"+part_pos.y);
+		//lets just put a div here to see what I get
+		this.resizer_elem = new rad.panels.resizer(_this);
+		this.element.appendChild(this.resizer_elem.element);
 		//console.log(document.getElementById(part[0].id).offsetWidth);
 	}
+}
+rad.panels.resizer=function(part){
+	var part_width = part.element.offsetWidth;
+	var part_height = part.element.offsetHeight;
+	var part_pos = rad.domposition(part.element);
+	//console.log(part.p[0].id)
+	//console.log("width:"+part_width+" x:"+part_pos.x+" y:"+part_pos.y);
+
+	this.element = document.createElement("DIV");
+	this.element.id = part.id+"_resizer";
+	this.element.style.position="absolute";
+	this.element.style.outline="thin solid #000000";
+	if(part.orientation==1){
+		this.element.style.width="10px";
+		this.element.style.height="20px";
+		this.element.style.left=part_pos.x-5+"px";
+		this.element.style.top=(part_height/2)-10+"px";
+	}else{
+		this.element.style.width="20px";
+		this.element.style.height="10px";
+		this.element.style.left=(part_pos.x+(part_width/2))-10+"px";
+		this.element.style.top=part_pos.y-5+"px";
+	}
+	console.log(part.orientation);
+
 }
 //splitter object
 //private should never be called from outside this class itself
@@ -186,7 +216,7 @@ rad.panels.splitter.prototype.split=function(dir){
 			"parent_id":this.parent_partition.id,
 			"panel":this.parent_partition.panel,
 			"side":0,
-			"orientation":1
+			"orientation":dir
 		});
 	this.parent_partition.p[1]=
 		new rad.panels.partition({
@@ -198,7 +228,7 @@ rad.panels.splitter.prototype.split=function(dir){
 			"parent_id":this.parent_partition.id,
 			"panel":this.parent_partition.panel,
 			"side":1,
-			"orientation":0
+			"orientation":dir
 		});
 	//console.log(this.parent_partition.id);
 	this.parent_partition.panel.count+=2;
