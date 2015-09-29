@@ -54,10 +54,21 @@ rad.panels.prototype.draw_partitions=function(part){
 		//console.log("children:"+children);
 		if(children==0){//if we DO NOT have children, we can draw this one
 			part[parts].draw(1);//draw it with the split boxes
+
+			var resizer_elem = new rad.panels.resizer(part[parts]);
+			var p0 = document.getElementById('partition0');
+			p0.appendChild(resizer_elem.element);
+			
 		}else{//if we DO have children, we need to iterate
+			
 			//console.log("we have children")
 			//i also need to draw a dividing drag slider in the middle
 			part[parts].draw(0);//draw the container, with no splitters
+			//since we have maybe this is where we draw the resizer
+			/*var resizer_elem = new rad.panels.resizer(part[parts]);
+			var p0 = document.getElementById('partition0');
+			p0.appendChild(resizer_elem.element);*/
+
 			this.draw_partitions(part[parts].p);
 			
 		}
@@ -122,7 +133,8 @@ rad.panels.partition.prototype.draw=function(draw_splitters){
 	document.getElementById(this.parent_id).appendChild(this.element);
 
 	//make the divider
-	if(this.side==0 && draw_splitters){
+	/*if(this.side==0 && draw_splitters){
+	//if(draw_splitters){
 		//get the width of this layer, then get the width of the next layer to determine where to place this to begin with
 		//var part_width = this.element.offsetWidth;
 		//var part_pos = rad.domposition(this.element);
@@ -130,11 +142,14 @@ rad.panels.partition.prototype.draw=function(draw_splitters){
 		//console.log("width:"+part_width+" x:"+part_pos.x+" y:"+part_pos.y);
 		//lets just put a div here to see what I get
 		this.resizer_elem = new rad.panels.resizer(_this);
-		this.element.appendChild(this.resizer_elem.element);
+		var p0 = document.getElementById('partition0');
+		//this.element.appendChild(this.resizer_elem.element);
+		p0.appendChild(this.resizer_elem.element);
 		//console.log(document.getElementById(part[0].id).offsetWidth);
-	}
+	}*/
 }
 rad.panels.resizer=function(part){
+	var pos = part.element.getBoundingClientRect();
 	var part_width = part.element.offsetWidth;
 	var part_height = part.element.offsetHeight;
 	var part_pos = rad.domposition(part.element);
@@ -148,15 +163,17 @@ rad.panels.resizer=function(part){
 	if(part.orientation==1){
 		this.element.style.width="10px";
 		this.element.style.height="20px";
-		this.element.style.left=part_pos.x-5+"px";
-		this.element.style.top=(part_height/2)-10+"px";
+		//this.element.style.left=pos.left-5+"px";
+		//this.element.style.top=((pos.bottom-pos.top)/2)-10+"px";
 	}else{
 		this.element.style.width="20px";
 		this.element.style.height="10px";
-		this.element.style.left=(part_pos.x+(part_width/2))-10+"px";
-		this.element.style.top=part_pos.y-5+"px";
+		//this.element.style.left=(pos.left+((pos.right-pos.left)/2))-10+"px";
+		//this.element.style.top=pos.top-5+"px";
 	}
-	console.log(part.orientation);
+	this.element.style.left=pos.left+"px";
+	this.element.style.top=pos.top+"px";
+	//console.log(part.orientation);
 
 }
 //splitter object
