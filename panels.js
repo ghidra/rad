@@ -55,9 +55,9 @@ rad.panels.prototype.draw_partitions=function(part){
 		if(children==0){//if we DO NOT have children, we can draw this one
 			part[parts].draw(1);//draw it with the split boxes
 
-			var resizer_elem = new rad.panels.resizer(part[parts]);
+			/*var resizer_elem = new rad.panels.resizer(part[parts]);
 			var p0 = document.getElementById('partition0');
-			p0.appendChild(resizer_elem.element);
+			p0.appendChild(resizer_elem.element);*/
 			
 		}else{//if we DO have children, we need to iterate
 			
@@ -65,9 +65,9 @@ rad.panels.prototype.draw_partitions=function(part){
 			//i also need to draw a dividing drag slider in the middle
 			part[parts].draw(0);//draw the container, with no splitters
 			//since we have maybe this is where we draw the resizer
-			/*var resizer_elem = new rad.panels.resizer(part[parts]);
+			var resizer_elem = new rad.panels.resizer(part[parts]);
 			var p0 = document.getElementById('partition0');
-			p0.appendChild(resizer_elem.element);*/
+			p0.appendChild(resizer_elem.element);
 
 			this.draw_partitions(part[parts].p);
 			
