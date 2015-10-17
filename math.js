@@ -4,6 +4,16 @@ rad.clamp = function(v,min,max) {
 rad.remap = function(v,l1,h1,l2,h2){
 	return l2 + (v - l1) * (h2 - l2) / (h1 - l1);
 }
+rad.rescale=function(v,l1,h1,l2,h2){//alias incase I get confused by XSI vs houdini
+  return rad.remap(v,l1,h1,l2,h2);
+}
+rad.fit=function(v,l1,h1,l2,h2){//alias incase I get confused by XSI vs houdini
+  return rad.remap(v,l1,h1,l2,h2);
+}
+rad.rand=function(seed){
+  seed = seed||Math.round(Math.random()*999);
+  return Math.abs(Math.sin(seed++));
+}
 rad.degtorad = function(d) {
     return d*(3.14159/180);
 }
