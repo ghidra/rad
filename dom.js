@@ -16,6 +16,11 @@ rad.domsize=function(obj){
   var h = obj.offsetHeight;
   return rad.vector2(w,h);
 }
+rad.bodysize=function(){
+    var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth || document.body.offsetWidth;
+    var h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || document.body.offsetHeight;
+    return rad.vector2(w,h);
+}
 rad.remove=function(id){
   var element = document.getElementById(id);
   element.parentNode.removeChild(element);
