@@ -11,9 +11,9 @@ rad.ui.prototype.init=function(d){
 
 	this.dtype=(d.dtype!=undefined)?d.dtype:"px"
 
-	this.width = (d.width)?d.width:10;
+	this.width = (d.width)?d.width:120;
 	this.height = (d.width)?d.height:10;
-	this.width_label = (d.width_label)?d.width_label:10;
+	this.width_label = (d.width_label)?d.width_label:60;
 	this.margin = (d.margin)?d.margin:0;
 
 	this.fontsize = (d.fontsize)?d.fontsize:10;
