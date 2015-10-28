@@ -1,4 +1,4 @@
-//requires ui
+//requires ui, object
 //this module will be for making customizagble panels that you can move around
 // I need a way to manage the panels
 //then each panel will have logic to move around
@@ -32,6 +32,7 @@ rad.panels=function(parent){
 			"orientation":-1
 		})
 	];
+	this.resizers=[];//hold resizers to place after drawing paritions
 	
 
 	this.margin=2;//the edge margins, for something to grab onto
@@ -43,8 +44,21 @@ rad.panels.prototype.draw=function(){
 	//erase everything first
 	//console.log("main panel draw")
 	//console.log(this.p[0].parent_id);
+	//clear the resizers
+	rad.flusharray(this.resizers);
+
 	document.getElementById(this.p[0].parent_id).innerHTML="";
 	this.draw_partitions(this.p);
+
+	//now drop in the resizers
+	s="";
+	for(i=0;i<this.resizers.length;i++){
+		s+=this.resizers[i].id+":";
+		var resizer_elem = new rad.panels.resizer(this.resizers[i]);
+		var p0 = document.getElementById('partition0');
+		p0.appendChild(resizer_elem.element);
+	}
+	console.log(s);
 }
 //my recursive draw function
 rad.panels.prototype.draw_partitions=function(part){
@@ -58,16 +72,18 @@ rad.panels.prototype.draw_partitions=function(part){
 			/*var resizer_elem = new rad.panels.resizer(part[parts]);
 			var p0 = document.getElementById('partition0');
 			p0.appendChild(resizer_elem.element);*/
+			//this.resizers.push(part[parts]);
 			
 		}else{//if we DO have children, we need to iterate
 			
-			//console.log("we have children")
+			//console.log(part[parts].id);
 			//i also need to draw a dividing drag slider in the middle
 			part[parts].draw(0);//draw the container, with no splitters
 			//since we have maybe this is where we draw the resizer
-			var resizer_elem = new rad.panels.resizer(part[parts]);
-			var p0 = document.getElementById('partition0');
-			p0.appendChild(resizer_elem.element);
+			//this.resizers.push(new rad.panels.resizer(part[parts]));
+			this.resizers.push(part[parts].p[0]);
+			//var p0 = document.getElementById('partition0');
+			//p0.appendChild(resizer_elem.element);
 
 			this.draw_partitions(part[parts].p);
 			
@@ -154,7 +170,7 @@ rad.panels.resizer=function(part){
 	var part_height = part.element.offsetHeight;
 	var part_pos = rad.domposition(part.element);
 	//console.log(part.p[0].id)
-	//console.log("width:"+part_width+" x:"+part_pos.x+" y:"+part_pos.y);
+	console.log("width:"+part_width+" x:"+part_pos.x+" y:"+part_pos.y);
 
 	this.element = document.createElement("DIV");
 	this.element.id = part.id+"_resizer";

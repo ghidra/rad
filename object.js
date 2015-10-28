@@ -20,3 +20,6 @@ rad.objclonefast=function(o){
   //dones not clone functions.. this is just for simple data cases
   return JSON.parse(JSON.stringify(o));
 }
+rad.objclear=function(o){
+  for (var member in o) delete o[member];
+}
