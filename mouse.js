@@ -1,8 +1,12 @@
 // !!!! requires vector module
 
 rad.relativemouseposition=function(e){
+  //var doc = document.documentElement;
+  //var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+  //var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+
   var pos = new rad.vector2();
-    var offset = new rad.vector2(e.clientX,e.clientY);
+  var offset = new rad.vector2(e.clientX,e.clientY);
   var target = e.currentTarget;
 
   while (target) {
@@ -30,7 +34,13 @@ rad.relativemouseposition=function(e){
   return {x: xo-xp, y: yo-yp};*/
 }
 rad.mouseposition=function(e){
-  return new rad.vector(e.clientX,e.clientY);
+  //http://stackoverflow.com/questions/3464876/javascript-get-window-x-y-position-for-scroll
+  var doc = document.documentElement;
+  var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+  var top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+  //console.log(left+":"+top);
+  //console.log(e.clientX+":"+e.clientY);
+  return new rad.vector2(e.clientX+left,e.clientY+top);
   //return {x:e.clientX,y:e.clientY};
 }
 rad.dragevent=function(move,release){

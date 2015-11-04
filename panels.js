@@ -67,47 +67,16 @@ rad.panels.prototype.draw_partitions=function(part){
 		var children = part[parts].p.length;
 		//console.log("children:"+children);
 		if(children==0){//if we DO NOT have children, we can draw this one
-			part[parts].draw(1);//draw it with the split boxes
-
-			/*var resizer_elem = new rad.panels.resizer(part[parts]);
-			var p0 = document.getElementById('partition0');
-			p0.appendChild(resizer_elem.element);*/
-			//this.resizers.push(part[parts]);
-			
+			part[parts].draw(1);//draw it with the split boxes	
 		}else{//if we DO have children, we need to iterate
-			
-			//console.log(part[parts].id);
-			//i also need to draw a dividing drag slider in the middle
 			part[parts].draw(0);//draw the container, with no splitters
 			//since we have maybe this is where we draw the resizer
-			//this.resizers.push(new rad.panels.resizer(part[parts]));
 			this.resizers.push(part[parts].p[0]);
-			//var p0 = document.getElementById('partition0');
-			//p0.appendChild(resizer_elem.element);
+			this.draw_partitions(part[parts].p);		
+		}
+	}
+}
 
-			this.draw_partitions(part[parts].p);
-			
-		}
-	}
-}
-/*
-rad.panels.prototype.find=function(id){
-	return this.find_partition(this.p,id);
-}
-rad.panels.prototype.find_partition=function(part,id){
-	//use id to to return the partition that we are going to operate on
-	for( var n in part ){
-		for(var o in part[n].p){
-			var pid = part[n].p[o].id
-			if(pid===id){
-				return part[n].p[o];
-			}else{
-				rad.panels.find_partition(part[n].p[o],id);//recurviely draw all the way down
-			}
-		}
-	}
-}
-*/
 ///////
 //partition object
 rad.panels.partition=function(d){
@@ -147,30 +116,17 @@ rad.panels.partition.prototype.draw=function(draw_splitters){
 	}
 
 	document.getElementById(this.parent_id).appendChild(this.element);
-
-	//make the divider
-	/*if(this.side==0 && draw_splitters){
-	//if(draw_splitters){
-		//get the width of this layer, then get the width of the next layer to determine where to place this to begin with
-		//var part_width = this.element.offsetWidth;
-		//var part_pos = rad.domposition(this.element);
-		//console.log(part.p[0].id)
-		//console.log("width:"+part_width+" x:"+part_pos.x+" y:"+part_pos.y);
-		//lets just put a div here to see what I get
-		this.resizer_elem = new rad.panels.resizer(_this);
-		var p0 = document.getElementById('partition0');
-		//this.element.appendChild(this.resizer_elem.element);
-		p0.appendChild(this.resizer_elem.element);
-		//console.log(document.getElementById(part[0].id).offsetWidth);
-	}*/
 }
+
+//-------------------resizer
 rad.panels.resizer=function(part){
 	var pos = part.element.getBoundingClientRect();
 	var part_width = part.element.offsetWidth;
 	var part_height = part.element.offsetHeight;
 	var part_pos = rad.domposition(part.element);
+	var lock=0;
 	//console.log(part.p[0].id)
-	console.log("width:"+part_width+" x:"+part_pos.x+" y:"+part_pos.y);
+	//console.log("width:"+part_width+" x:"+part_pos.x+" y:"+part_pos.y);
 
 	this.element = document.createElement("DIV");
 	this.element.id = part.id+"_resizer";
@@ -179,16 +135,19 @@ rad.panels.resizer=function(part){
 	if(part.orientation==1){
 		this.element.style.width="10px";
 		this.element.style.height="20px";
-		//this.element.style.left=pos.left-5+"px";
-		//this.element.style.top=((pos.bottom-pos.top)/2)-10+"px";
+		this.element.style.left=pos.right-12+"px";
+		this.element.style.top=(pos.top+(pos.bottom-pos.top)/2)-10+"px";
 	}else{
 		this.element.style.width="20px";
 		this.element.style.height="10px";
-		//this.element.style.left=(pos.left+((pos.right-pos.left)/2))-10+"px";
-		//this.element.style.top=pos.top-5+"px";
+		this.element.style.left=(pos.left+((pos.right-pos.left)/2))-10+"px";
+		this.element.style.top=pos.bottom-12+"px";
+		lock=1;
 	}
-	this.element.style.left=pos.left+"px";
-	this.element.style.top=pos.top+"px";
+	this.element.onmousedown=function(e){rad.drag.draggable(e,part.id+"_resizer",lock);};
+	//var header = new tentacle.element('div',{'class':'aBar','onmousedown':'tentacle.floating_window.drag(event,\''+id+'\')' });
+	//this.element.style.left=pos.left+"px";
+	//this.element.style.top=pos.top+"px";
 	//console.log(part.orientation);
 
 }
