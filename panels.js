@@ -76,6 +76,18 @@ rad.panels.prototype.draw_partitions=function(part){
 		}
 	}
 }
+//recursive search function
+rad.panels.prototype.match_id=function(id,part){
+	for(parts in part){
+		var name = part[parts].id;
+		//console.log(name);
+		if(name==id){//if we DO NOT have children, we can draw this one
+			return part[parts].p;//draw it with the split boxes	
+		}else{//if we DO have children, we need to iterate
+			this.match_id(id,part[parts].p);		
+		}
+	}
+}
 
 ///////
 //partition object
@@ -117,6 +129,13 @@ rad.panels.partition.prototype.draw=function(draw_splitters){
 
 	document.getElementById(this.parent_id).appendChild(this.element);
 }
+rad.panels.partition.prototype.getparent=function(){
+	//this returns the parent object, so that I can update the size with the resizer
+	var parent = this.panel.match_id(this.parent_id,this.panel.p);
+	//console.log(parent.id);
+	console.log(parent);
+	//this seems to work sometimes, only on the first object, not any other ones
+}
 
 //-------------------resizer
 rad.panels.resizer=function(part){
@@ -144,12 +163,18 @@ rad.panels.resizer=function(part){
 		this.element.style.top=pos.bottom-12+"px";
 		lock=1;
 	}
-	this.element.onmousedown=function(e){rad.drag.draggable(e,part.id+"_resizer",lock);};
+	var _this=this;
+	var dragging=function(e){console.log(part.id)};
+	var release=function(e){_this.changesize(part)};
+	this.element.onmousedown=function(e){rad.drag.draggable(e,part.id+"_resizer",dragging,release,lock);};
 	//var header = new tentacle.element('div',{'class':'aBar','onmousedown':'tentacle.floating_window.drag(event,\''+id+'\')' });
 	//this.element.style.left=pos.left+"px";
 	//this.element.style.top=pos.top+"px";
 	//console.log(part.orientation);
 
+}
+rad.panels.resizer.prototype.changesize=function(part){
+	part.getparent()
 }
 //splitter object
 //private should never be called from outside this class itself

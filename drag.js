@@ -15,7 +15,9 @@ rad.drag={
 	'list':[],//be able to drag multiple things at once
 	'list_data':[],//hold any data specific to this draggable element, like a lock
 	'z_index' :10,
-	'draggable':function(e,id,lock){
+	'draggable':function(e,id,dragcall,releasecall,lock){
+		this.dragcallback=dragcall;
+		this.releasecallback=releasecall;
 		//if we want to lock it to an axis
 		lock=(lock!='undefined')?lock:-1;
 		//deal with multiple draggable elements
@@ -69,7 +71,7 @@ rad.drag={
 			var pn = _this.dragging[i].add(pd)
             //var xn = _this.drag_data.windows[i][0]+xd;
             //var yn = _this.drag_data.windows[i][1]+yd;
-            console.log(_this.list_data[i]);
+            //console.log(_this.list_data[i]);
             xn=(_this.list_data[i]==1)?_this.dragging[i].x:pn.x;//lock to vertical axis
             yn=(_this.list_data[i]==0)?_this.dragging[i].y:pn.y;//lock to the horizontal axis
             
@@ -78,6 +80,7 @@ rad.drag={
             win.style.top = yn + "px";
             //console.log(pn.x+":"+pn.y);
         }
+        _this.dragcallback();
 	},
 	'stop':function(e){
 		var _this = rad.drag;
@@ -85,5 +88,6 @@ rad.drag={
 			document.getElementById(_this.list[i]).style.zIndex = _this.z_index-1;
 		}
    		rad.removedragevent(_this.go,_this.stop);
+   		_this.releasecallback();
 	}
 }
