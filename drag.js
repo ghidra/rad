@@ -1,4 +1,4 @@
-//requires mouse, array,vector
+//requires mouse, array,vector, math
 //THIS IS BOGUS< DOES NOT WORK
 /*rad.drag=function(move,release){
 	this.move = move;
@@ -15,10 +15,11 @@ rad.drag={
 	'list':[],//be able to drag multiple things at once
 	'list_data':[],//hold any data specific to this draggable element, like a lock
 	'z_index' :10,
-	'draggable':function(e,id,dragcall,releasecall,lock){
+	'draggable':function(e,id,dragcall,releasecall,clamp,lock){
 		this.dragcallback=dragcall;
 		this.releasecallback=releasecall;
 		//if we want to lock it to an axis
+		clamp=(clamp!='undefined')?clamp:new rad.vector2(-1,-1);
 		lock=(lock!='undefined')?lock:-1;
 		//deal with multiple draggable elements
 		if(!this.modifier){
@@ -34,7 +35,7 @@ rad.drag={
 		}
 	    if(add){
 	    	this.list.push(id);
-	    	this.list_data.push(lock);
+	    	this.list_data.push({'clamp':clamp,'lock':lock});
 	    }
 	    //--------
 	    
@@ -72,9 +73,15 @@ rad.drag={
             //var xn = _this.drag_data.windows[i][0]+xd;
             //var yn = _this.drag_data.windows[i][1]+yd;
             //console.log(_this.list_data[i]);
-            xn=(_this.list_data[i]==1)?_this.dragging[i].x:pn.x;//lock to vertical axis
-            yn=(_this.list_data[i]==0)?_this.dragging[i].y:pn.y;//lock to the horizontal axis
+            //lock
+            xn=(_this.list_data[i].lock==1)? _this.dragging[i].x : pn.x;//lock to vertical axis
+            yn=(_this.list_data[i].lock==0)? _this.dragging[i].y : pn.y;//lock to the horizontal axis
             
+            //clamp
+            xn=(_this.list_data[i].clamp.x>-1 && _this.list_data[i].lock==0)? rad.clamp(xn,_this.list_data[i].clamp.x,_this.list_data[i].clamp.y) : xn;
+            yn=(_this.list_data[i].clamp.x>-1 && _this.list_data[i].lock==1)? rad.clamp(yn,_this.list_data[i].clamp.x,_this.list_data[i].clamp.y) : yn;
+			
+            //console.log(_this.list_data[i].clamp.x+":"+_this.list_data[i].clamp.y)
 			var win = document.getElementById(_this.list[i]);
 			win.style.left = xn + "px";
             win.style.top = yn + "px";

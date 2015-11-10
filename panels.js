@@ -54,11 +54,12 @@ rad.panels.prototype.draw=function(){
 	s="";
 	for(i=0;i<this.resizers.length;i++){
 		s+=this.resizers[i].id+":";
-		var resizer_elem = new rad.panels.resizer(this.resizers[i]);
+		//we replace the intial value that is a partition with a new resizer
+		this.resizers[i] = new rad.panels.resizer(this.resizers[i]);
 		var p0 = document.getElementById('partition0');
-		p0.appendChild(resizer_elem.element);
+		p0.appendChild(this.resizers[i].element);
 	}
-	console.log(s);
+	//console.log(s);
 }
 //my recursive draw function
 rad.panels.prototype.draw_partitions=function(part){
@@ -78,13 +79,16 @@ rad.panels.prototype.draw_partitions=function(part){
 }
 //recursive search function
 rad.panels.prototype.match_id=function(id,part){
+	//this isnt grabbing it if its the in the second one
 	for(parts in part){
 		var name = part[parts].id;
-		//console.log(name);
-		if(name==id){//if we DO NOT have children, we can draw this one
-			return part[parts].p;//draw it with the split boxes	
+		if(name===id){//if we DO NOT have children, we can draw this one
+			return part[parts];//draw it with the split boxes	
 		}else{//if we DO have children, we need to iterate
-			this.match_id(id,part[parts].p);		
+			var rtn = this.match_id(id,part[parts].p);
+			//this keeps it from returning and erasing a found object
+			if (rtn != null)
+				return rtn;	
 		}
 	}
 }
@@ -130,11 +134,7 @@ rad.panels.partition.prototype.draw=function(draw_splitters){
 	document.getElementById(this.parent_id).appendChild(this.element);
 }
 rad.panels.partition.prototype.getparent=function(){
-	//this returns the parent object, so that I can update the size with the resizer
-	var parent = this.panel.match_id(this.parent_id,this.panel.p);
-	//console.log(parent.id);
-	console.log(parent);
-	//this seems to work sometimes, only on the first object, not any other ones
+	return this.panel.match_id(this.parent_id,this.panel.p);
 }
 
 //-------------------resizer
@@ -143,7 +143,9 @@ rad.panels.resizer=function(part){
 	var part_width = part.element.offsetWidth;
 	var part_height = part.element.offsetHeight;
 	var part_pos = rad.domposition(part.element);
+	var clamp;
 	var lock=0;
+
 	//console.log(part.p[0].id)
 	//console.log("width:"+part_width+" x:"+part_pos.x+" y:"+part_pos.y);
 
@@ -151,22 +153,29 @@ rad.panels.resizer=function(part){
 	this.element.id = part.id+"_resizer";
 	this.element.style.position="absolute";
 	this.element.style.outline="thin solid #000000";
+
+	//we store the parent element, since this is where we are going to be pulling any data from
+	this.parent = part.getparent();
+	this.parent_dimensions = this.parent.element.getBoundingClientRect();
+	
 	if(part.orientation==1){
 		this.element.style.width="10px";
 		this.element.style.height="20px";
 		this.element.style.left=pos.right-12+"px";
 		this.element.style.top=(pos.top+(pos.bottom-pos.top)/2)-10+"px";
+		clamp=new rad.vector2(this.parent_dimensions.left+20,this.parent_dimensions.right-20);
 	}else{
 		this.element.style.width="20px";
 		this.element.style.height="10px";
 		this.element.style.left=(pos.left+((pos.right-pos.left)/2))-10+"px";
 		this.element.style.top=pos.bottom-12+"px";
+		clamp=new rad.vector2(this.parent_dimensions.top+20,this.parent_dimensions.bottom-20);
 		lock=1;
 	}
 	var _this=this;
-	var dragging=function(e){console.log(part.id)};
+	var dragging=function(e){/*console.log(part.id)*/};
 	var release=function(e){_this.changesize(part)};
-	this.element.onmousedown=function(e){rad.drag.draggable(e,part.id+"_resizer",dragging,release,lock);};
+	this.element.onmousedown=function(e){rad.drag.draggable(e,part.id+"_resizer",dragging,release,clamp,lock);};
 	//var header = new tentacle.element('div',{'class':'aBar','onmousedown':'tentacle.floating_window.drag(event,\''+id+'\')' });
 	//this.element.style.left=pos.left+"px";
 	//this.element.style.top=pos.top+"px";
@@ -174,7 +183,8 @@ rad.panels.resizer=function(part){
 
 }
 rad.panels.resizer.prototype.changesize=function(part){
-	part.getparent()
+	//part.getparent()
+	console.log('do the size change')
 }
 //splitter object
 //private should never be called from outside this class itself
