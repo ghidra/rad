@@ -11,17 +11,20 @@
 
 //maybe even have tabbed panels
 
-rad.panels=function(parent){
+rad.panels=function(parent,layout){
+	//layout is optional, it will build a default layout
 	//the root, will not change size or partition
 	var root = document.getElementById(parent);
 	root.style.width="100%";
 	root.style.height="100%";
+
+	this.layout=layout;
 	//the main partition
 	//there is only one to start, A.
 	var _this=this;//i have to give this to the object so I can call draw
 	this.p=[
 		new rad.panels.partition({
-			"id":"partition0",
+			"id":"partition_0",
 			"width":100,
 			"height":100,
 			"width_label":0,
@@ -32,6 +35,11 @@ rad.panels=function(parent){
 			"orientation":-1
 		})
 	];
+
+	if(layout){
+		this.layout_assign(layout);
+	}
+
 	this.resizers=[];//hold resizers to place after drawing paritions
 	
 
@@ -56,7 +64,7 @@ rad.panels.prototype.draw=function(){
 		s+=this.resizers[i].id+":";
 		//we replace the intial value that is a partition with a new resizer
 		this.resizers[i] = new rad.panels.resizer(this.resizers[i]);
-		var p0 = document.getElementById('partition0');
+		var p0 = document.getElementById('partition_0');
 		p0.appendChild(this.resizers[i].element);
 	}
 	//console.log(s);
@@ -92,6 +100,61 @@ rad.panels.prototype.match_id=function(id,part){
 		}
 	}
 }
+//deal with the passed in layout
+rad.panels.prototype.split=function(obj,parent){
+	var orientation = (obj.split)?obj.split:0;
+	var size = (obj.size)?obj.size:50;
+	parent = (parent)?parent:'0';
+	
+	var width = (orientation)?size:100;
+	var height = (orientation)?100:size;
+	var this_=this;
+
+	console.log(parent)
+	console.log(obj.partitions)
+	/*var part = this.match_id("partition_"+parent,this.p);
+	//console.log(parent);
+	//console.log(part.p);
+	for ( np in obj.partitions){
+		console.log(np);
+		part.p[part.p.length]=
+			new rad.panels.partition({
+				"id":"partition_"+np,
+				"width":width,
+				"height":height,
+				"width_label":0,
+				"dtype":"%",
+				"parent_id":'partition_'+parent,
+				"panel":this_,
+				"side":part.p.length-1,
+				"orientation":orientation
+			});
+	}*/
+}
+rad.panels.prototype.layout_assign=function(obj,parent){
+	//console.log(obj);
+	if(obj.partitions){
+		//if we have partitions
+		for( p in obj.partitions ){
+			//make the split
+			//console.log(p);//the name of the partition
+			this.split(obj,parent);
+			//see if we have children partitions
+			if(obj.partitions[p].partitions){
+				//console.log(p)
+				this.layout_assign(obj.partitions[p],p);
+				//console.log(this);
+				
+			}
+		}
+	}
+	/*var count = 0;
+	for( p in obj.partitions ){
+		var size = (count==0)?obj.size:100-obj.size;
+		//console.log(obj.partitions)
+		count+=1;
+	}*/
+}
 
 ///////
 //partition object
@@ -117,6 +180,7 @@ rad.panels.partition.prototype.draw=function(draw_splitters){
 	this.element.style.position="relative";
 	this.element.style.outline="thin solid #000000";
 	this.element.style.display="inline-block";
+	this.element.id=this.id;
 	
 	var _this = this;
 
@@ -130,7 +194,7 @@ rad.panels.partition.prototype.draw=function(draw_splitters){
 		this.splitter_h = new rad.panels.splitter(_this,0);
 		this.element.appendChild(this.splitter_h.element);
 	}
-
+	//console.log(this.parent_id)
 	document.getElementById(this.parent_id).appendChild(this.element);
 }
 rad.panels.partition.prototype.getparent=function(){
@@ -143,7 +207,7 @@ rad.panels.resizer=function(part){
 	var part_width = part.element.offsetWidth;
 	var part_height = part.element.offsetHeight;
 	var part_pos = rad.domposition(part.element);
-	var clamp;
+	var clamp;//vector to hold values of clamping
 	var lock=0;
 
 	//console.log(part.p[0].id)
@@ -157,6 +221,7 @@ rad.panels.resizer=function(part){
 	//we store the parent element, since this is where we are going to be pulling any data from
 	this.parent = part.getparent();
 	this.parent_dimensions = this.parent.element.getBoundingClientRect();
+	this.orientation = part.orientation;//store the orientation of the division
 	
 	if(part.orientation==1){
 		this.element.style.width="10px";
@@ -184,7 +249,30 @@ rad.panels.resizer=function(part){
 }
 rad.panels.resizer.prototype.changesize=function(part){
 	//part.getparent()
-	console.log('do the size change')
+	//console.log('do the size change');
+	//get the parent partitions elements
+
+	//console.log(this.parent.p[0].element);
+	var all,pos,percentage;
+	if(this.orientation==0){
+		//var h_yoff = this.parent_dimensions.top;
+		all = this.parent_dimensions.height;
+		pos = rad.parseint(this.element.style.top); //this.element.style.top;
+		percentage = Math.ceil((pos/all)*100)
+		//set the updated sizes
+		this.parent.p[0].height=percentage;
+		this.parent.p[1].height=100-percentage;
+	}else{
+		all = this.parent_dimensions.width;
+		pos = rad.parseint(this.element.style.left+(this.element.style.width/2)); //this.element.style.top;
+		percentage = Math.ceil((pos/all)*100)
+		//set the updated sizes
+		this.parent.p[0].width=percentage;
+		this.parent.p[1].width=100-percentage;
+	}
+
+	this.parent.p[0].panel.draw();
+	//set the new ratio, since we are dealing with percentages
 }
 //splitter object
 //private should never be called from outside this class itself
