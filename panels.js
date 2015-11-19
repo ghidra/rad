@@ -1,4 +1,4 @@
-//requires ui, object
+//requires ui, object, dom
 //this module will be for making customizagble panels that you can move around
 // I need a way to manage the panels
 //then each panel will have logic to move around
@@ -11,7 +11,7 @@
 
 //maybe even have tabbed panels
 
-rad.panels=function(parent,layout){
+rad.panels=function(parent,layout,callback){
 	//layout is optional, it will build a default layout
 	//the root, will not change size or partition
 	var root = document.getElementById(parent);
@@ -42,9 +42,14 @@ rad.panels=function(parent,layout){
 
 	this.resizers=[];//hold resizers to place after drawing paritions
 	
-
 	this.margin=2;//the edge margins, for something to grab onto
 	this.count=0;//count for partition naming
+
+	//callback on resize
+	this.resize = rad.windowdoneresizing(rad.closure(_this,_this.windowresized));
+	this.resizecallback = callback;
+	//rad.addevent(window,'resize',function(e){console.log('yeah')});
+
 	this.draw();//draw the partitions
 }
 //this is the function I call to redraw everything
@@ -176,6 +181,15 @@ rad.panels.prototype.layout_assign=function(obj,parent){
 rad.panels.prototype.get_panel=function(id){
 	return document.getElementById("partition_"+id);
 }
+///this is kind of a private function that is only called when the user resizes the window
+rad.panels.prototype.windowresized=function(){
+	//i need to copy all the data that might be in the partitions, and put them back
+	//because when I call the draw function, it basically erases everything that is in there
+	//this.draw();
+	if(this.resizecallback != undefined){
+		this.resizecallback();
+	}
+}
 ///////
 //partition object
 rad.panels.partition=function(d){
@@ -202,6 +216,7 @@ rad.panels.partition.prototype.draw=function(draw_splitters){
 	//this.element.style.position="relative";
 	this.element.style.outline="thin solid #000000";
 	this.element.style.display="inline-block";
+	this.element.style.float="left";
 	this.element.id=this.id;
 	
 	var _this = this;
@@ -372,19 +387,3 @@ rad.panels.splitter.prototype.split=function(dir){
 	this.parent_partition.panel.count+=2;
 	this.parent_partition.panel.draw();//call the main draw function
 }
-
-/*rad.panels.splitter.prototype.dragsplit=function(e){
-	//console.log(e.target);//e.srcElement
-	this.dragging=true;
-}
-rad.panels.splitter.prototype.mousemove=function(e){
-	if(this.dragging){
-		//console.log(e.target);//e.srcElement
-	}
-}
-rad.panels.splitter.prototype.mouseup=function(e){
-	if(this.dragging){
-		this.dragging=false;
-		//console.log(e.target);//e.srcElement
-	}
-}*/
