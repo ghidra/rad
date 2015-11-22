@@ -63,6 +63,8 @@ rad.ismiddleclick=function(e){
 rad.getmouseclicktype=function(e,i){
   var c;
   e = e || window.event;
+  //this isnt working arch firefox 42 if e is not sent in
+  //console.log(e);
   if ("which" in e)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
       c = e.which == i;
   else if ("button" in e)  // IE, Opera 
