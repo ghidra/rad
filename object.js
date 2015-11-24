@@ -15,6 +15,9 @@ rad.objhasprop=function(o){
   	}
   	return false;
 }
+rad.objhasfunction=function(o,func){
+  return typeof o[func]==="function";
+}
 rad.objlength=function(o){
   //return the number of unique properties
   var count = 0;
@@ -32,4 +35,20 @@ rad.objclonefast=function(o){
 }
 rad.objclear=function(o){
   for (var member in o) delete o[member];
+}
+///check if its a dom element
+//http://stackoverflow.com/questions/384286/javascript-isdom-how-do-you-check-if-a-javascript-object-is-a-dom-object
+rad.isdomnode=function(o){
+  return (
+    typeof Node === "object" ? o instanceof Node : 
+    o && typeof o === "object" && typeof o.nodeType === "number" && typeof o.nodeName==="string"
+  );
+}
+
+//Returns true if it is a DOM element    
+rad.isdomelement=function(o){
+  return (
+    typeof HTMLElement === "object" ? o instanceof HTMLElement : //DOM2
+    o && typeof o === "object" && o !== null && o.nodeType === 1 && typeof o.nodeName==="string"
+);
 }

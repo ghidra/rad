@@ -65,7 +65,9 @@ rad.dropdown=function(d){
 	//the function
 	var _this = this;
 	//dd.onchange=function(e){_this.changed()};
-	dd.onchange=function(e){d.callback(_this)};
+	if(rad.objhasfunction(d,"callback")){
+		dd.onchange=function(e){d.callback(_this)};
+	}
 
 	for (var option in d.options){
 		var opt = document.createElement("OPTION");
@@ -85,6 +87,8 @@ rad.dropdown=function(d){
 }
 rad.dropdown.prototype=new rad.ui();
 rad.dropdown.prototype.constructor=rad.ui;
+
+
 //-----------textbox
 rad.textbox=function(d){
 	/*{
@@ -117,7 +121,9 @@ rad.textbox=function(d){
 	//console.log(this.width_input+"px");
 	s.id = "tb_"+this.id+"_"+this.label;
 	var _this = this;
-	s.onchange=function(e){d.callback(_this)};
+	if(rad.objhasfunction(d,"callback")){
+		s.onchange=function(e){d.callback(_this)};
+	}
 
 	if(this.width_label>0)this.element.appendChild(s_label);
 	this.element.appendChild(s);
@@ -126,6 +132,7 @@ rad.textbox=function(d){
 }
 rad.textbox.prototype=new rad.ui();
 rad.textbox.prototype.constructor=rad.ui;
+
 
 //-----------slider
 rad.slider=function(d){
@@ -256,3 +263,45 @@ rad.slider.prototype.bounds=function(val){
 
 	return {min:val-v, max:val+v};
 }
+
+
+//-----------button
+rad.button=function(d){
+	/*{
+		"id":"",
+		"label":"",
+		"width":1,
+		"width_label":0,
+		"margin":0,
+		"fontsize":1,
+		"callback":function(){}
+	}*/
+	rad.ui.prototype.init.call(this,d);
+	
+	if(this.width_label>0){
+		var bu_label = document.createElement("DIV");
+		bu_label.className="textbox_label_ui";
+		bu_label.innerHTML = "&nbsp";
+		bu_label.style.maxWidth = this.width_label+this.dtype;
+		bu_label.style.margin = this.margin+this.dtype;
+	}
+	this.element.style.clear="both";
+
+	var bu = document.createElement("BUTTON");
+	//s.type = "text";
+	//s.value=this.value;
+	bu.style.float = "right";
+	bu.style.width=this.width+this.dtype;
+	//console.log(this.width_input+"px");
+	bu.id = "tb_"+this.id+"_"+this.label;
+	bu.innerHTML=this.label;
+	var _this = this;
+	bu.onclick=function(e){d.callback(_this)};
+
+	if(this.width_label>0)this.element.appendChild(bu_label);
+	this.element.appendChild(bu);
+
+	return this;
+}
+rad.button.prototype=new rad.ui();
+rad.button.prototype.constructor=rad.ui;
