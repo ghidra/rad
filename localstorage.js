@@ -30,6 +30,12 @@ rad.localstorage.prototype.set=function(id,d){
 rad.localstorage.prototype.get=function(id){
     return this.storage.getItem(id);
 }
-///debug
+///cleanup
+rad.localstorage.prototype.deleteall=function(){
+    return this.storage.clear();
+}
+rad.localstorage.prototype.deleteitem=function(name){
+    return this.storage.removeItem(name);
+}
 
 
