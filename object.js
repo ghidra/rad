@@ -15,6 +15,9 @@ rad.objhasprop=function(o){
   	}
   	return false;
 }
+rad.objfindprop=function(o,prop){
+  return Object.prototype.hasOwnProperty.call(o, prop);
+}
 rad.objhasfunction=function(o,func){
   return typeof o[func]==="function";
 }
