@@ -234,21 +234,21 @@ rad.slider.prototype.input_changed=function(e){
 	}
 }
 rad.slider.prototype.update=function(e){
-	var c = js.mouseposition(e);
-	var p = js.position(this.bg);
-	var s = js.size(this.bg);
+	var c = rad.mouseposition(e);
+	var p = rad.domposition(this.bg);
+	var s = rad.domsize(this.bg);
 
 	var mouse_offset = c.x-p.x;
 
-	var new_position = js.clamp(mouse_offset,1,this.width_max);//i need to know the width to go to
+	var new_position = rad.clamp(mouse_offset,1,this.width_max);//i need to know the width to go to
 	var bounds = this.bounds(this.value);
-	var new_val = js.remap(new_position,1,this.width_max,bounds.min,bounds.max);
+	var new_val = rad.remap(new_position,1,this.width_max,bounds.min,bounds.max);
 	//console.log(bounds.min+":"+bounds.max);
 	this.fg.style.width = new_position;
 	this.input.value = new_val.toFixed(2);
 }
 rad.slider.prototype.release=function(e){
-	js.removedragevent(this.tmp_updater,this.tmp_release);
+	rad.removedragevent(this.tmp_updater,this.tmp_release);
 	//now i need to set the value on the node
 	this.value = parseFloat(this.input.value);
 	if (typeof this.callback === "function"){
