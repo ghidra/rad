@@ -118,6 +118,7 @@ rad.panels.prototype.layout_split=function(name,part,parent){
 	size=(parentpart.p.length>0)?100-size:size;
 	var usesplitters = (part.splitters)?part.splitters:0;
 	var useresizers = (part.resizers)?part.resizers:0;
+	var parttype = (part.type)?part.type:"%";
 	
 	//console.log(orientation)
 	
@@ -140,7 +141,7 @@ rad.panels.prototype.layout_split=function(name,part,parent){
 			"width":width,
 			"height":height,
 			"width_label":0,
-			"dtype":"%",
+			"dtype":parttyoe,
 			"parent_id":'partition_'+parent,
 			"panel":this_,
 			"side":parentpart.p.length-1,
