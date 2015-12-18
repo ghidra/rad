@@ -1,15 +1,5 @@
 //requires ui, object, dom
 //this module will be for making customizagble panels that you can move around
-// I need a way to manage the panels
-//then each panel will have logic to move around
-
-
-//panels, will say where panels are, and how many panels there are.
-//as well as be able to divide a panel.
-
-//each panel, will have controls to move it around and resize and swap with another panel
-
-//maybe even have tabbed panels
 
 rad.panels=function(parent,layout,callback){
 	//layout is optional, it will build a default layout
@@ -141,7 +131,7 @@ rad.panels.prototype.layout_split=function(name,part,parent){
 			"width":width,
 			"height":height,
 			"width_label":0,
-			"dtype":parttyoe,
+			"dtype":parttype,
 			"parent_id":'partition_'+parent,
 			"panel":this_,
 			"side":parentpart.p.length-1,
@@ -212,6 +202,7 @@ rad.panels.partition.prototype.constructor=rad.ui;
 rad.panels.partition.prototype.draw=function(draw_splitters){
 	//console.log("we are drawing");
 	this.element.innerHTML="";//clean it out
+	
 	this.element.style.width=this.width+this.dtype;
 	this.element.style.height=this.height+this.dtype;
 	//this.element.style.position="relative";
