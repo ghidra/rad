@@ -37,6 +37,22 @@ rad.defaults.ui={
 	    		"margin-right":2
 	    	}
 		}
+	},
+	"dropdown":{
+		"style":{}
+	},
+	"textbox":{
+		"style":{
+			//"float":"right"
+		}
+	},
+	"button":{
+		"style":{
+			"float":"right"
+		}
+	},
+	"label":{
+		"style":{}
 	}
 };
 //-----------base class
@@ -51,7 +67,7 @@ rad.ui.prototype.init=function(d){
 
 	//init the css style
 	this.style = rad.objclonefast(rad.defaults.ui.style);
-	this.appendstyle(d.style);
+	this.appendstyle(this.style,d.style);
 	//this.style=(d.style!=undefined)?d.style:{};//passed in style to overwrite default values
 
 	this.dtype=(d.dtype!=undefined)?d.dtype:"px";////switch this to measure later
@@ -89,11 +105,11 @@ rad.ui.prototype.getvalue=function(){
 	}
 	return v;
 }
-rad.ui.prototype.appendstyle=function(d){
+rad.ui.prototype.appendstyle=function(s,d){
 	//updates or overwrites styles for use
 	if(d!=undefined){
 		for(var style_attribute in d){
-			this.style[style_attribute] = d[style_attribute];
+			s[style_attribute] = d[style_attribute];
 		}
 	}
 }
@@ -140,7 +156,11 @@ rad.dropdown=function(d){
 
 	var dd = document.createElement("SELECT");
 	//dd.style.float = "right";
-	dd.style.width=this.width+this.dtype;
+	if(d.style_dropdown!=undefined){
+		this.setstyle(dd,d.style_dropdown);
+	}else{
+		dd.style.width=this.width+this.dtype;
+	}
 	dd.id = "dd_"+this.id+"_"+this.label;
 	
 	//the function
@@ -193,13 +213,24 @@ rad.textbox=function(d){
 		s_label.style.maxWidth = this.width_label+this.dtype;
 		s_label.style.margin = this.margin+this.dtype;
 	}
-	this.element.style.clear="both";
+	//this.element.style.clear="both";
 
 	var s = document.createElement("INPUT");
 	s.type = "text";
 	s.value=this.value;
 	//dd.style.float = "right";
-	s.style.width=this.width+this.dtype;
+	
+	this.style_textbox = rad.objclonefast(rad.defaults.ui.textbox.style);
+	if(d.style_textbox!=undefined){
+		this.appendstyle(this.style_textbox, d.style_textbox);
+	}
+	this.setstyle(s,this.style_textbox);
+
+	/*if(d.style_textbox!=undefined){
+		this.setstyle(s,d.style_textbox);
+	}else{
+		s.style.width=this.width+this.dtype;
+	}*/
 	//console.log(this.width_input+"px");
 	s.id = "tb_"+this.id+"_"+this.label;
 	var _this = this;
@@ -247,7 +278,7 @@ rad.slider=function(d){
 	this.fg = document.createElement("DIV");
 	this.input = document.createElement("INPUT");
 
-	this.element.style.clear="both";
+	//this.element.style.clear="both";
 
 	if(this.width_label){
 		s_label.className="slider_label_ui";
@@ -369,13 +400,19 @@ rad.button=function(d){
 		bu_label.style.maxWidth = this.width_label+this.dtype;
 		bu_label.style.margin = this.margin+this.dtype;
 	}
-	this.element.style.clear="both";
+	//this.element.style.clear="both";
 
 	var bu = document.createElement("BUTTON");
 	//s.type = "text";
 	//s.value=this.value;
-	bu.style.float = "right";
-	bu.style.width=this.width+this.dtype;
+	this.style_button = rad.objclonefast(rad.defaults.ui.button.style);
+	if(d.style_button!=undefined){
+		this.appendstyle(this.style_button, d.style_button);
+	}
+	this.setstyle(bu,this.style_button);
+	//bu.style.float = "right";
+	//bu.style.width=this.width+this.dtype;
+	
 	//console.log(this.width_input+"px");
 	bu.id = "tb_"+this.id+"_"+this.label;
 	bu.innerHTML=this.label;

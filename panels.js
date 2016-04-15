@@ -156,7 +156,7 @@ rad.panels.prototype.layout_split=function(name,part,parent){
 		//styles can now be passed in per partition element
 		//console.log(parentpart.p[parentpart.p.length-1]);
 		var elem = parentpart.p[parentpart.p.length-1];
-		elem.appendstyle( part.partitions[name].style );
+		elem.appendstyle( elem.style, part.partitions[name].style );
 		elem.setstyle(elem.element,elem.style);
 	}
 }
