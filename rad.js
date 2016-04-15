@@ -1,4 +1,5 @@
 rad={};
+rad.defaults={};
 //------------------------
 rad.includes={
 	module_path:"",

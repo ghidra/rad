@@ -15,6 +15,12 @@ rad.panels=function(parent,layout,callback){
 	this.p=[
 		new rad.panels.partition({
 			"id":"partition_0",
+			"style":{
+				"width":100,
+				"height":100,
+				"clear":"none",
+				"fontSize":0
+			},
 			"width":100,
 			"height":100,
 			"width_label":0,
@@ -128,6 +134,12 @@ rad.panels.prototype.layout_split=function(name,part,parent){
 	parentpart.p[parentpart.p.length]=
 		new rad.panels.partition({
 			"id":"partition_"+name,
+			"style":{
+				"width":width,
+				"height":height,
+				"clear":"none",
+				"fontSize":0,
+			},
 			"width":width,
 			"height":height,
 			"width_label":0,
@@ -139,6 +151,14 @@ rad.panels.prototype.layout_split=function(name,part,parent){
 			"usesplitters":usesplitters,
 			"useresizers":useresizers
 		});
+
+	if(part.partitions[name].style!=undefined){
+		//styles can now be passed in per partition element
+		//console.log(parentpart.p[parentpart.p.length-1]);
+		var elem = parentpart.p[parentpart.p.length-1];
+		elem.appendstyle( part.partitions[name].style );
+		elem.setstyle(elem.element,elem.style);
+	}
 }
 rad.panels.prototype.layout_assign=function(obj,parent){
 	//console.log(obj);

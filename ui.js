@@ -1,5 +1,44 @@
-// !!!! requires mouse module 
+// !!!! requires mouse module and object
 
+rad.defaults.ui={
+	"width_label":60,
+	"dtype":"px",
+	"style":{
+		"width":120,
+		"height":10,
+		"margin":0,
+		"fontSize":10,
+		"clear":"both",
+		"float":"none"
+	},
+	"slider":{
+		"bg":{
+			"dtype":"px",
+			"style":{
+				"height":22,
+  				"backgroundColor":"#ccc",
+  				"float":"right"
+  			}
+		},
+		"fg":{
+			"dtype":"px",
+			"style":{
+				"height":20,
+    			"margin":1,
+    			"backgroundColor":"white",
+    			"float":"left"
+			}
+		},
+		"in":{
+			"dtype":"px",
+			"style":{
+				"float":"right",
+	    		"color":"black",
+	    		"margin-right":2
+	    	}
+		}
+	}
+};
 //-----------base class
 rad.ui=function(){
 	return this;
@@ -8,21 +47,62 @@ rad.ui.prototype.init=function(d){
 	this.id = (d.id!=undefined)?d.id:"";
 	this.label = (d.label!=undefined)?d.label:"";
 	this.value = (d.value!=undefined)?d.value:"0";
+	this.uitype = 'none';//the type of ui element this is, set automatically
 
-	this.dtype=(d.dtype!=undefined)?d.dtype:"px"
+	//init the css style
+	this.style = rad.objclonefast(rad.defaults.ui.style);
+	this.appendstyle(d.style);
+	//this.style=(d.style!=undefined)?d.style:{};//passed in style to overwrite default values
+
+	this.dtype=(d.dtype!=undefined)?d.dtype:"px";////switch this to measure later
+
+	this.width_label = (d.width_label!=undefined)?d.width_label:60;
 
 	this.width = (d.width)?d.width:120;
 	this.height = (d.width)?d.height:10;
-	this.width_label = (d.width_label)?d.width_label:60;
-	this.margin = (d.margin)?d.margin:0;
+	this.margin = (d.margin!=undefined)?d.margin:0;
 
 	this.fontsize = (d.fontsize)?d.fontsize:10;
 
 	this.element = document.createElement("DIV");
 	this.element.id = this.id;
+
+	this.setstyle(this.element,this.style);//set the style of the top level element
 }
 rad.ui.prototype.getelement=function(){
 	return this.element;
+}
+rad.ui.prototype.getvalue=function(){
+	var v;
+	switch(this.uitype){
+		case "dropdown":
+			v = document.getElementById("dd_"+this.id+"_"+this.label).value
+			break;
+		case "textbox":
+			v = document.getElementById("tb_"+this.id+"_"+this.label).value;
+			break;
+		case "slider":
+			v = this.value;
+			break;
+		case "button":
+			break;
+	}
+	return v;
+}
+rad.ui.prototype.appendstyle=function(d){
+	//updates or overwrites styles for use
+	if(d!=undefined){
+		for(var style_attribute in d){
+			this.style[style_attribute] = d[style_attribute];
+		}
+	}
+}
+rad.ui.prototype.setstyle=function(elem,d){
+	for(var style_attribute in d){
+		if(d[style_attribute]!="none" && d[style_attribute]!=0 && d[style_attribute]!="0" ){
+			elem.style[style_attribute] = d[style_attribute];
+		}
+	}
 }
 
 //-----------dropdown
@@ -41,6 +121,7 @@ rad.dropdown=function(d){
 		"callback":function(){}
 	}*/
 	rad.ui.prototype.init.call(this,d);
+	this.uitype="dropdown";
 
 	this.options = (d.options)?d.options:[];
 
@@ -55,7 +136,7 @@ rad.dropdown=function(d){
 		dd_label.style.margin = this.margin+this.dtype;
 	}
 
-	this.element.style.clear="both";
+	//this.element.style.clear="both";
 
 	var dd = document.createElement("SELECT");
 	//dd.style.float = "right";
@@ -102,6 +183,7 @@ rad.textbox=function(d){
 		"callback":function(){}
 	}*/
 	rad.ui.prototype.init.call(this,d);
+	this.uitype="textbox";
 	
 	if(this.width_label>0){
 		var s_label = document.createElement("DIV");
@@ -148,6 +230,7 @@ rad.slider=function(d){
 		"callback":function(){}
 	}*/
 	rad.ui.prototype.init.call(this,d);
+	this.uitype="slider";
 
 	this.keep=false;//what is this shit?
 	this.width_in = (d.width_input)?d.width_input:40;//with of the input box
@@ -277,7 +360,8 @@ rad.button=function(d){
 		"callback":function(){}
 	}*/
 	rad.ui.prototype.init.call(this,d);
-	
+	this.uitype="button";
+
 	if(this.width_label>0){
 		var bu_label = document.createElement("DIV");
 		bu_label.className="textbox_label_ui";
