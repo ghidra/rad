@@ -52,7 +52,9 @@ rad.defaults.ui={
 		}
 	},
 	"label":{
-		"style":{}
+		"style":{
+			"width":60
+		}
 	}
 };
 //-----------base class
@@ -60,6 +62,8 @@ rad.ui=function(){
 	return this;
 }
 rad.ui.prototype.init=function(d){
+	rad.element.prototype.init.call(this,"DIV",d.element);
+
 	this.id = (d.id!=undefined)?d.id:"";
 	this.label = (d.label!=undefined)?d.label:"";
 	this.value = (d.value!=undefined)?d.value:"0";
@@ -70,21 +74,35 @@ rad.ui.prototype.init=function(d){
 	this.appendstyle(this.style,d.style);
 	//this.style=(d.style!=undefined)?d.style:{};//passed in style to overwrite default values
 
-	this.dtype=(d.dtype!=undefined)?d.dtype:"px";////switch this to measure later
+	this.dtype=(d.dtype!=undefined)?d.dtype:rad.defaults.ui.dtype;////switch this to measure later
 
-	this.width_label = (d.width_label!=undefined)?d.width_label:60;
+	//this.width_label = (d.width_label!=undefined)?d.width_label:60;
 
-	this.width = (d.width)?d.width:120;
-	this.height = (d.width)?d.height:10;
-	this.margin = (d.margin!=undefined)?d.margin:0;
-
-	this.fontsize = (d.fontsize)?d.fontsize:10;
+	this.width = (d.width)?d.width:this.style.width;
+	this.height = (d.width)?d.height:this.style.height;
+	this.margin = (d.margin!=undefined)?d.margin:this.style.margin;
+	this.fontsize = (d.fontsize)?d.fontsize:this.style.fontSize;
 
 	this.element = document.createElement("DIV");
 	this.element.id = this.id;
 
 	this.setstyle(this.element,this.style);//set the style of the top level element
+
+	//now we can do the label element
+	this.style_label=rad.objclonefast(rad.defaults.ui.label.style);
+	this.appendstyle(this.style_label,d.style_label);
+	if(this.style_label.width>0){
+		this.element_label = document.createElement("DIV");
+		//dd_label.style.float = "left";
+		this.element_label.className="dd_label_ui";
+		this.element_label.innerHTML = "&nbsp;"+this.label;
+		this.setstyle(this.element_label,this.style_label);
+		this.element.appendChild(this.element_label);
+	}
 }
+rad.ui.prototype=new rad.element();
+rad.ui.prototype.constructor=rad.element;
+
 rad.ui.prototype.getelement=function(){
 	return this.element;
 }
@@ -136,13 +154,15 @@ rad.dropdown=function(d){
 		"fontsize":1,
 		"callback":function(){}
 	}*/
-	rad.ui.prototype.init.call(this,d);
+	console.log("WHAT HAPPENS AFTER THIS")
+	rad.ui.prototype.init.call(this,"DIV",d.element);
+	this.setstyle(this.style);
+	console.log("BUTWHY");
 	this.uitype="dropdown";
-
 	this.options = (d.options)?d.options:[];
 
 	//label
-	if(this.width_label>0){
+	/*if(this.width_label>0){
 		var dd_label = document.createElement("DIV");
 		//dd_label.style.float = "left";
 		dd_label.className="dd_label_ui";
@@ -150,19 +170,19 @@ rad.dropdown=function(d){
 		dd_label.style.fontSize=this.fontsize;
 		dd_label.style.maxWidth = this.width_label+this.dtype;
 		dd_label.style.margin = this.margin+this.dtype;
-	}
+	}*/
 
 	//this.element.style.clear="both";
 
 	var dd = document.createElement("SELECT");
 	//dd.style.float = "right";
-	if(d.style_dropdown!=undefined){
+	/*if(d.style_dropdown!=undefined){
 		this.setstyle(dd,d.style_dropdown);
 	}else{
 		dd.style.width=this.width+this.dtype;
 	}
 	dd.id = "dd_"+this.id+"_"+this.label;
-	
+	*/
 	//the function
 	var _this = this;
 	//dd.onchange=function(e){_this.changed()};
@@ -180,7 +200,7 @@ rad.dropdown=function(d){
 		opt.innerHTML = d.options[option];
 		dd.appendChild(opt);
 	}
-	if(this.width_label>0)this.element.appendChild(dd_label);
+	//if(this.width_label>0)this.element.appendChild(dd_label);
 	this.element.appendChild(dd);
 	
 	//return this.element;
@@ -205,14 +225,14 @@ rad.textbox=function(d){
 	rad.ui.prototype.init.call(this,d);
 	this.uitype="textbox";
 	
-	if(this.width_label>0){
+	/*if(this.width_label>0){
 		var s_label = document.createElement("DIV");
 		s_label.className="textbox_label_ui";
 		s_label.innerHTML = "&nbsp;"+this.label;
 		s_label.style.fontSize=this.fontsize;
 		s_label.style.maxWidth = this.width_label+this.dtype;
 		s_label.style.margin = this.margin+this.dtype;
-	}
+	}*/
 	//this.element.style.clear="both";
 
 	var s = document.createElement("INPUT");
@@ -238,7 +258,7 @@ rad.textbox=function(d){
 		s.onchange=function(e){d.callback(_this)};
 	}
 
-	if(this.width_label>0)this.element.appendChild(s_label);
+	//if(this.width_label>0)this.element.appendChild(s_label);
 	this.element.appendChild(s);
 
 	return this;
@@ -280,20 +300,21 @@ rad.slider=function(d){
 
 	//this.element.style.clear="both";
 
-	if(this.width_label){
+	/*if(this.width_label){
 		s_label.className="slider_label_ui";
 		s_label.innerHTML = "&nbsp;"+this.label;
 		s_label.style.maxWidth = this.width_label+this.dtype;
 		s_label.style.margin = this.margin+"px";
 		s_label.style.fontSize=(d.fontsize)?d.fontsize:10;
-	}
+	}*/
 
 	s_con.style.float="right";
 
 	this.bg.className="slider_BG";
 	this.fg.className="slider_FG";
 	this.input.className="slider_IN";
-	this.input.style.width = this.width_in;
+	this.input.style.width = this.width_in-2;
+	this.input.style.float = "right";
 	this.input.type="text";
 	this.input.value=this.value;
 
@@ -307,7 +328,7 @@ rad.slider=function(d){
 
 	this.bg.appendChild(this.fg);
 	s_con.appendChild(this.bg);
-	if(this.width_label)this.element.appendChild(s_label);
+	//if(this.width_label)this.element.appendChild(s_label);
 	this.element.appendChild(this.input);
 	this.element.appendChild(s_con);
 
@@ -393,13 +414,13 @@ rad.button=function(d){
 	rad.ui.prototype.init.call(this,d);
 	this.uitype="button";
 
-	if(this.width_label>0){
+	/*if(this.width_label>0){
 		var bu_label = document.createElement("DIV");
 		bu_label.className="textbox_label_ui";
 		bu_label.innerHTML = "&nbsp";
 		bu_label.style.maxWidth = this.width_label+this.dtype;
 		bu_label.style.margin = this.margin+this.dtype;
-	}
+	}*/
 	//this.element.style.clear="both";
 
 	var bu = document.createElement("BUTTON");
@@ -419,7 +440,7 @@ rad.button=function(d){
 	var _this = this;
 	bu.onclick=function(e){d.callback(_this)};
 
-	if(this.width_label>0)this.element.appendChild(bu_label);
+	//if(this.width_label>0)this.element.appendChild(bu_label);
 	this.element.appendChild(bu);
 
 	return this;

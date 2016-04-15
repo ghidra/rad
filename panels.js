@@ -1,4 +1,4 @@
-//requires ui, object, dom
+//requires object, dom, element
 //this module will be for making customizagble panels that you can move around
 
 rad.panels=function(parent,layout,callback){
@@ -14,15 +14,17 @@ rad.panels=function(parent,layout,callback){
 	var _this=this;//i have to give this to the object so I can call draw
 	this.p=[
 		new rad.panels.partition({
-			"id":"partition_0",
-			"style":{
-				"width":100,
-				"height":100,
-				"clear":"none",
-				"fontSize":0
+			"element":{
+				"id":"partition_0",
+				"style":{
+					"width":"100%",
+					"height":"100%",
+					"clear":"none",
+					"fontSize":0
+				}
 			},
-			"width":100,
-			"height":100,
+			//"width":100,
+			//"height":100,
 			"width_label":0,
 			"dtype":"%",
 			"parent_id":parent,
@@ -133,12 +135,15 @@ rad.panels.prototype.layout_split=function(name,part,parent){
 	
 	parentpart.p[parentpart.p.length]=
 		new rad.panels.partition({
-			"id":"partition_"+name,
-			"style":{
-				"width":width,
-				"height":height,
-				"clear":"none",
-				"fontSize":0,
+			//"id":"partition_"+name,
+			"element":{
+				"id":"partition_"+name,
+				"style":{
+					"width":width+parttype,
+					"height":height+parttype,
+					"clear":"none",
+					"fontSize":0,
+				}
 			},
 			"width":width,
 			"height":height,
@@ -154,10 +159,9 @@ rad.panels.prototype.layout_split=function(name,part,parent){
 
 	if(part.partitions[name].style!=undefined){
 		//styles can now be passed in per partition element
-		//console.log(parentpart.p[parentpart.p.length-1]);
 		var elem = parentpart.p[parentpart.p.length-1];
-		elem.appendstyle( elem.style, part.partitions[name].style );
-		elem.setstyle(elem.element,elem.style);
+		elem.appendstyle(  part.partitions[name].style );
+		elem.setstyle(elem.style);
 	}
 }
 rad.panels.prototype.layout_assign=function(obj,parent){
@@ -204,7 +208,13 @@ rad.panels.prototype.windowresized=function(){
 ///////
 //partition object
 rad.panels.partition=function(d){
-	rad.ui.prototype.init.call(this,d);
+	rad.element.prototype.init.call(this,"DIV",d.element);
+
+	this.id = d.element.id;
+	//this.width = d.element.style.width;
+	//this.height = d.element.style.height;
+
+	//this.dtype=d.dtype;
 
 	this.p=[];//the partitions, only 2 [0,1]
 	this.parent_id=d.parent_id;
@@ -216,15 +226,17 @@ rad.panels.partition=function(d){
 
 	return this;
 }
-rad.panels.partition.prototype=new rad.ui();
-rad.panels.partition.prototype.constructor=rad.ui;
+rad.panels.partition.prototype=new rad.element();
+rad.panels.partition.prototype.constructor=rad.element;
 
 rad.panels.partition.prototype.draw=function(draw_splitters){
 	//console.log("we are drawing");
 	this.element.innerHTML="";//clean it out
 	
-	this.element.style.width=this.width+this.dtype;
-	this.element.style.height=this.height+this.dtype;
+	//this.element.style.width=this.width+this.dtype;
+	//this.element.style.height=this.height+this.dtype;
+	//this.element.style.width=this.width+this.dtype;
+	//this.element.style.height=this.height+this.dtype;
 	//this.element.style.position="relative";
 	this.element.style.outline="thin solid #000000";
 	this.element.style.display="inline-block";
