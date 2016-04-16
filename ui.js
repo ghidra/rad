@@ -1,7 +1,7 @@
 // !!!! requires mouse module and object
 
 rad.defaults.ui={
-	"width_label":60,
+	//"width_label":60,
 	"dtype":"px",
 	"style":{
 		"width":120,
@@ -42,6 +42,7 @@ rad.defaults.ui={
 		"style":{}
 	},
 	"textbox":{
+		"type":"text",
 		"style":{
 			//"float":"right"
 		}
@@ -52,6 +53,7 @@ rad.defaults.ui={
 		}
 	},
 	"label":{
+		"className":"rad_ui_label",
 		"style":{
 			"width":60
 		}
@@ -62,49 +64,52 @@ rad.ui=function(){
 	return this;
 }
 rad.ui.prototype.init=function(d){
-	rad.element.prototype.init.call(this,"DIV",d.element);
+
+	//make the container, the main element that will hold the children
+	var tmp = {
+		"id":d.id,
+		"style":rad.defaults.ui.style
+	};
+	this.container = new rad.element("DIV",tmp);
 
 	this.id = (d.id!=undefined)?d.id:"";
-	this.label = (d.label!=undefined)?d.label:"";
+	this.label = (d.label!=undefined)?d.label:"";//for easy data access, as ids are using these vars
 	this.value = (d.value!=undefined)?d.value:"0";
 	this.uitype = 'none';//the type of ui element this is, set automatically
 
 	//init the css style
-	this.style = rad.objclonefast(rad.defaults.ui.style);
-	this.appendstyle(this.style,d.style);
+	this.container.appendstyle(rad.defaults.ui.style);
+	this.container.appendstyle(d.style);
+	this.container.setstyle();//set/apply the style yo the element
 	//this.style=(d.style!=undefined)?d.style:{};//passed in style to overwrite default values
 
-	this.dtype=(d.dtype!=undefined)?d.dtype:rad.defaults.ui.dtype;////switch this to measure later
+	//this.dtype=(d.dtype!=undefined)?d.dtype:rad.defaults.ui.dtype;////switch this to measure later
 
 	//this.width_label = (d.width_label!=undefined)?d.width_label:60;
 
-	this.width = (d.width)?d.width:this.style.width;
-	this.height = (d.width)?d.height:this.style.height;
-	this.margin = (d.margin!=undefined)?d.margin:this.style.margin;
-	this.fontsize = (d.fontsize)?d.fontsize:this.style.fontSize;
+	//this.width = (d.width)?d.width:this.style.width;
+	//this.height = (d.width)?d.height:this.style.height;
+	//this.margin = (d.margin!=undefined)?d.margin:this.style.margin;
+	//this.fontsize = (d.fontsize)?d.fontsize:this.style.fontSize;
 
-	this.element = document.createElement("DIV");
-	this.element.id = this.id;
+	//this.element = document.createElement("DIV");
+	//this.element.id = this.id;
 
-	this.setstyle(this.element,this.style);//set the style of the top level element
+	//this.setstyle(this.element,this.style);//set the style of the top level element
 
 	//now we can do the label element
-	this.style_label=rad.objclonefast(rad.defaults.ui.label.style);
-	this.appendstyle(this.style_label,d.style_label);
-	if(this.style_label.width>0){
-		this.element_label = document.createElement("DIV");
-		//dd_label.style.float = "left";
-		this.element_label.className="dd_label_ui";
-		this.element_label.innerHTML = "&nbsp;"+this.label;
-		this.setstyle(this.element_label,this.style_label);
-		this.element.appendChild(this.element_label);
+	this.label_container = new rad.element("DIV",rad.defaults.ui.label,"&nbsp;"+d.label);
+	this.label_container.appendstyle(d.style_label);
+	this.label_container.setstyle();
+
+	if(this.label_container.style.width>0){
+		this.container.element.appendChild(this.label_container.element);
 	}
 }
-rad.ui.prototype=new rad.element();
-rad.ui.prototype.constructor=rad.element;
+
 
 rad.ui.prototype.getelement=function(){
-	return this.element;
+	return this.container.element;
 }
 rad.ui.prototype.getvalue=function(){
 	var v;
@@ -123,73 +128,48 @@ rad.ui.prototype.getvalue=function(){
 	}
 	return v;
 }
-rad.ui.prototype.appendstyle=function(s,d){
-	//updates or overwrites styles for use
-	if(d!=undefined){
-		for(var style_attribute in d){
-			s[style_attribute] = d[style_attribute];
-		}
-	}
-}
-rad.ui.prototype.setstyle=function(elem,d){
-	for(var style_attribute in d){
-		if(d[style_attribute]!="none" && d[style_attribute]!=0 && d[style_attribute]!="0" ){
-			elem.style[style_attribute] = d[style_attribute];
-		}
-	}
-}
 
 //-----------dropdown
 rad.dropdown=function(d){
 	/*{
-		"id":"",
-		"label":"",
-		"options":[] || {},
-		"value":0 || "",
-		"dtype":"px",//dimension type
-		"width":1,
-		"height":1,
-		"width_label":0,
-		"margin":0,
-		"fontsize":1,
+		"label":"graph size",
+	    "id":"graphsize",
+	    "style":{//if the main container
+	      "clear":"none",
+	      "float":"left"
+	    },
+	    "label_style":{"width":0},
+	    "dropdown_style":{},
+	    "options":{
+	      0:"4x4",
+	      1:"8x8",
+	      2:"16x16",
+	      3:"32x32"
+	    },//or as an array as well
+	    "value": "3",
 		"callback":function(){}
 	}*/
-	console.log("WHAT HAPPENS AFTER THIS")
-	rad.ui.prototype.init.call(this,"DIV",d.element);
-	this.setstyle(this.style);
-	console.log("BUTWHY");
+	rad.ui.prototype.init.call(this,d);
 	this.uitype="dropdown";
+
 	this.options = (d.options)?d.options:[];
 
-	//label
-	/*if(this.width_label>0){
-		var dd_label = document.createElement("DIV");
-		//dd_label.style.float = "left";
-		dd_label.className="dd_label_ui";
-		dd_label.innerHTML = "&nbsp;"+this.label;
-		dd_label.style.fontSize=this.fontsize;
-		dd_label.style.maxWidth = this.width_label+this.dtype;
-		dd_label.style.margin = this.margin+this.dtype;
-	}*/
+	//make the DROPDOWN ELEMENT
+	var tmp = rad.defaults.ui.dropdown;
+	tmp.id="dd_"+d.id+"_"+d.label;
+	var dd = new rad.element("SELECT",tmp);
+	dd.appendstyle({"width":this.container.style.width-this.label_container.style.width});//add in the width minus the label
+	dd.appendstyle(d.style_dropdown);//we might be overwritting the above width calc, so di it first
+	dd.setstyle();
 
-	//this.element.style.clear="both";
-
-	var dd = document.createElement("SELECT");
-	//dd.style.float = "right";
-	/*if(d.style_dropdown!=undefined){
-		this.setstyle(dd,d.style_dropdown);
-	}else{
-		dd.style.width=this.width+this.dtype;
-	}
-	dd.id = "dd_"+this.id+"_"+this.label;
-	*/
 	//the function
 	var _this = this;
-	//dd.onchange=function(e){_this.changed()};
+
 	if(rad.objhasfunction(d,"callback")){
-		dd.onchange=function(e){d.callback(_this)};
+		dd.element.onchange=function(e){d.callback(_this)};
 	}
 
+	//POPULATE THE DROPDOWN ELEMENT
 	for (var option in d.options){
 		var opt = document.createElement("OPTION");
 		var opt_string = (typeof d.options === 'object')?option:d.options[option];
@@ -198,13 +178,12 @@ rad.dropdown=function(d){
 			opt.selected = true;
 		}
 		opt.innerHTML = d.options[option];
-		dd.appendChild(opt);
+		dd.element.appendChild(opt);
 	}
-	//if(this.width_label>0)this.element.appendChild(dd_label);
-	this.element.appendChild(dd);
+	this.container.element.appendChild(dd.element);
 	
-	//return this.element;
 	return this;
+
 }
 rad.dropdown.prototype=new rad.ui();
 rad.dropdown.prototype.constructor=rad.ui;
@@ -213,53 +192,50 @@ rad.dropdown.prototype.constructor=rad.ui;
 //-----------textbox
 rad.textbox=function(d){
 	/*{
-		"id":"",
-		"label":"",
-		"value":"",
-		"width":1,
-		"width_label":0,
-		"margin":0,
-		"fontsize":1,
+		 "id":"numberofframe",
+	    "label":"frames",
+	    "value": "1",
+	    "style":{
+	      "clear":"none",
+	      "float":"left",
+	      "width":40
+	    },
+	    "style_textbox":{
+	      "width":40
+	    },
+	    "style_label":{
+	      "width":0
+	    },
 		"callback":function(){}
 	}*/
 	rad.ui.prototype.init.call(this,d);
 	this.uitype="textbox";
 	
-	/*if(this.width_label>0){
-		var s_label = document.createElement("DIV");
-		s_label.className="textbox_label_ui";
-		s_label.innerHTML = "&nbsp;"+this.label;
-		s_label.style.fontSize=this.fontsize;
-		s_label.style.maxWidth = this.width_label+this.dtype;
-		s_label.style.margin = this.margin+this.dtype;
-	}*/
-	//this.element.style.clear="both";
-
-	var s = document.createElement("INPUT");
+	var tmp = rad.defaults.ui.textbox;
+	tmp.id="tb_"+d.id+"_"+d.label;
+	tmp.value=this.value;
+	var tb = new rad.element("INPUT",tmp);
+	tb.appendstyle(d.style_textbox);
+	tb.setstyle();
+	/*var s = document.createElement("INPUT");
 	s.type = "text";
-	s.value=this.value;
-	//dd.style.float = "right";
+	s.value=this.value;*/
+
 	
-	this.style_textbox = rad.objclonefast(rad.defaults.ui.textbox.style);
+	/*this.style_textbox = rad.objclonefast(rad.defaults.ui.textbox.style);
 	if(d.style_textbox!=undefined){
 		this.appendstyle(this.style_textbox, d.style_textbox);
 	}
 	this.setstyle(s,this.style_textbox);
 
-	/*if(d.style_textbox!=undefined){
-		this.setstyle(s,d.style_textbox);
-	}else{
-		s.style.width=this.width+this.dtype;
-	}*/
-	//console.log(this.width_input+"px");
-	s.id = "tb_"+this.id+"_"+this.label;
+	s.id = "tb_"+this.id+"_"+this.label;*/
 	var _this = this;
 	if(rad.objhasfunction(d,"callback")){
-		s.onchange=function(e){d.callback(_this)};
+		tb.element.onchange=function(e){d.callback(_this)};
 	}
 
 	//if(this.width_label>0)this.element.appendChild(s_label);
-	this.element.appendChild(s);
+	this.container.element.appendChild(tb.element);
 
 	return this;
 }

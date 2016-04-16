@@ -33,6 +33,12 @@ rad.panels=function(parent,layout,callback){
 			"orientation":-1
 		})
 	];
+	var elem = this.p[0];
+	//if(OVERRIDE.style!=undefined){
+		//styles can now be passed in per partition element
+		//elem.appendstyle(  OVERRIDE.style );
+	//}
+	elem.setstyle();
 
 	if(layout){
 		this.layout_assign(layout);
@@ -157,12 +163,12 @@ rad.panels.prototype.layout_split=function(name,part,parent){
 			"useresizers":useresizers
 		});
 
+	var elem = parentpart.p[parentpart.p.length-1];
 	if(part.partitions[name].style!=undefined){
 		//styles can now be passed in per partition element
-		var elem = parentpart.p[parentpart.p.length-1];
 		elem.appendstyle(  part.partitions[name].style );
-		elem.setstyle(elem.style);
 	}
+	elem.setstyle();
 }
 rad.panels.prototype.layout_assign=function(obj,parent){
 	//console.log(obj);
