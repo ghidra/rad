@@ -12,8 +12,13 @@ rad.defaults.ui={
 		"float":"none"
 	},
 	"slider":{
+		"slider":{
+			"style":{
+				"float":"right"
+			}
+		},
 		"bg":{
-			"dtype":"px",
+			"className":"slider_BG",
 			"style":{
 				"height":22,
   				"backgroundColor":"#ccc",
@@ -21,21 +26,23 @@ rad.defaults.ui={
   			}
 		},
 		"fg":{
-			"dtype":"px",
+			"className":"slider_FG",
 			"style":{
 				"height":20,
-    			"margin":1,
-    			"backgroundColor":"white",
-    			"float":"left"
+	    			"margin":1,
+	    			"backgroundColor":"white",
+	    			"float":"left"
 			}
 		},
 		"in":{
-			"dtype":"px",
+			"className":"slider_IN",
+			"type":"text",
 			"style":{
+				"width":40,
 				"float":"right",
-	    		"color":"black",
-	    		"margin-right":2
-	    	}
+		    		"color":"black",
+		    		"margin-right":2
+	    		}
 		}
 	},
 	"dropdown":{
@@ -245,34 +252,75 @@ rad.textbox.prototype.constructor=rad.ui;
 
 //-----------slider
 rad.slider=function(d){
-	/*{
-		"id":"",
-		"label":"",
-		"value":0,
-		"width":1,
-		"width_label":1,
-		"width_input":1,
-		"margin":0,
-		"fontsize":1,
-		"callback":function(){}
-	}*/
 	rad.ui.prototype.init.call(this,d);
 	this.uitype="slider";
 
 	this.keep=false;//what is this shit?
-	this.width_in = (d.width_input)?d.width_input:40;//with of the input box
-	//var margin = (d.margin)?d.margin:0;
-	//var width = (d.width)?d.width:100;
-	this.width_max = (this.width-this.width_in-(this.margin*3));
+	//this.width_in = (d.width_input)?d.width_input:40;//with of the input box
+	
+	//get width    this.container.style.width
 
 	this.callback=d.callback;
 
+	//lets append all the data
+
 	//this.element = document.createElement("DIV");
-	var s_label = document.createElement("DIV");
-	var s_con = document.createElement("DIV");
-	this.bg = document.createElement("DIV");
-	this.fg = document.createElement("DIV");
-	this.input = document.createElement("INPUT");
+	//var s_label = document.createElement("DIV");
+	this.con = new rad.element("DIV",rad.defaults.ui.slider.slider);//document.createElement("DIV");
+	this.bg = new rad.element("DIV",rad.defaults.ui.slider.bg);//document.createElement("DIV");
+	this.fg = new rad.element("DIV",rad.defaults.ui.slider.fg);//document.createElement("DIV");
+
+	var tmp = rad.defaults.ui.slider.in;
+	tmp.value=this.value;
+	this.in = new rad.element("INPUT",tmp);//document.createElement("INPUT");
+
+	if(d.slider!=undefined)
+	{
+		if(d.slider.slider!=undefined)
+		{
+			this.con.appendstyle(d.slider.slider.stlye);
+			this.in.appendstyle(d.slider.in.stlye);
+		}
+	}
+
+	this.width_max = this.container.style.width-this.in.style.width-(this.container.style.margin*3);
+
+	if(d.slider!=undefined)
+	{
+		if(d.slider.bg!=undefined)
+		{
+			this.bg.appendstyle(d.slider.bg.stlye);
+		}
+	}
+	tmpbgst={
+		"stlye":{
+			"width":this.width_max,//need to maybe add the measure or dtype eventually
+			"marginTop":this.container.style.margin,
+			"marginBottom":this.container.style.margin
+		}
+	}
+	this.bg.appendstyle(tmpbgst);
+
+	if(d.slider!=undefined)
+	{
+		if(d.slider.fg!=undefined)
+		{
+			this.fg.appendstyle(d.slider.fg.stlye);
+		}
+	}
+	tmpfgst={
+		"stlye":{
+			"width":Math.round(this.width_max/2),//need to maybe add the measure or dtype eventually
+			"maxWidth": this.width_max
+		}
+	}
+	this.fg.appendstyle(tmpfgst);
+	
+
+	this.con.setstyle();//con is only an object for the possibilty in the future that might be useeful
+	this.bg.setstyle();
+	this.fg.setstyle();
+	this.in.setstyle();
 
 	//this.element.style.clear="both";
 
@@ -284,9 +332,9 @@ rad.slider=function(d){
 		s_label.style.fontSize=(d.fontsize)?d.fontsize:10;
 	}*/
 
-	s_con.style.float="right";
+	//s_con.style.float="right";
 
-	this.bg.className="slider_BG";
+/*	this.bg.className="slider_BG";
 	this.fg.className="slider_FG";
 	this.input.className="slider_IN";
 	this.input.style.width = this.width_in-2;
@@ -301,16 +349,15 @@ rad.slider=function(d){
 	this.fg.style.width=(Math.round(this.width_max/2))+this.dtype;//for debug
 	this.fg.style.maxWidth = this.width_max+this.dtype
 	//dd.id = "dd_node_"+id+"_"+parm;
-
-	this.bg.appendChild(this.fg);
-	s_con.appendChild(this.bg);
-	//if(this.width_label)this.element.appendChild(s_label);
-	this.element.appendChild(this.input);
-	this.element.appendChild(s_con);
+*/
+	this.bg.element.appendChild(this.fg.element);
+	this.con.element.appendChild(this.bg.element);
+	this.container.element.appendChild(this.in.element);
+	this.container.element.appendChild(this.con.element);
 
 	var _this = this;
-	this.bg.onmousedown=function(e){_this.mousedown(e)};
-	this.input.onchange=function(e){_this.input_changed(e)};
+	this.bg.element.onmousedown=function(e){_this.mousedown(e)};
+	this.in.element.onchange=function(e){_this.input_changed(e)};
 
 	return this;
 }
