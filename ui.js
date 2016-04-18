@@ -448,6 +448,12 @@ rad.slider.prototype.update=function(e){
 	
 	this.in.element.value = new_val.toFixed(2);
 }
+rad.slider.prototype.refresh=function(){
+	//updates without event, on value change from outside call
+	var new_position = rad.remap(this.value,this.settings.lower,this.settings.upper,0,this.width_max);
+
+	this.fg.element.style.width = new_position;
+}
 rad.slider.prototype.release=function(e){
 	rad.removedragevent(this.tmp_updater,this.tmp_release);
 	//now i need to set the value on the node
