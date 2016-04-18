@@ -40,8 +40,7 @@ rad.defaults.ui={
 			"style":{
 				"width":40,
 				"float":"right",
-		    		"color":"black",
-		    		"margin-right":2
+		    		"color":"black"
 	    		}
 		}
 	},
@@ -271,7 +270,9 @@ rad.slider=function(d){
 	this.fg = new rad.element("DIV",rad.defaults.ui.slider.fg);//document.createElement("DIV");
 
 	var tmp = rad.defaults.ui.slider.in;
+
 	tmp.value=this.value;
+	tmp.id="stb_"+this.id+"_"+this.label;
 	this.in = new rad.element("INPUT",tmp);//document.createElement("INPUT");
 
 	if(d.slider!=undefined)
@@ -283,7 +284,7 @@ rad.slider=function(d){
 		}
 	}
 
-	this.width_max = this.container.style.width-this.in.style.width-(this.container.style.margin*3);
+	this.width_max = this.container.style.width-this.in.style.width-(this.container.style.margin*3)-2;
 
 	if(d.slider!=undefined)
 	{
@@ -292,12 +293,10 @@ rad.slider=function(d){
 			this.bg.appendstyle(d.slider.bg.stlye);
 		}
 	}
-	tmpbgst={
-		"stlye":{
-			"width":this.width_max,//need to maybe add the measure or dtype eventually
-			"marginTop":this.container.style.margin,
-			"marginBottom":this.container.style.margin
-		}
+	var tmpbgst={
+		"width":this.width_max,//need to maybe add the measure or dtype eventually
+		"marginTop":this.container.style.margin,
+		"marginBottom":this.container.style.margin
 	}
 	this.bg.appendstyle(tmpbgst);
 
@@ -309,10 +308,8 @@ rad.slider=function(d){
 		}
 	}
 	tmpfgst={
-		"stlye":{
-			"width":Math.round(this.width_max/2),//need to maybe add the measure or dtype eventually
-			"maxWidth": this.width_max
-		}
+		"width":Math.round(this.width_max/2),//need to maybe add the measure or dtype eventually
+		"maxWidth": this.width_max
 	}
 	this.fg.appendstyle(tmpfgst);
 	
@@ -367,7 +364,7 @@ rad.slider.prototype.constructor=rad.ui
 
 rad.slider.prototype.mousedown=function(e){
 	if(!this.keep){
-		this.value = this.input.value;
+		this.value = this.in.value;
 		this.keep=true;
 	}
 	this.update(e);
@@ -382,7 +379,7 @@ rad.slider.prototype.input_changed=function(e){
 		//v.value=this.val;//the fuck is v?
 	}else{
 		var bounds = this.bounds(new_value);
-		this.fg.style.width = (this.width_max/2)+this.dtype;
+		this.fg.element.style.width = (this.width_max/2)+this.dtype;
 		//now set the nodes value
 		this.value = new_value;
 		if (typeof this.callback === "function"){
@@ -393,22 +390,26 @@ rad.slider.prototype.input_changed=function(e){
 }
 rad.slider.prototype.update=function(e){
 	var c = rad.mouseposition(e);
-	var p = rad.domposition(this.bg);
-	var s = rad.domsize(this.bg);
+	var p = rad.domposition(this.bg.element);
+	var s = rad.domsize(this.bg.element);
 
 	var mouse_offset = c.x-p.x;
 
 	var new_position = rad.clamp(mouse_offset,1,this.width_max);//i need to know the width to go to
+	console.log(this['value']);//THE SLIDER DOES NOT LIKE THE this.value, but tracing this, gives me the object that has value as an attribute
 	var bounds = this.bounds(this.value);
 	var new_val = rad.remap(new_position,1,this.width_max,bounds.min,bounds.max);
 	//console.log(bounds.min+":"+bounds.max);
-	this.fg.style.width = new_position;
-	this.input.value = new_val.toFixed(2);
+	this.fg.element.style.width = new_position;
+	
+	//this.in.element.value = new_val.toFixed(2);
 }
 rad.slider.prototype.release=function(e){
 	rad.removedragevent(this.tmp_updater,this.tmp_release);
 	//now i need to set the value on the node
-	this.value = parseFloat(this.input.value);
+	//console.log(this.in)
+	
+	this.value = parseFloat( document.getElementById("stb_"+this.id+"_"+this.label).value );
 	if (typeof this.callback === "function"){
 		this.callback(this);
 	}
