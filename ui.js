@@ -12,6 +12,14 @@ rad.defaults.ui={
 		"float":"none"
 	},
 	"slider":{
+		"settings":{
+			"clamp":false,
+			"upper":1,
+			"lower":-1,
+			"max_upper":10,
+			"max_lower":-10,
+			"int":false
+		},
 		"slider":{
 			"style":{
 				"float":"right"
@@ -261,7 +269,9 @@ rad.slider=function(d){
 
 	this.callback=d.callback;
 
-	//lets append all the data
+	//lets store any settings that are passed in for use
+	this.settings=rad.defaults.ui.slider.settings;
+	this.set_settings(d.settings);//pass on the settings
 
 	//this.element = document.createElement("DIV");
 	//var s_label = document.createElement("DIV");
@@ -307,8 +317,15 @@ rad.slider=function(d){
 			this.fg.appendstyle(d.slider.fg.stlye);
 		}
 	}
+	//set it to the desired initial width
+	var fgwidth;
+	if(this.settings.clamped){
+		fgwidth=rad.remap(this.value,this.settings.lower,this.settings.upper,0,this.width_max);
+	}else{
+		fgwidth=this.width_max/2;
+	}
 	tmpfgst={
-		"width":Math.round(this.width_max/2),//need to maybe add the measure or dtype eventually
+		"width":fgwidth,//need to maybe add the measure or dtype eventually
 		"maxWidth": this.width_max
 	}
 	this.fg.appendstyle(tmpfgst);
@@ -362,9 +379,17 @@ rad.slider=function(d){
 rad.slider.prototype=new rad.ui();
 rad.slider.prototype.constructor=rad.ui
 
+rad.slider.prototype.set_settings=function(d){
+	if(d!=undefined){
+		for (var s in d){
+			this.settings[s]=d[s];
+		}
+	}
+}
+
 rad.slider.prototype.mousedown=function(e){
 	if(!this.keep){
-		this.value = this.in.value;
+		this.value = this.in.element.value;
 		this.keep=true;
 	}
 	this.update(e);
@@ -374,12 +399,27 @@ rad.slider.prototype.mousedown=function(e){
 	rad.dragevent(this.tmp_updater,this.tmp_release);
 }
 rad.slider.prototype.input_changed=function(e){
-	var new_value = parseFloat(this.input.value);
+	//I NEED TO MAKE IT SO THAT IT CLAMPS AT MAX_UPPER AND LOWER, and update values
+	var new_value = parseFloat(this.in.element.value);
 	if ( isNaN(new_value) ){
-		//v.value=this.val;//the fuck is v?
+		this.in.element.value=this.value;//rest it back
 	}else{
-		var bounds = this.bounds(new_value);
-		this.fg.element.style.width = (this.width_max/2)+this.dtype;
+		if(this.settings.clamped){
+			//we are clamped, update the values propperly
+			if(new_value>this.settings.max_upper){//we put in a higher value than the max clamped
+				new_value=this.settings.max_upper;
+				this.settings.upper=this.settings.max_upper;
+			}
+			if(new_value<this.settings.max_lower){//we put in a higher value than the max clamped
+				new_value=this.settings.max_lower;
+				this.settings.lower=this.settings.max_lower;
+			}
+			this.fg.element.style.width=rad.remap(new_value,this.settings.lower,this.settings.upper,0,this.width_max);
+		}else{
+			//we are not clamped, just reset the slider to center
+			var bounds = this.bounds(new_value);
+			this.fg.element.style.width = this.width_max/2;
+		}
 		//now set the nodes value
 		this.value = new_value;
 		if (typeof this.callback === "function"){
@@ -391,18 +431,21 @@ rad.slider.prototype.input_changed=function(e){
 rad.slider.prototype.update=function(e){
 	var c = rad.mouseposition(e);
 	var p = rad.domposition(this.bg.element);
-	var s = rad.domsize(this.bg.element);
 
 	var mouse_offset = c.x-p.x;
 
 	var new_position = rad.clamp(mouse_offset,1,this.width_max);//i need to know the width to go to
-	console.log(this['value']);//THE SLIDER DOES NOT LIKE THE this.value, but tracing this, gives me the object that has value as an attribute
-	var bounds = this.bounds(this.value);
-	var new_val = rad.remap(new_position,1,this.width_max,bounds.min,bounds.max);
+	var new_val;
+	if(this.settings.clamped){
+		new_val = rad.remap(new_position,1,this.width_max,this.settings.lower,this.settings.upper);
+	}else{
+		var bounds = this.bounds(this.value);
+		new_val = rad.remap(new_position,1,this.width_max,bounds.min,bounds.max);
+	}
 	//console.log(bounds.min+":"+bounds.max);
 	this.fg.element.style.width = new_position;
 	
-	//this.in.element.value = new_val.toFixed(2);
+	this.in.element.value = new_val.toFixed(2);
 }
 rad.slider.prototype.release=function(e){
 	rad.removedragevent(this.tmp_updater,this.tmp_release);
@@ -426,6 +469,7 @@ rad.slider.prototype.bounds=function(val){
 
 //-----------button
 rad.button=function(d){
+	//button needs to be updated to use the same method as the rest of the UI elements
 	/*{
 		"id":"",
 		"label":"",

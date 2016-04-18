@@ -8,8 +8,19 @@ rad.domposition=function(obj){
       curleft += obj.offsetLeft;
       curtop += obj.offsetTop;
     }while (obj = obj.offsetParent);
-      return rad.vector2(curleft,curtop);
+    return rad.vector2(curleft,curtop);
   }
+  /*var _x = 0;
+  var _y = 0;
+  while( obj && !isNaN( obj.offsetLeft ) && !isNaN( obj.offsetTop ) ) {
+        _x += obj.offsetLeft - obj.scrollLeft;
+        _y += obj.offsetTop - obj.scrollTop;
+        obj = obj.offsetParent;
+  }
+  return rad.vector2(_x,_y);//{ top: _y, left: _x };
+*/
+  /*var rect = obj.getBoundingClientRect();
+  return rad.vector2(rect.top,rect.left);*/
 };
 rad.domsize=function(obj){
   var w = obj.offsetWidth; 
