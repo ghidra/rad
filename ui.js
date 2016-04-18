@@ -69,6 +69,7 @@ rad.defaults.ui={
 	"label":{
 		"className":"rad_ui_label",
 		"style":{
+			"float":"left",
 			"width":60
 		}
 	}
@@ -482,34 +483,18 @@ rad.button=function(d){
 	rad.ui.prototype.init.call(this,d);
 	this.uitype="button";
 
-	/*if(this.width_label>0){
-		var bu_label = document.createElement("DIV");
-		bu_label.className="textbox_label_ui";
-		bu_label.innerHTML = "&nbsp";
-		bu_label.style.maxWidth = this.width_label+this.dtype;
-		bu_label.style.margin = this.margin+this.dtype;
-	}*/
-	//this.element.style.clear="both";
+	var tmp = rad.defaults.ui.button;
+	tmp.id="bu_"+d.id+"_"+d.label;
+	var bu = new rad.element("BUTTON",tmp,this.label);
+	bu.appendstyle(d.style_button);
+	bu.setstyle();
 
-	var bu = document.createElement("BUTTON");
-	//s.type = "text";
-	//s.value=this.value;
-	this.style_button = rad.objclonefast(rad.defaults.ui.button.style);
-	if(d.style_button!=undefined){
-		this.appendstyle(this.style_button, d.style_button);
-	}
-	this.setstyle(bu,this.style_button);
-	//bu.style.float = "right";
-	//bu.style.width=this.width+this.dtype;
-	
-	//console.log(this.width_input+"px");
-	bu.id = "tb_"+this.id+"_"+this.label;
-	bu.innerHTML=this.label;
 	var _this = this;
-	bu.onclick=function(e){d.callback(_this)};
+	bu.element.onclick=function(e){d.callback(_this)};
+	//bu.element.onclick=function(e){console.log("fack")};
 
 	//if(this.width_label>0)this.element.appendChild(bu_label);
-	this.element.appendChild(bu);
+	this.container.element.appendChild(bu.element);
 
 	return this;
 }
