@@ -92,11 +92,14 @@ rad.graph.prototype.clear_border=function(border){
 
 rad.graph.prototype.merge=function(g,x,y){
 	//merge another graph into this graph
+	x=x||0;
+	y=y||0;
 	var start_offset = (this.xdiv*y)+(this.ydiv*x);
 	var cell = start_offset;
 	for(var i=0;i<g.centers.length;i++){//loop the incoming graph, it should be smaller, but if not, we can handle that too
 	//	if ((i+start_offset)%)
-		this.centers[cell].string = g.centers[i].string;
+		this.centers[i+cell].string = g.centers[i].string;
+		this.centers[i+cell].color = (g.centers[i].color!=undefined)?g.centers[i].color:"";
 	}
 }
 //----------------
