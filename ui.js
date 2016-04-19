@@ -18,7 +18,8 @@ rad.defaults.ui={
 			"lower":-1,
 			"max_upper":10,
 			"max_lower":-10,
-			"int":false
+			"int":false,
+			"update":false
 		},
 		"slider":{
 			"style":{
@@ -282,7 +283,7 @@ rad.slider=function(d){
 
 	var tmp = rad.defaults.ui.slider.in;
 
-	tmp.value=this.value;
+	tmp.value=(this.settings.int)?Math.round(this.value):this.value;
 	tmp.id="stb_"+this.id+"_"+this.label;
 	this.in = new rad.element("INPUT",tmp);//document.createElement("INPUT");
 
@@ -402,6 +403,7 @@ rad.slider.prototype.mousedown=function(e){
 rad.slider.prototype.input_changed=function(e){
 	//I NEED TO MAKE IT SO THAT IT CLAMPS AT MAX_UPPER AND LOWER, and update values
 	var new_value = parseFloat(this.in.element.value);
+	var rval;
 	if ( isNaN(new_value) ){
 		this.in.element.value=this.value;//rest it back
 	}else{
@@ -415,14 +417,20 @@ rad.slider.prototype.input_changed=function(e){
 				new_value=this.settings.max_lower;
 				this.settings.lower=this.settings.max_lower;
 			}
-			this.fg.element.style.width=rad.remap(new_value,this.settings.lower,this.settings.upper,0,this.width_max);
+			rval=(this.settings.int)?Math.round(new_value):new_value
+			this.fg.element.style.width=rad.remap(rval,this.settings.lower,this.settings.upper,0,this.width_max);
 		}else{
 			//we are not clamped, just reset the slider to center
 			var bounds = this.bounds(new_value);
-			this.fg.element.style.width = this.width_max/2;
+			rval=(this.settings.int)?Math.round(new_value):new_value
+			this.fg.element.style.width=rad.remap(rval,this.settings.lower,this.settings.upper,0,this.width_max/2);
+			//this.fg.element.style.width = this.width_max/2;
 		}
 		//now set the nodes value
-		this.value = new_value;
+		this.value = rval;
+		if(this.settings.int){
+			this.in.element.value = rval;
+		}
 		if (typeof this.callback === "function"){
 			this.callback(this);
 		}
@@ -446,7 +454,7 @@ rad.slider.prototype.update=function(e){
 	//console.log(bounds.min+":"+bounds.max);
 	this.fg.element.style.width = new_position;
 	
-	this.in.element.value = new_val.toFixed(2);
+	this.in.element.value = (this.settings.int)?Math.round(new_val):new_val.toFixed(2);
 }
 rad.slider.prototype.refresh=function(){
 	//updates without event, on value change from outside call
@@ -459,7 +467,11 @@ rad.slider.prototype.release=function(e){
 	//now i need to set the value on the node
 	//console.log(this.in)
 	
-	this.value = parseFloat( document.getElementById("stb_"+this.id+"_"+this.label).value );
+	var rval =  parseFloat( document.getElementById("stb_"+this.id+"_"+this.label).value );
+	this.value =  (this.settings.int)?Math.round(rval):rval;
+	if(this.settings.int){
+		this.fg.element.style.width=rad.remap(this.value,this.settings.lower,this.settings.upper,0,this.width_max);
+	}
 	if (typeof this.callback === "function"){
 		this.callback(this);
 	}
