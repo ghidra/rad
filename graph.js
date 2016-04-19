@@ -138,4 +138,5 @@ rad.graph_center.prototype.init=function(id,lu,n,bo){
 
 	//this.string="";
 	this.string="&nbsp;";
+	this.color="";//store the color
 }

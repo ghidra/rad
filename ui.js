@@ -59,7 +59,8 @@ rad.defaults.ui={
 	"textbox":{
 		"type":"text",
 		"style":{
-			//"float":"right"
+			"width":80,
+			"float":"right"
 		}
 	},
 	"button":{
@@ -517,6 +518,10 @@ rad.button=function(d){
 	}*/
 	rad.ui.prototype.init.call(this,d);
 	this.uitype="button";
+
+	this.container.get_element().removeChild(this.container.get_element().childNodes[0]);//remove the label
+	//this.label_container.appendstyle({"width":0});
+	//this.label_container.setstyle();
 
 	var tmp = rad.defaults.ui.button;
 	tmp.id="bu_"+d.id+"_"+d.label;
