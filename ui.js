@@ -366,6 +366,10 @@ rad.slider=function(d){
 	this.fg.style.maxWidth = this.width_max+this.dtype
 	//dd.id = "dd_node_"+id+"_"+parm;
 */
+	if(rad.objhasfunction(d,"callback")){
+		this.callback = d.callback;
+	}
+
 	this.bg.element.appendChild(this.fg.element);
 	this.con.element.appendChild(this.bg.element);
 	this.container.element.appendChild(this.in.element);
@@ -454,7 +458,20 @@ rad.slider.prototype.update=function(e){
 	//console.log(bounds.min+":"+bounds.max);
 	this.fg.element.style.width = new_position;
 	
-	this.in.element.value = (this.settings.int)?Math.round(new_val):new_val.toFixed(2);
+	var rval = (this.settings.int)?Math.round(new_val):new_val.toFixed(2);
+	this.in.element.value = rval;
+
+	//do the callback if we are set to
+	if (typeof this.callback === "function" && this.settings.update){
+		if(this.settings.int){
+			if(rval!=this.value){//do the call back only when the value has changed
+				this.callback(this);
+			}
+		}else{
+			this.callback(this);
+		}
+		this.value=rval;
+	}
 }
 rad.slider.prototype.refresh=function(){
 	//updates without event, on value change from outside call
