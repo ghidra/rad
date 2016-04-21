@@ -4,8 +4,8 @@ rad.defaults.ui={
 	//"width_label":60,
 	"dtype":"px",
 	"style":{
-		"width":120,
-		"height":10,
+		"width":140,
+		"height":"auto",
 		"margin":0,
 		"fontSize":10,
 		"clear":"both",
