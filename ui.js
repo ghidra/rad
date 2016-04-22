@@ -68,6 +68,13 @@ rad.defaults.ui={
 			"float":"right"
 		}
 	},
+	"dialogue":{
+		"className":"rad_dialogue",
+		"style":{
+			"position":"absolute",
+			"margin":"auto"
+		}
+	},
 	"label":{
 		"className":"rad_ui_label",
 		"style":{
@@ -540,3 +547,39 @@ rad.button=function(d){
 }
 rad.button.prototype=new rad.ui();
 rad.button.prototype.constructor=rad.ui;
+
+///-----
+
+rad.dialogue=function(d,inner){
+	//this is gonna have to be used differently... as in the container is the auto margin etc
+	rad.ui.prototype.init.call(this,d);
+	this.uitype="dialogue";
+
+	//this.container.get_element().removeChild(this.container.get_element().childNodes[0]);//remove the label
+	//this.label_container.appendstyle({"width":0});
+	//this.label_container.setstyle();
+
+	var tmp = rad.defaults.ui.dialogue;
+	tmp.id=d.id;;
+	var dia = new rad.element("DIV",tmp);
+	dia.appendstyle(d.style_dialogue);
+	dia.setstyle();
+	//i have to manually set the 0 values here, since I ignnore them in the elemment creation
+	dia.element.style.top=0;
+	dia.element.style.bottom=0;
+	dia.element.style.left=0;
+	dia.element.style.right=0;
+
+	dia.element.innerHTML=inner;
+
+	var _this = this;
+	//bu.element.onclick=function(e){d.callback(_this)};
+	//bu.element.onclick=function(e){console.log("fack")};
+
+	//if(this.width_label>0)this.element.appendChild(bu_label);
+	this.container.element.appendChild(dia.element);
+
+	return this;
+}
+rad.dialogue.prototype=new rad.ui();
+rad.dialogue.prototype.constructor=rad.ui;
