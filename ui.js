@@ -71,8 +71,11 @@ rad.defaults.ui={
 	"dialogue":{
 		"className":"rad_dialogue",
 		"style":{
-			"position":"absolute",
-			"margin":"auto"
+			"backgroundColor":"white",
+			"color":"black",
+			"clear":"both",
+			"margin":2,
+			"height":"100%"
 		}
 	},
 	"label":{
@@ -565,10 +568,23 @@ rad.dialogue=function(d,inner){
 	dia.appendstyle(d.style_dialogue);
 	dia.setstyle();
 	//i have to manually set the 0 values here, since I ignnore them in the elemment creation
-	dia.element.style.top=0;
-	dia.element.style.bottom=0;
-	dia.element.style.left=0;
-	dia.element.style.right=0;
+	//dia.element.style.top=0;
+	//dia.element.style.bottom=0;
+	//dia.element.style.left=0;
+	//dia.element.style.right=0;
+
+	var d = this.getposition();
+
+	this.container.element.style.position="absolute"
+	this.container.element.style.top=d.y;
+	this.container.element.style.left=d.x;
+
+	//var si = rad.domsize(this.container.element);
+	//console.log(this.container.element.style.width + ":" + this.container.element.style.height)
+	 
+	//console.log( d.x + ":" + d.y );
+	//this.container.element.style.width="100%";
+	//this.container.element.style.height="100%";
 
 	dia.element.innerHTML=inner;
 
@@ -583,3 +599,18 @@ rad.dialogue=function(d,inner){
 }
 rad.dialogue.prototype=new rad.ui();
 rad.dialogue.prototype.constructor=rad.ui;
+
+rad.dialogue.prototype.getposition=function(){
+	//this gets my position to place it based on the size for the container
+	var d = rad.bodysize();
+	var px = d.x/2.0;
+	var py = d.y/2.0;
+ 	if(this.container.element.style.height!="auto"){
+ 		px -= rad.parseint(this.container.element.style.width)/2.0;
+ 	}
+ 	if(this.container.element.style.height!="auto"){
+ 		py -= rad.parseint(this.container.element.style.height)/2.0;
+ 	}
+
+	return rad.vector2(px,py);
+}
