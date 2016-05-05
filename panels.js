@@ -34,6 +34,9 @@ rad.panels=function(parent,layout,callback){
 		})
 	];
 	var elem = this.p[0];
+	if(layout.style){
+		elem.appendstyle(layout.style);
+	}
 	//if(OVERRIDE.style!=undefined){
 		//styles can now be passed in per partition element
 		//elem.appendstyle(  OVERRIDE.style );
