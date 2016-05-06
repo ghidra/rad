@@ -155,6 +155,22 @@ rad.ui.prototype.getvalue=function(){
 	}
 	return v;
 }
+rad.ui.prototype.getguielement=function(){
+	var v;
+	switch(this.uitype){
+		case "dropdown":
+			v = document.getElementById("dd_"+this.id+"_"+this.label);
+			break;
+		case "textbox":
+			v = document.getElementById("tb_"+this.id+"_"+this.label);
+			break;
+		case "slider":
+			break;
+		case "button":
+			break;
+	}
+	return v;
+}
 
 //-----------dropdown
 rad.dropdown=function(d){
