@@ -505,6 +505,7 @@ rad.slider.prototype.refresh=function(){
 	var new_position = rad.remap(this.value,this.settings.lower,this.settings.upper,0,this.width_max);
 
 	this.fg.element.style.width = new_position;
+	this.in.element.value=this.value;
 }
 rad.slider.prototype.release=function(e){
 	rad.removedragevent(this.tmp_updater,this.tmp_release);
@@ -527,6 +528,14 @@ rad.slider.prototype.bounds=function(val){
 	var v = Math.abs(span);
 
 	return {min:val-v, max:val+v};
+}
+rad.slider.prototype.set_to_minimum=function(){
+	this.value=this.settings.lower;
+	this.refresh();
+}
+rad.slider.prototype.set_to_maximum=function(){
+	this.value=this.settings.upper;
+	this.refresh();
 }
 
 
