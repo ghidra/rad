@@ -36,6 +36,9 @@ rad.element.prototype.setdata=function(d){
 		}
 	}
 }
+rad.element.prototype.remove=function(){
+	return this.element.parentElement.removeChild(this.element);
+}
 //---getters
 rad.element.prototype.get_element=function(){
 	return this.element;

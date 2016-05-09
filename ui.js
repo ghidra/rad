@@ -69,13 +69,27 @@ rad.defaults.ui={
 		}
 	},
 	"dialogue":{
-		"className":"rad_dialogue",
-		"style":{
-			"backgroundColor":"white",
-			"color":"black",
-			"clear":"both",
-			"margin":2,
-			"height":"100%"
+		"window":{
+			"className":"rad_dialogue",
+			"style":{
+				"backgroundColor":"white",
+				"color":"black",
+				"clear":"both",
+				"margin":2,
+				"height":"100%",
+				"overflowY":"scroll"
+			}
+		},
+		"close_button":{
+			"id":"close_button",
+			"style":{
+				"width":8,
+				"height":8,
+				"margin":1,
+				"outline":"1px solid black",
+				"float":"right",
+				"cursor":"hand"
+			}
 		}
 	},
 	"label":{
@@ -578,19 +592,36 @@ rad.button.prototype.constructor=rad.ui;
 
 ///-----
 
-rad.dialogue=function(d,inner){
+rad.dialogue=function(d,inner,show_close_button){
 	//this is gonna have to be used differently... as in the container is the auto margin etc
 	rad.ui.prototype.init.call(this,d);
 	this.uitype="dialogue";
+
+	show_close_button=show_close_button||1;
 
 	//this.container.get_element().removeChild(this.container.get_element().childNodes[0]);//remove the label
 	//this.label_container.appendstyle({"width":0});
 	//this.label_container.setstyle();
 
-	var tmp = rad.defaults.ui.dialogue;
+	//lets make a close box in the top right
+	if(show_close_button>0){
+		var close = new rad.element("DIV",rad.defaults.ui.dialogue.close_button);
+		close.appendstyle(d.style_close_button);
+		close.setstyle();
+		var _cont = this.container;
+		close.get_element().onmousedown=function(e){
+			_cont.remove();
+		};
+	}
+	
+
+	//now make the wondow that holds the data we care about
+	var tmp = rad.defaults.ui.dialogue.window;
 	tmp.id=d.id;;
 	var dia = new rad.element("DIV",tmp);
 	dia.appendstyle(d.style_dialogue);
+	var dia_dimensions = {"width":this.container.style.width-4,"height":this.container.style.height-14};
+	dia.appendstyle(dia_dimensions);
 	dia.setstyle();
 	//i have to manually set the 0 values here, since I ignnore them in the elemment creation
 	//dia.element.style.top=0;
@@ -604,13 +635,6 @@ rad.dialogue=function(d,inner){
 	this.container.element.style.top=d.y;
 	this.container.element.style.left=d.x;
 
-	//var si = rad.domsize(this.container.element);
-	//console.log(this.container.element.style.width + ":" + this.container.element.style.height)
-	 
-	//console.log( d.x + ":" + d.y );
-	//this.container.element.style.width="100%";
-	//this.container.element.style.height="100%";
-
 	dia.element.innerHTML=inner;
 
 	var _this = this;
@@ -618,7 +642,8 @@ rad.dialogue=function(d,inner){
 	//bu.element.onclick=function(e){console.log("fack")};
 
 	//if(this.width_label>0)this.element.appendChild(bu_label);
-	this.container.element.appendChild(dia.element);
+	if(show_close_button>0) this.container.element.appendChild( close.get_element() );
+	this.container.element.appendChild( dia.get_element() );
 
 	return this;
 }
