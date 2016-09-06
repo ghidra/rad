@@ -5,3 +5,6 @@ rad.totype=function(obj){
 rad.parseint=function(str){
 	return parseInt(str.replace(/[^0-9\.]/g, ''), 10);
 }
+rad.strremovenumbers=function(str){
+	return str.replace(/[0-9]/g, '');
+}
