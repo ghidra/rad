@@ -4,16 +4,40 @@ rad.defaults={};
 rad.includes={
 	module_path:"",
 	use_modules:[],
+	queued_modules:[],//modules that have been called up so far
+	required:{
+		dom:["vector"],
+		drag:["mouse", "array","vector", "math"],
+		element:["object","dom"],
+		graph:["vector"],
+		io:["localstorage"],
+		mouse:["vector"],
+		noise:["vector"],
+		panel:["element"],
+		ui:["mouse","object"]
+	},
 	init_modules:function(path){
 		this.module_path=path;
 		this.use_modules=[this.module_path+"core.js"];
 	},
+	///this method allows us to recursively get requirements of dependant modules
+	modules_complete:function(mod){
+		//console.log(mod);
+		if (mod in this.required){///check for requirements not included yet?
+			for(var r in this.required[mod]){///loop the requirements
+				this.modules_complete(this.required[mod][r]);
+			}
+		}
+		///now we can add ourself to the list
+		this.use_modules.push(this.module_path+mod+".js");//for loading
+		this.queued_modules.push(mod);//so we know what is already queued up to load
+	},
 	modules:function(libs){
 		for(var i in libs){
-			libs[i]=this.module_path+libs[i]+".js";
+			if(this.queued_modules.indexOf(libs[i])<0){//only include if we havent already included the module
+				this.modules_complete(libs[i]);
+			}
 		}
-		this.use_modules = this.use_modules.concat(libs);
-		//this.use_modules=libs;
 	},
 	use_files:[],
 	source:function(files){
@@ -50,3 +74,4 @@ rad.includes.init_modules(r_p);
 //---
 //can I run this automatically
 //rad.includes.include();
+
