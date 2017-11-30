@@ -57,3 +57,9 @@ rad.element.prototype.get_dimensions=function(){
 rad.element.prototype.get_class=function(){
 	return this.element.class;
 }
+
+// rad.element.empty=function(elem){
+// 	while (elem.hasChildNodes()) {
+// 	    elem.removeChild(elem.lastChild);
+// 	}
+// }

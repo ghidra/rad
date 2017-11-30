@@ -32,10 +32,40 @@ rad.bodysize=function(){
     var h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || document.body.offsetHeight;
     return rad.vector2(w,h);
 };
+//https://stackoverflow.com/questions/384286/javascript-isdom-how-do-you-check-if-a-javascript-object-is-a-dom-object
+//Returns true if it is a DOM node
+rad.isnode=function(o){
+  return (
+    typeof Node === "object" ? o instanceof Node : 
+    o && typeof o === "object" && typeof o.nodeType === "number" && typeof o.nodeName==="string"
+  );
+}
+
+//Returns true if it is a DOM element    
+rad.iselement=function(o){
+  return (
+    typeof HTMLElement === "object" ? o instanceof HTMLElement : //DOM2
+    o && typeof o === "object" && o !== null && o.nodeType === 1 && typeof o.nodeName==="string"
+);
+}
+
 rad.remove=function(id){
-  var element = document.getElementById(id);
+  var element = id;
+  if ( !rad.iselement(element) ){
+    element = document.getElementById(id);
+  }
+  //element = document.getElementById(id);
   element.parentNode.removeChild(element);
 };
+rad.emptyelement=function(id){
+  var elem = id;
+  if ( !rad.iselement(elem) ){
+    elem = document.getElementById(id);
+  }
+  while (elem.hasChildNodes()) {
+    elem.removeChild(elem.lastChild);
+  }
+}
 //------
 rad.bind=function(elem, e, func, bool){
   bool = bool || false;
@@ -69,6 +99,7 @@ rad.addevent=function(object, type, callback) {
     object["on"+type] = callback;
   }
 };
+
 //eg rad.addevent(window, 'resize', function)
 rad.windowdoneresizing=function(callback){
   callback=(callback!=undefined)?callback:function(){console.log("no windowdoneresizing event given");};

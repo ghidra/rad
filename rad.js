@@ -14,6 +14,7 @@ rad.includes={
 		mouse:["vector"],
 		noise:["vector"],
 		panel:["element"],
+		panels:["object", "dom", "element"],
 		ui:["mouse","object"]
 	},
 	init_modules:function(path){
@@ -23,7 +24,7 @@ rad.includes={
 	///this method allows us to recursively get requirements of dependant modules
 	modules_complete:function(mod){
 		//console.log(mod);
-		if (mod in this.required){///check for requirements not included yet?
+		if ( this.required.hasOwnProperty(mod) ){///check for requirements not included yet?
 			for(var r in this.required[mod]){///loop the requirements
 				this.modules_complete(this.required[mod][r]);
 			}
