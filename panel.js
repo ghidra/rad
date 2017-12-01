@@ -10,12 +10,25 @@ rad.panel=function(parent){
 	this.width="100%";
 	this.height="100%";
 
-	this.contents=[
+	///this holds children if we are split
+	this.panels=[
 	
 	];
 
+	////place everything
+	///get the parent element
 	var root = document.getElementById(parent);
 	rad.emptyelement(root);
+
+	///set up the styles for this panel
+	this.appendstyle({
+		width:this.width,
+		height:this.height,
+		outline:"thin solid #000000"
+	});
+	this.setstyle();
+
+	///append it to the parent
 	root.appendChild(this.element);
 
 	return this;
@@ -23,3 +36,10 @@ rad.panel=function(parent){
 
 rad.panel.prototype=new rad.element();
 rad.panel.prototype.constructor=rad.element;
+
+
+rad.panel_class = class extends rad.element{
+	constructor(parent){
+		this.parent_id = parent;
+	}
+}
