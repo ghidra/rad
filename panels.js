@@ -394,7 +394,13 @@ rad.panels.splitter.prototype.split=function(dir){
 	//console.log(this);
 	this.parent_partition.p[0]=
 		new rad.panels.partition({
-			"id":"partition"+(this.parent_partition.panel.count+1),
+			"element":{
+				"id":"partition"+(this.parent_partition.panel.count+1),
+				"style":{
+					"width":width,
+					"height":height
+				}
+			},
 			"width":width,
 			"height":height,
 			"width_label":0,
@@ -406,7 +412,13 @@ rad.panels.splitter.prototype.split=function(dir){
 		});
 	this.parent_partition.p[1]=
 		new rad.panels.partition({
-			"id":"partition"+(this.parent_partition.panel.count+2),
+			"element":{
+				"id":"partition"+(this.parent_partition.panel.count+2),
+				"style":{
+					"width":width,
+					"height":height
+				}
+			},
 			"width":width,
 			"height":height,
 			"width_label":0,

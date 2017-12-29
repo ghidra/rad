@@ -13,8 +13,8 @@ rad.includes={
 		io:["localstorage"],
 		mouse:["vector"],
 		noise:["vector"],
-		panel:["element"],
-		panels:["object", "dom", "element"],
+		layout:["element"],
+		panels:["array","object", "dom", "element","drag"],
 		ui:["mouse","object"]
 	},
 	init_modules:function(path){
