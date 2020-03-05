@@ -205,6 +205,9 @@ rad.panels.prototype.layout_assign=function(obj,parent){
 rad.panels.prototype.get_panel=function(id){
 	return document.getElementById("partition_"+id);
 }
+rad.panels.prototype.get_panel_id=function(id){
+	return "partition_"+id;
+}
 ///this is kind of a private function that is only called when the user resizes the window
 rad.panels.prototype.windowresized=function(){
 	//i need to copy all the data that might be in the partitions, and put them back
