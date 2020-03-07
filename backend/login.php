@@ -88,6 +88,7 @@ class login{
 		}
 		return $page;
 	}
+	
 }
 
 class logout{
@@ -97,6 +98,17 @@ class logout{
 		$_SESSION = array();
 		session_destroy();
 	}
+}
+
+function get_logout_page()
+{
+	$page='<div>
+		<div id="user_id" class="invisible" style="display:none">'.$_SESSION['user_id'].'</div>
+		<div id="user_name" style="display:none">'.$_SESSION['user'].'</div>
+		<button onclick="logout()">logout</button>
+	</div>';
+
+	return $page;
 }
 
 ?>
