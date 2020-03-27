@@ -24,21 +24,30 @@ if ( isset($_GET['q'])  )
 {
 	$q = $_GET['q'];
 
+	$payload = new stdClass();
+
 	if($q=='logout')
 	{
 		$logout = new logout();
-		echo attemp_login($_GET);
+		$payload->html = attemp_login($_GET);
+		$payload->logged_in = false;
+		echo json_encode($payload);
 	}
 
 	if($q=='login')	
 	{
 		if(isset($_SESSION['logged_in']))
 		{
-			echo get_logout_page();
+			$payload->html = get_logout_page();
+			$payload->logged_in = true;
+			echo json_encode($payload);
 		}
 		else
 		{
-			echo attemp_login($_GET);//json_decode($_GET['payload'],true);
+			//echo attemp_login($_GET);//json_decode($_GET['payload'],true);
+			$payload->html = attemp_login($_GET);
+			$payload->logged_in = isset($_SESSION['logged_in']);
+			echo json_encode($payload);
 		}
 	}
 }
@@ -47,7 +56,10 @@ if ( isset($_POST['q'])  )
 {
 	if($_POST['q']=='login')
 	{
-		echo attemp_login($_POST);
+		$payload->html = attemp_login($_POST);
+		$payload->logged_in = isset($_SESSION['logged_in']);
+		echo json_encode($payload);
+		//echo attemp_login($_POST);
 	}
 }
 ?>
