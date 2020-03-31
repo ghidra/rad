@@ -23,6 +23,7 @@ rad.element.prototype.setstyle=function(){
 		if(this.style[style_attribute]!="none" && this.style[style_attribute]!=0 && this.style[style_attribute]!="0" ){
 			this.element.style[style_attribute] = this.style[style_attribute];
 		}
+		if(style_attribute=="display") this.element.style[style_attribute] = this.style[style_attribute];//if this is display saying none, then set it none
 	}
 }
 rad.element.prototype.setdata=function(d){

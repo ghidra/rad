@@ -223,13 +223,14 @@ rad.dropdown=function(d){
 	var _this = this;
 
 	if(rad.objhasfunction(d,"callback")){
-		dd.element.onchange=function(e){d.callback(_this)};
+		dd.element.onchange=function(e){d.callback(this)};////was _this
 	}
 
 	//POPULATE THE DROPDOWN ELEMENT
 	for (var option in d.options){
 		var opt = document.createElement("OPTION");
-		var opt_string = (typeof d.options === 'object')?option:d.options[option];
+		var opt_string = (Array.isArray(d.options))?d.options[option]:option;
+		//var opt_string = (typeof d.options === 'object')?option:d.options[option];
 		opt.value = opt_string;
 		if(opt_string===d.value){
 			opt.selected = true;
@@ -271,6 +272,8 @@ rad.textbox=function(d){
 	var tmp = rad.defaults.ui.textbox;
 	tmp.id="tb_"+d.id+"_"+d.label;
 	tmp.value=this.value;
+	if(rad.objhasprop(d,"name")){tmp.name = d.name;}
+
 	var tb = new rad.element("INPUT",tmp);
 	tb.appendstyle(d.style_textbox);
 	tb.setstyle();
