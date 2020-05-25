@@ -223,7 +223,7 @@ rad.dropdown=function(d){
 	var _this = this;
 
 	if(rad.objhasfunction(d,"callback")){
-		dd.element.onchange=function(e){d.callback(this)};////was _this
+		dd.element.onchange=function(e){d.callback(_this)};////was _this
 	}
 
 	//POPULATE THE DROPDOWN ELEMENT
