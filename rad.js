@@ -10,7 +10,7 @@ rad.includes={
 		drag:["mouse", "array","vector", "math"],
 		element:["object","dom"],
 		graph:["vector"],
-		io:["localstorage"],
+		io:["localstorage","ajax"],
 		mouse:["vector"],
 		noise:["vector"],
 		layout:["element"],

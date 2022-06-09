@@ -1,13 +1,34 @@
 //requires rad.localstorage
-rad.io=function(id){
-	return this.init(id);
+//requires rad.ajax
+
+rad.io=function(id,path,callback){
+	path = path || "";
+	callback = callback || function fallback(){console.log("empty callback")};
+	this.storage_type = "local";
+	this.a = new rad.ajax();
+
+	return this.init(id,path,callback);
 }
-rad.io.prototype.init=function(id){
+rad.io.prototype.init=function(id,path,callback){
 	//first see if we have access to a database...
+	if(path!=""){
+		lo = path;
+		//a = new rad.ajax();
+		_this = this;///pass the reference to this for access in ajax callback
+		this.a.get(
+			path,
+			"q=login",
+			function(lamda){
+				_this.storage_type = "mysql";
+				callback(lamda);
+			}
+		);
+	}	
 	//if not fall back to local storage (which is just for demo purposes and testing)
 	//maybe give the option to switch between if both are available
 	this.id = id;//we need an identifier, to keep seperate apps on different objects
 	this.storage = new rad.localstorage();
+
 	return this;
 }
 //---------------------
@@ -60,6 +81,36 @@ rad.io.prototype.load=function(name){
 	}else{
 		return 'none';
 	}
+}
+
+////////php logS in stuff
+rad.io.prototype.process_login=function(form_name,path,callback){
+	var elements = document.getElementById(form_name).elements;
+	var obj ={};
+	obj.q = "login";
+    for(var i = 0 ; i < elements.length ; i++){
+        var item = elements.item(i);
+        obj[item.name] = item.value;
+    }
+    //console.log(obj);
+    //alert(JSON.stringify(obj));
+    this.a.post(
+	    path,
+	    obj,
+	    //"q=login&payload="+JSON.stringify(obj),
+	    function(lamda){
+	      callback(lamda);
+	    }
+  	);
+}
+rad.io.prototype.logout=function(path,callback){
+	this.a.get(
+    path,
+    "q=logout",
+    function(lamda){
+      callback(lamda);
+    }
+  );
 }
 
 /*local storage should look like:

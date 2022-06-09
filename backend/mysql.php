@@ -7,15 +7,19 @@ class mysql{
 	var $user_id = -1;///same with this
 	var $errMsg = '';
 
-	public function __construct(){
-		include('mysql_login.php');
+	public function __construct($mysql_login_path = '/mysql_login.php'){
+		include(__DIR__.$mysql_login_path);
+		//$this->path = $mysql_ascii_table;//$mysql_login_path;
 		$this->user_table = $mysql_user_table;
 		//connect to the database
+		//$this->conn = mysqli_connect ('localhost', 'root', 'eimajimi');
+		
 		$this->conn = mysqli_connect ($mysql_host, $mysql_user, $mysql_pass) or die ("I cannot connect to the database because: " . mysqli_error($this->conn));
 		//now once we are conected to the mysql server... lets connect to the database
 		$success = mysqli_select_db ($this->conn,$mysql_database_name);
 		if(!$success)
 		{
+			//THIS DOES NOT SEEM TO WORK!
 			//no database was found... lets call the method to initialize the database
 			$this->init_database($mysql_database_name);
 			//print ("I cannot select the database '$mysql_database_name' because: " . mysqli_error($this->conn));
