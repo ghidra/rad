@@ -4,13 +4,12 @@
 rad.io=function(id,path,callback){
 	this.path = path || "";
 	callback = callback || function fallback(){console.log("empty callback")};
-	this.storage_type = "local";
-	this.a = new rad.ajax();
-
 	return this.init(id,callback);
 }
 rad.io.prototype.init=function(id,callback){
 	//first see if we have access to a database...
+	this.a = new rad.ajax();
+
 	if(this.path!=""){
 		lo = this.path;
 		//a = new rad.ajax();
@@ -28,11 +27,14 @@ rad.io.prototype.init=function(id,callback){
 	//maybe give the option to switch between if both are available
 	this.id = id;//we need an identifier, to keep seperate apps on different objects
 	this.storage = new rad.localstorage();
+	this.storage_type = "local";
 
 	return this;
 }
-rad.io.prototype.set_storage_type=function(t){
-	this.storage_type = t;
+rad.io.prototype.set_storage_type_mysql=function(files){
+	this.storage_type = "mysql";
+	//ok, i need to make an object to deal with mysql storage functions
+	this.storage = new rad.mysqlstorage(files);
 }
 //---------------------
 ///return a list of files from local storage
@@ -44,7 +46,7 @@ rad.io.prototype.list=function(){
 		//this is the brute force local storage way
 		var files = this.storage.getobj(this.id);
 		if(!files){//there are no files already saved
-			return ["no files found"];
+			return ["(local) no files found"];
 		}else{
 			var file_names=[];
 			for (n in files){
@@ -56,16 +58,17 @@ rad.io.prototype.list=function(){
 	if(this.storage_type == "mysql"){
 		//we goona need to do some ajax in here
 		///get all the files from mysql
-		console.log('---we need to go akax into the database');
-		_this=this;
-		this.a.get(
-			_this.path,
-			"q=list",
-			function(lamda){
-				console.log(lamda);
+		var files = this.storage.getobj();
+		
+		if(!files){//there are no files already saved
+			return ["(mysql) no files found"];
+		}else{
+			var file_names=[];
+			for (n in files){
+				file_names.push(n);
 			}
-		);
-		return ["WAITING"];
+			return file_names;
+		}
 
 	}
 	console.log("ERROR IN RAD.IO.LIST");
