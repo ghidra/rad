@@ -9,7 +9,9 @@ rad.mysqlstorage.prototype.init=function(files){
 }
     
 //use *obj to strigify json data
-rad.mysqlstorage.prototype.setobj=function(id,obj){
+rad.mysqlstorage.prototype.setobj=function(){
+    ///this is the call back after this has been saved
+    console.log("mysqlstorrage setobj: ");
     //this.storage.setItem(id,JSON.stringify(obj));
 }
 rad.mysqlstorage.prototype.getobj=function(id){

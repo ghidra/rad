@@ -101,6 +101,24 @@ rad.io.prototype.save=function(name,src,sanitize){//optional sanitize function t
 		}
 	}
 	if(this.storage_type == "mysql"){
+		console.log("---io.js save to mysql: "+this.id+"  - "+name);
+
+		var new_file = {};
+		new_file[name]=src_clean;
+
+		_this = this;///pass the reference to this for access in ajax callback
+		this.a.get(
+			_this.path,
+			"q=save",
+			function(lamda){
+				//_this.storage_type = "mysql";
+				_this.storage.setobj();
+				//callback(lamda);
+			}
+		);
+
+		//this.storage.setobj(this.id,new_file);
+
 		//we goona need to do some ajax in here
 		///go see if we have this file already, if se we can overwrite, if not, we just save
 		//look at the the already loaded files... so we can overwrite that way..maybe
