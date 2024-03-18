@@ -1,4 +1,5 @@
 //requires rad.localstorage
+//requires rad.mysqlstorage
 //requires rad.ajax
 
 rad.io=function(id,path,callback){
