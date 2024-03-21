@@ -5,6 +5,7 @@
 rad.io=function(id,path,callback){
 	this.path = path || "";
 	callback = callback || function fallback(){console.log("empty callback")};
+	this.user=null;
 	return this.init(id,callback);
 }
 rad.io.prototype.init=function(id,callback){
@@ -37,6 +38,9 @@ rad.io.prototype.set_storage_type_mysql=function(files){
 	//ok, i need to make an object to deal with mysql storage functions
 	this.storage = new rad.mysqlstorage(files);
 }
+rad.io.prototype.set_user=function(user){
+	this.user=user;
+}
 //---------------------
 ///return a list of files from local storage
 // or if we are logged in, from the data base
@@ -59,7 +63,10 @@ rad.io.prototype.list=function(){
 	if(this.storage_type == "mysql"){
 		//we goona need to do some ajax in here
 		///get all the files from mysql
+		console.log("-----making the mysql list");
 		var files = this.storage.getobj();
+		console.dir(files);
+		console.log();
 		
 		if(!files){//there are no files already saved
 			return ["(mysql) no files found"];
@@ -94,7 +101,7 @@ rad.io.prototype.save=function(name,src,sanitize){//optional sanitize function t
 			var new_file = {};
 			new_file[name]=src_clean;
 			//console.log(name)
-			this.storage.setobj(this.id,new_file);
+			this.storage.setobj(this.id,name,new_file);
 		}else{
 			//there are saved files, lets append, or overwrite
 			files[name]=src_clean;
@@ -102,18 +109,26 @@ rad.io.prototype.save=function(name,src,sanitize){//optional sanitize function t
 		}
 	}
 	if(this.storage_type == "mysql"){
-		console.log("---io.js save to mysql: "+this.id+"  - "+name);
-
+		//console.log("---io.js save to mysql: "+this.id+"  - "+name);
+		//console.dir(src_clean);
 		var new_file = {};
 		new_file[name]=src_clean;
 
 		_this = this;///pass the reference to this for access in ajax callback
-		this.a.get(
+		
+		var query={}
+		query.q = "save";
+		query.user = this.user.name;
+		query.user_id = this.user.id;
+		query.name = name;
+		query.data = JSON.stringify(src_clean);
+
+		this.a.post(
 			_this.path,
-			"q=save",
+			query,
 			function(lamda){
 				//_this.storage_type = "mysql";
-				_this.storage.setobj();
+				_this.storage.setobj(lamda);
 				//callback(lamda);
 			}
 		);

@@ -17,8 +17,10 @@ rad.localstorage.prototype.init=function(type){
     }
 }
 //use *obj to strigify json data
-rad.localstorage.prototype.setobj=function(id,obj){
-    this.storage.setItem(id,JSON.stringify(obj));
+rad.localstorage.prototype.setobj=function(id,name,obj){
+    newobj={}
+    newobj[name]=obj;
+    this.storage.setItem(id,JSON.stringify(newobj));
 }
 rad.localstorage.prototype.getobj=function(id){
     return JSON.parse(this.storage.getItem(id));

@@ -4,14 +4,19 @@ rad.mysqlstorage=function(files){
     return this.init(files);
 }
 rad.mysqlstorage.prototype.init=function(files){
-    console.log(files);
-    console.log("mysqlstorrage do something with: "+files);
+    //console.log(files);
+    //console.log("mysqlstorrage do something with: "+files);
+    this.storage = files;//create an empty oject to hold data
 }
     
 //use *obj to strigify json data
-rad.mysqlstorage.prototype.setobj=function(){
+rad.mysqlstorage.prototype.setobj=function(d){
     ///this is the call back after this has been saved
     console.log("mysqlstorrage setobj: ");
+    console.log(JSON.parse(d));
+    //console.dir(JSON.parse(d));
+    //add it to the mysql... then add it to the list of files
+
     //this.storage.setItem(id,JSON.stringify(obj));
 }
 rad.mysqlstorage.prototype.getobj=function(id){
