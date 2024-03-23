@@ -5,11 +5,13 @@
 rad.io=function(id,path,callback){
 	this.path = path || "";
 	callback = callback || function fallback(){console.log("empty callback")};
-	this.user=null;
 	return this.init(id,callback);
 }
 rad.io.prototype.init=function(id,callback){
 	//first see if we have access to a database...
+	this.user=null;
+	this.filelist=null;
+
 	this.a = new rad.ajax();
 
 	if(this.path!=""){
@@ -57,6 +59,7 @@ rad.io.prototype.list=function(){
 			for (n in files){
 				file_names.push(n);
 			}
+			this.filelist=file_names;
 			return file_names;
 		}
 	}
@@ -64,11 +67,23 @@ rad.io.prototype.list=function(){
 		//we goona need to do some ajax in here
 		///get all the files from mysql
 		console.log("-----making the mysql list");
-		var files = this.storage.getobj();
-		console.dir(files);
-		console.log();
+
+		_this = this;///pass the reference to this for access in ajax callback
+
+		this.a.get(
+			_this.path,
+			"q=list",
+			function(lamda){
+				//_this.storage.getobj(lamda);
+				console.log(lamda);///the file names are in here... but like.. we have to trigger something to USE them
+			}
+		);
+
+		//var files = this.storage.getobj();
+		//console.dir(files);
+		//console.log();
 		
-		if(!files){//there are no files already saved
+		/*if(!files){//there are no files already saved
 			return ["(mysql) no files found"];
 		}else{
 			var file_names=[];
@@ -76,11 +91,11 @@ rad.io.prototype.list=function(){
 				file_names.push(n);
 			}
 			return file_names;
-		}
+		}*/
 
 	}
-	console.log("ERROR IN RAD.IO.LIST");
-	return ["ERROR"];
+	//console.log("ERROR IN RAD.IO.LIST");
+	//return ["ERROR"];
 	
 }
 rad.io.prototype.save=function(name,src,sanitize){//optional sanitize function to clean out the save data if need be
@@ -140,19 +155,29 @@ rad.io.prototype.save=function(name,src,sanitize){//optional sanitize function t
 		//look at the the already loaded files... so we can overwrite that way..maybe
 	}
 }
-rad.io.prototype.load=function(name){
+rad.io.prototype.load=function(name,callback){
 	//load file, return object to be processed
 	if(this.storage_type == "local"){
 		//get all the local files
 		var files = this.storage.getobj(this.id);
 		if(files[name]){
-			return files[name];//return the specfic file requested
+			callback(files[name]);
 		}else{
-			return 'none';
+			alert("File not found: "+name);
 		}
 	}
 	if(this.storage_type == "mysql"){
 		//we goona need to do some ajax in here
+		_this=this;
+		this.a.get(
+    		_this.path,
+    		"q=load&name="+name,
+    		function(lamda){
+    			console.log("we got the file from mysql:");
+    			console.dir(JSON.parse(lamda)[0]);
+      			//callback(lamda);
+    		}
+  		);
 	}
 }
 
