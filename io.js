@@ -174,8 +174,8 @@ rad.io.prototype.load=function(name,callback){
     		"q=load&name="+name,
     		function(lamda){
     			console.log("we got the file from mysql:");
-    			console.dir(JSON.parse(lamda)[0]);
-      			//callback(lamda);
+    			console.dir(lamda);
+      			callback(JSON.parse(lamda));
     		}
   		);
 	}
