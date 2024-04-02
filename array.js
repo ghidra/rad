@@ -10,3 +10,22 @@ rad.removefromarray=function(a,elem){
     	a.splice(i, 1);
 	}
 }
+rad.indexstringtoarray=function(str){
+	//takes a string of 0-10,12,15,20-22 and makes an array
+	var a = [];
+	var sections = str.split(",");
+	for(var s = 0; s<sections.length; s++){
+		var dashSections = sections[s].split('-');
+		if(dashSections.length>1){
+			var start=parseInt(dashSections[0]);
+			var end=parseInt(dashSections[1]);
+			for(var step=start; step<=end;step++){
+				a.push(step);	
+			}
+		}else{
+			var v=parseInt(sections[s]);
+			a.push(v);
+		}
+	}
+	return a;
+}
