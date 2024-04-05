@@ -98,8 +98,18 @@ rad.graph.prototype.merge=function(g,x,y){
 	var cell = start_offset;
 	for(var i=0;i<g.centers.length;i++){//loop the incoming graph, it should be smaller, but if not, we can handle that too
 	//	if ((i+start_offset)%)
-		this.centers[i+cell].string = g.centers[i].string;
+		short=this.centers[i+cell];
+		shortcen = g.centers[i];
+		attributes = Object.keys(short);
+		//this is better.. can have arbirary attributes that also get assigned in this step
+		attributes.forEach(
+			function(key){
+				short[key]=shortcen[key];
+			}
+		);
+		/*this.centers[i+cell].string = g.centers[i].string;
 		this.centers[i+cell].color = (g.centers[i].color!=undefined)?g.centers[i].color:"";
+		*/
 	}
 }
 //----------------
