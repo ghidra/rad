@@ -15,7 +15,8 @@ rad.includes={
 		noise:["vector"],
 		layout:["element"],
 		panels:["array","object", "dom", "element","drag"],
-		ui:["mouse","object"]
+		ui:["mouse","object"],
+		chainsaw:["vector"]
 	},
 	init_modules:function(path){
 		this.module_path=path;
