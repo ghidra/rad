@@ -4,8 +4,10 @@ rad.chainsaw=function(width, height){
 	this.shaders=[];//hold the shaders
 	this.vertShaderIds=[];
 	this.fragShaderIds=[];
-	this,preloadImageCount=0;
-	this,preloadImageCounter=0;
+	this.shaderPrograms=[];//hold shader programs
+	this.buffers=[];//hold buffers
+	this.preloadImageCount=0;
+	this.preloadImageCounter=0;
 	this.images=[];
 	return this.init();
 }
@@ -16,15 +18,10 @@ rad.chainsaw.prototype.init=function(){
 	this.canvas.height = this.height;
 	this.gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
 
-	//set the shader program
-	this.shaderProgram = this.gl.createProgram();
-
-	//create a sprite buffer
+	//create a general purpose sprite buffer... the array is stored for easy manipulation
 	this.spriteBufferArray = new Float32Array(1024);  // allow for 512 sprites
-	//this.spriteBufferArray[0] = 0;  // x-value
-	//this.spriteBufferArray[1] = 0;  // y-value
-	const spriteBuffer = this.gl.createBuffer();
-	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, spriteBuffer);///
+	var sb = this.createBuffer();
+	this.setBufferFloatData(sb,this.spriteBufferArray);
 	
 }
 rad.chainsaw.prototype.loadVertexShader=function(source) {
@@ -48,26 +45,55 @@ rad.chainsaw.prototype.loadShader=function(source,type) {
   	}
   	return shader;
 }
-rad.chainsaw.prototype.attachShader=function(index){
-	this.gl.attachShader(this.shaderProgram, this.shaders[index]);
-}
-rad.chainsaw.prototype.linkShaderProgram=function(){
-	this.gl.linkProgram(this.shaderProgram);
+rad.chainsaw.prototype.createProgram=function(vert_index,frag_index) {
+	var program = this.gl.createProgram();
+	this.gl.attachShader(program, this.shaders[vert_index]);
+	this.gl.attachShader(program, this.shaders[frag_index]);
+	this.gl.linkProgram(program);
 
-	const status = this.gl.getProgramParameter(this.shaderProgram, this.gl.LINK_STATUS);
+	const status = this.gl.getProgramParameter(program, this.gl.LINK_STATUS);
 	if (!status) {
-  		throw new TypeError(`couldn't link shader program:\n${this.gl.getProgramInfoLog(this.shaderProgram)}`);
+  		throw new TypeError(`couldn't link shader program:\n${this.gl.getProgramInfoLog(program)}`);
 	}
 
-	this.gl.useProgram(this.shaderProgram);
-	this.gl.uniform2f(this.gl.getUniformLocation(this.shaderProgram, 'screenSize'), this.width, this.height);
+	this.shaderPrograms.push(program);//hold shader programs
+	return this.shaderPrograms.length-1;
+}
+rad.chainsaw.prototype.linkShaderProgram=function(program_index){
+	this.gl.linkProgram(this.shaderPrograms[program_index]);
+
+	const status = this.gl.getProgramParameter(this.shaderPrograms[program_index], this.gl.LINK_STATUS);
+	if (!status) {
+  		throw new TypeError(`couldn't link shader program:\n${this.gl.getProgramInfoLog(this.shaderPrograms[program_index])}`);
+	}
+
+	this.gl.useProgram(this.shaderPrograms[program_index]);
+	this.gl.uniform2f(this.gl.getUniformLocation(this.shaderPrograms[program_index], 'screenSize'), this.width, this.height);
+}
+rad.chainsaw.prototype.createBuffer=function(){
+	this.buffers.push(this.gl.createBuffer());
+	return this.buffers.length-1;
+}
+rad.chainsaw.prototype.setBufferFloatData=function(buffer_index,data){
+	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[buffer_index]);
+	this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
+}
+rad.chainsaw.prototype.uploadFloatBuffer=function(buffer_index,program_index,attribute,size,normalize,stride,offset){
+	size=size||2;
+	normalize=normalize||false;
+	stride=stride||0;
+	offset=offset||0;
+	var attribLocation = this.gl.getAttribLocation(this.shaderPrograms[program_index], attribute);
+	this.gl.enableVertexAttribArray(attribLocation);
+	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[buffer_index]);
+	this.gl.vertexAttribPointer(attribLocation, size, this.gl.FLOAT, normalize, stride, offset);
 }
 rad.chainsaw.prototype.modifySpriteBuffer=function(SpriteIndex,x,y){
 	this.spriteBufferArray[SpriteIndex*2] = x||0;  // x-value
 	this.spriteBufferArray[(SpriteIndex*2)+1] = y||0;  // y-value
 }
-rad.chainsaw.prototype.uploadSpriteBuffer=function(){
-	const loc = this.gl.getAttribLocation(this.shaderProgram, 'spritePosition');
+rad.chainsaw.prototype.uploadSpriteBuffer=function(program_index){
+	const loc = this.gl.getAttribLocation(this.shaderPrograms[program_index], 'spritePosition');
 	this.gl.enableVertexAttribArray(loc);
 	this.gl.vertexAttribPointer(loc,
 	    2,  // because it was a vec2
@@ -78,7 +104,7 @@ rad.chainsaw.prototype.uploadSpriteBuffer=function(){
 
 	this.gl.bufferData(this.gl.ARRAY_BUFFER, this.spriteBufferArray, this.gl.DYNAMIC_DRAW);  // upload data
 }
-rad.chainsaw.prototype.loadImage=function(image,uniform_name){
+rad.chainsaw.prototype.loadImage=function(program_index,image,uniform_name){
 	// Create a texture.
 	const texture = this.gl.createTexture();
 	this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
@@ -92,10 +118,11 @@ rad.chainsaw.prototype.loadImage=function(image,uniform_name){
 	// Upload the image into the texture.
 	this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, image);
 
-	this.gl.uniform1i(this.gl.getUniformLocation(this.shaderProgram, uniform_name), 0);
+	this.gl.uniform1i(this.gl.getUniformLocation(this.shaderPrograms[program_index], uniform_name), 0);
 }
 ////This is from a DOM example
 rad.chainsaw.prototype.setDomTexture=function(dom_element,uniform_name){
+	///this will break if you call it now
 	const icon = document.getElementById(dom_element);  // get the <img> tag
 
 	const glTexture = this.gl.createTexture();
@@ -115,31 +142,33 @@ rad.chainsaw.prototype.rectangle=function(x, y, width, height){
 	var x2 = x + width;
 	var y1 = y;
 	var y2 = y + height;
-	var positionBuffer = gl.createBuffer();
-	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
-	this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
+	//positions
+	var p = new Float32Array([
 		x1, y1,
 		x2, y1,
 		x1, y2,
 		x1, y2,
 		x2, y1,
 		x2, y2,
-	]), this.gl.STATIC_DRAW);
-
-	// provide texture coordinates for the rectangle.
-	const texcoordBuffer = gl.createBuffer();
-	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, texcoordBuffer);
-	this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
+	]);
+	//texture coordinates
+	var t = new Float32Array([
 		0.0,  0.0,
 		1.0,  0.0,
 		0.0,  1.0,
 		0.0,  1.0,
 		1.0,  0.0,
 		1.0,  1.0,
-	]), this.gl.STATIC_DRAW);
+	]);
+	var pbuffer = this.createBuffer();
+	this.setBufferFloatData(pbuffer,p);
+	var tbuffer = this.createBuffer();
+	this.setBufferFloatData(pbuffer,t);
+
+	return [pbuffer,tbuffer];
 }
 rad.chainsaw.prototype.preloadImages=function(images,callback){
-	this,preloadImageCount=images.length;
+	this.preloadImageCount=images.length;
 	_this=this;
 	for(var i=0;i<images.length;i++){
 		const image = new Image();
@@ -151,8 +180,8 @@ rad.chainsaw.prototype.preloadImages=function(images,callback){
 	}
 }
 rad.chainsaw.prototype.preloadImageComplete=function(callback){
-	this,preloadImageCounter+=1;
-	if(this,preloadImageCounter>=this,preloadImageCount){
+	this.preloadImageCounter+=1;
+	if(this.preloadImageCounter>=this.preloadImageCount){
 		callback();
 	}
 }
