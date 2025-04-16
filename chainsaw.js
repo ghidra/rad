@@ -6,6 +6,7 @@ rad.chainsaw=function(width, height){
 	this.fragShaderIds=[];
 	this.shaderPrograms=[];//hold shader programs
 	this.shaderProgramsAttributeMap=[];//hold relevant attributes to the shader program
+	this.shaderProgramsUniformMap=[];//hold uniforms
 	this.buffers=[];//hold buffers
 	this.preloadImageCount=0;
 	this.preloadImageCounter=0;
@@ -45,7 +46,7 @@ rad.chainsaw.prototype.loadShader=function(source,type) {
   	}
   	return shader;
 }
-rad.chainsaw.prototype.createProgram=function(vert_index,frag_index,attributes_array) {
+rad.chainsaw.prototype.createProgram=function(vert_index,frag_index,attributes_array,uniforms_array) {
 	var program = this.gl.createProgram();
 	this.gl.attachShader(program, this.shaders[vert_index]);
 	this.gl.attachShader(program, this.shaders[frag_index]);
@@ -58,15 +59,26 @@ rad.chainsaw.prototype.createProgram=function(vert_index,frag_index,attributes_a
 	//now deal with attributes
 	var attributeMap=new Map();//hold the attribute indicies
 	for(var a=0; a<attributes_array.length; a++){
-		var attribLocation = this.gl.getAttribLocation(program, attributes_array[a]);
+		const attribLocation = this.gl.getAttribLocation(program, attributes_array[a]);
 		if(attribLocation<0){
 			console.log("Missing shader attribute: "+attributes_array[a]);
 		}else{
 			attributeMap.set(attributes_array[a],attribLocation);
 		}
 	}
+	//now deal with uniforms
+	var uniformMap=new Map();//hold the attribute indicies
+	for(var u=0; u<uniforms_array.length; u++){
+		const uniformLocation = this.gl.getUniformLocation(program, uniforms_array[u]);
+		if(uniformLocation<0){
+			console.log("Missing shader uniform: "+uniforms_array[u]);
+		}else{
+			uniformMap.set(uniforms_array[u],uniformLocation);
+		}
+	}
 	//save it
 	this.shaderProgramsAttributeMap.push(attributeMap);
+	this.shaderProgramsUniformMap.push(uniformMap);
 	this.shaderPrograms.push(program);//hold shader programs
 	return this.shaderPrograms.length-1;
 }
@@ -131,7 +143,8 @@ rad.chainsaw.prototype.loadImage=function(program_index,image,uniform_name){
 	// Upload the image into the texture.
 	this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, image);
 
-	this.gl.uniform1i(this.gl.getUniformLocation(this.shaderPrograms[program_index], uniform_name), 0);
+	//this.gl.uniform1i(this.gl.getUniformLocation(this.shaderPrograms[program_index], uniform_name), 0);
+	this.gl.uniform1i(this.shaderProgramsUniformMap[program_index].get(uniform_name), 0);	
 }
 ////This is from a DOM example
 rad.chainsaw.prototype.setDomTexture=function(dom_element,uniform_name){
