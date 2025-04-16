@@ -5,6 +5,7 @@ rad.chainsaw=function(width, height){
 	this.vertShaderIds=[];
 	this.fragShaderIds=[];
 	this.shaderPrograms=[];//hold shader programs
+	this.shaderProgramsAttributeMap=[];//hold relevant attributes to the shader program
 	this.buffers=[];//hold buffers
 	this.preloadImageCount=0;
 	this.preloadImageCounter=0;
@@ -22,7 +23,6 @@ rad.chainsaw.prototype.init=function(){
 	this.spriteBufferArray = new Float32Array(1024);  // allow for 512 sprites
 	var sb = this.createBuffer();
 	this.setBufferFloatData(sb,this.spriteBufferArray);
-	
 }
 rad.chainsaw.prototype.loadVertexShader=function(source) {
   	this.shaders.push(this.loadShader(source,this.gl.VERTEX_SHADER));
@@ -45,7 +45,7 @@ rad.chainsaw.prototype.loadShader=function(source,type) {
   	}
   	return shader;
 }
-rad.chainsaw.prototype.createProgram=function(vert_index,frag_index) {
+rad.chainsaw.prototype.createProgram=function(vert_index,frag_index,attributes_array) {
 	var program = this.gl.createProgram();
 	this.gl.attachShader(program, this.shaders[vert_index]);
 	this.gl.attachShader(program, this.shaders[frag_index]);
@@ -55,11 +55,22 @@ rad.chainsaw.prototype.createProgram=function(vert_index,frag_index) {
 	if (!status) {
   		throw new TypeError(`couldn't link shader program:\n${this.gl.getProgramInfoLog(program)}`);
 	}
-
+	//now deal with attributes
+	var attributeMap=new Map();//hold the attribute indicies
+	for(var a=0; a<attributes_array.length; a++){
+		var attribLocation = this.gl.getAttribLocation(program, attributes_array[a]);
+		if(attribLocation<0){
+			console.log("Missing shader attribute: "+attributes_array[a]);
+		}else{
+			attributeMap.set(attributes_array[a],attribLocation);
+		}
+	}
+	//save it
+	this.shaderProgramsAttributeMap.push(attributeMap);
 	this.shaderPrograms.push(program);//hold shader programs
 	return this.shaderPrograms.length-1;
 }
-rad.chainsaw.prototype.linkShaderProgram=function(program_index){
+/*rad.chainsaw.prototype.linkShaderProgram=function(program_index){
 	this.gl.linkProgram(this.shaderPrograms[program_index]);
 
 	const status = this.gl.getProgramParameter(this.shaderPrograms[program_index], this.gl.LINK_STATUS);
@@ -69,7 +80,7 @@ rad.chainsaw.prototype.linkShaderProgram=function(program_index){
 
 	this.gl.useProgram(this.shaderPrograms[program_index]);
 	this.gl.uniform2f(this.gl.getUniformLocation(this.shaderPrograms[program_index], 'screenSize'), this.width, this.height);
-}
+}*/
 rad.chainsaw.prototype.createBuffer=function(){
 	this.buffers.push(this.gl.createBuffer());
 	return this.buffers.length-1;
@@ -83,7 +94,8 @@ rad.chainsaw.prototype.uploadFloatBuffer=function(buffer_index,program_index,att
 	normalize=normalize||false;
 	stride=stride||0;
 	offset=offset||0;
-	var attribLocation = this.gl.getAttribLocation(this.shaderPrograms[program_index], attribute);
+	const attribLocation = this.shaderProgramsAttributeMap[program_index].get(attribute);
+	//var attribLocation = this.gl.getAttribLocation(this.shaderPrograms[program_index], attribute);
 	this.gl.enableVertexAttribArray(attribLocation);
 	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[buffer_index]);
 	this.gl.vertexAttribPointer(attribLocation, size, this.gl.FLOAT, normalize, stride, offset);
@@ -92,8 +104,9 @@ rad.chainsaw.prototype.modifySpriteBuffer=function(SpriteIndex,x,y){
 	this.spriteBufferArray[SpriteIndex*2] = x||0;  // x-value
 	this.spriteBufferArray[(SpriteIndex*2)+1] = y||0;  // y-value
 }
-rad.chainsaw.prototype.uploadSpriteBuffer=function(program_index){
-	const loc = this.gl.getAttribLocation(this.shaderPrograms[program_index], 'spritePosition');
+rad.chainsaw.prototype.uploadSpriteBuffer=function(program_index,spritePosition_attribute){
+	//const loc = this.gl.getAttribLocation(this.shaderPrograms[program_index], 'spritePosition');
+	const loc = this.shaderProgramsAttributeMap[program_index].get(spritePosition_attribute);
 	this.gl.enableVertexAttribArray(loc);
 	this.gl.vertexAttribPointer(loc,
 	    2,  // because it was a vec2
@@ -163,7 +176,7 @@ rad.chainsaw.prototype.rectangle=function(x, y, width, height){
 	var pbuffer = this.createBuffer();
 	this.setBufferFloatData(pbuffer,p);
 	var tbuffer = this.createBuffer();
-	this.setBufferFloatData(pbuffer,t);
+	this.setBufferFloatData(tbuffer,t);
 
 	return [pbuffer,tbuffer];
 }
