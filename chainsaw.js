@@ -22,8 +22,8 @@ rad.chainsaw.prototype.init=function(){
 
 	//create a general purpose sprite buffer... the array is stored for easy manipulation
 	this.spriteBufferArray = new Float32Array(1024);  // allow for 512 sprites
-	var sb = this.createBuffer();
-	this.setBufferFloatData(sb,this.spriteBufferArray);
+	this.spriteBufferId = this.createBuffer();
+	this.setBufferFloatData(this.spriteBufferId,this.spriteBufferArray);
 }
 rad.chainsaw.prototype.loadVertexShader=function(source) {
   	this.shaders.push(this.loadShader(source,this.gl.VERTEX_SHADER));
@@ -82,17 +82,6 @@ rad.chainsaw.prototype.createProgram=function(vert_index,frag_index,attributes_a
 	this.shaderPrograms.push(program);//hold shader programs
 	return this.shaderPrograms.length-1;
 }
-/*rad.chainsaw.prototype.linkShaderProgram=function(program_index){
-	this.gl.linkProgram(this.shaderPrograms[program_index]);
-
-	const status = this.gl.getProgramParameter(this.shaderPrograms[program_index], this.gl.LINK_STATUS);
-	if (!status) {
-  		throw new TypeError(`couldn't link shader program:\n${this.gl.getProgramInfoLog(this.shaderPrograms[program_index])}`);
-	}
-
-	this.gl.useProgram(this.shaderPrograms[program_index]);
-	this.gl.uniform2f(this.gl.getUniformLocation(this.shaderPrograms[program_index], 'screenSize'), this.width, this.height);
-}*/
 rad.chainsaw.prototype.createBuffer=function(){
 	this.buffers.push(this.gl.createBuffer());
 	return this.buffers.length-1;
@@ -100,6 +89,7 @@ rad.chainsaw.prototype.createBuffer=function(){
 rad.chainsaw.prototype.setBufferFloatData=function(buffer_index,data){
 	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[buffer_index]);
 	this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
+	this.gl.bindBuffer(this.gl.ARRAY_BUFFER,null);
 }
 rad.chainsaw.prototype.uploadFloatBuffer=function(buffer_index,program_index,attribute,size,normalize,stride,offset){
 	size=size||2;
@@ -108,8 +98,8 @@ rad.chainsaw.prototype.uploadFloatBuffer=function(buffer_index,program_index,att
 	offset=offset||0;
 	const attribLocation = this.shaderProgramsAttributeMap[program_index].get(attribute);
 	//var attribLocation = this.gl.getAttribLocation(this.shaderPrograms[program_index], attribute);
-	this.gl.enableVertexAttribArray(attribLocation);
 	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[buffer_index]);
+	this.gl.enableVertexAttribArray(attribLocation);
 	this.gl.vertexAttribPointer(attribLocation, size, this.gl.FLOAT, normalize, stride, offset);
 }
 rad.chainsaw.prototype.modifySpriteBuffer=function(SpriteIndex,x,y){
@@ -119,6 +109,8 @@ rad.chainsaw.prototype.modifySpriteBuffer=function(SpriteIndex,x,y){
 rad.chainsaw.prototype.uploadSpriteBuffer=function(program_index,spritePosition_attribute){
 	//const loc = this.gl.getAttribLocation(this.shaderPrograms[program_index], 'spritePosition');
 	const loc = this.shaderProgramsAttributeMap[program_index].get(spritePosition_attribute);
+	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[this.spriteBufferId]);
+
 	this.gl.enableVertexAttribArray(loc);
 	this.gl.vertexAttribPointer(loc,
 	    2,  // because it was a vec2
@@ -127,7 +119,8 @@ rad.chainsaw.prototype.uploadSpriteBuffer=function(program_index,spritePosition_
 	    0,   // each value is next to each other
 	    0);  // starts at start of array
 
-	this.gl.bufferData(this.gl.ARRAY_BUFFER, this.spriteBufferArray, this.gl.DYNAMIC_DRAW);  // upload data
+
+	this.gl.bufferData(this.gl.ARRAY_BUFFER, this.spriteBufferArray, this.gl.STATIC_DRAW);  // upload data
 }
 rad.chainsaw.prototype.loadImage=function(program_index,image,uniform_name){
 	// Create a texture.
