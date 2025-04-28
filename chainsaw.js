@@ -18,7 +18,7 @@ rad.chainsaw.prototype.init=function(){
 	this.canvas = document.createElement('canvas');
 	this.canvas.width = this.width;
 	this.canvas.height = this.height;
-	this.gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
+	this.gl = this.canvas.getContext('webgl',{premultipliedAlpha: false, alpha:false}) || this.canvas.getContext('experimental-webgl');
 
 	//create a general purpose sprite buffer... the array is stored for easy manipulation
 	this.spriteBufferArray = new Float32Array(1024);  // allow for 512 sprites
