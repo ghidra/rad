@@ -191,13 +191,15 @@ rad.chainsaw.prototype.rectangle=function(x, y, width, height){
 }
 rad.chainsaw.prototype.preloadImages=function(images,callback){
 	this.preloadImageCount=images.length;
-	_this=this;
+	_preload = rad.closure(this,this.preloadImageComplete);
+	//_this=this;
 	for(var i=0;i<images.length;i++){
 		const image = new Image();
 		this.images.push(image);
 		image.src = images[i];
 		image.onload = function() {
-			_this.preloadImageComplete(callback);
+			//_this.preloadImageComplete(callback);
+			_preload(callback);
 		}
 	}
 }

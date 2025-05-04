@@ -98,13 +98,21 @@ rad.io.prototype.list=function(){
 	//return ["ERROR"];
 	
 }
-rad.io.prototype.save=function(name,src,sanitize){//optional sanitize function to clean out the save data if need be
+rad.io.prototype.save=function(attributes){//name,src,sanitize){//optional sanitize function to clean out the save data if need be
+
+	name = attributes.name;
+	src = attributes.src;
+	sanitize = attributes.sanitize;
+
 	//clean data
 	var src_clean;
+	
+	
 	if(typeof sanitize === "function"){
 		src_clean = sanitize(src);
+	}else{
+		src_clean=src;
 	}
-	if(src_clean===undefined) src_clean=src;
 	//var src_clean=this.sanitize_script(src);
 
 	//save the file
@@ -124,7 +132,7 @@ rad.io.prototype.save=function(name,src,sanitize){//optional sanitize function t
 		}
 	}
 	if(this.storage_type == "mysql"){
-		//console.log("---io.js save to mysql: "+this.id+"  - "+name);
+		console.log("---io.js save to mysql: "+this.id+"  - "+name);
 		//console.dir(src_clean);
 		var new_file = {};
 		new_file[name]=src_clean;
@@ -155,7 +163,9 @@ rad.io.prototype.save=function(name,src,sanitize){//optional sanitize function t
 		//look at the the already loaded files... so we can overwrite that way..maybe
 	}
 }
-rad.io.prototype.load=function(name,callback){
+rad.io.prototype.load=function(attributes){//name,callback
+	name = attributes.name;
+	callback = attributes.callback;
 	//load file, return object to be processed
 	if(this.storage_type == "local"){
 		//get all the local files
@@ -173,8 +183,8 @@ rad.io.prototype.load=function(name,callback){
     		_this.path,
     		"q=load&name="+name,
     		function(lamda){
-    			console.log("we got the file from mysql:");
-    			console.dir(lamda);
+    			//console.log("we got the file from mysql:");
+    			//console.dir(lamda);
       			callback(JSON.parse(lamda));
     		}
   		);
