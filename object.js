@@ -1,3 +1,6 @@
+rad.isobject=function (arg) {
+  return Object.prototype.toString.call(arg) === '[object Object]';
+}
 rad.objisempty=function(obj){
   for(var key in obj) {
       //if (obj.hasOwnProperty(key)) {

@@ -101,18 +101,20 @@ rad.io.prototype.list=function(){
 rad.io.prototype.save=function(attributes){//name,src,sanitize){//optional sanitize function to clean out the save data if need be
 
 	name = attributes.name;
-	src = attributes.src;
 	sanitize = attributes.sanitize;
-
+	
 	//clean data
 	var src_clean;
-	
-	
 	if(typeof sanitize === "function"){
-		src_clean = sanitize(src);
+		src_clean = sanitize(attributes.src);
 	}else{
-		src_clean=src;
+		if(rad.isobject(attributes.src)){
+			src_clean = rad.objclonefast(attributes.src);
+		}else{
+			src_clean = attributes.src;
+		}
 	}
+	
 	//var src_clean=this.sanitize_script(src);
 
 	//save the file
@@ -134,10 +136,10 @@ rad.io.prototype.save=function(attributes){//name,src,sanitize){//optional sanit
 	if(this.storage_type == "mysql"){
 		console.log("---io.js save to mysql: "+this.id+"  - "+name);
 		//console.dir(src_clean);
-		var new_file = {};
-		new_file[name]=src_clean;
+		//var new_file = {};
+		//new_file[name]=src_clean;
 
-		_this = this;///pass the reference to this for access in ajax callback
+		_thispath = this.path;///pass the reference to this for access in ajax callback
 		
 		var query={}
 		query.q = "save";
@@ -146,8 +148,10 @@ rad.io.prototype.save=function(attributes){//name,src,sanitize){//optional sanit
 		query.name = name;
 		query.data = JSON.stringify(src_clean);
 
+		console.log(src_clean)
+
 		this.a.post(
-			_this.path,
+			_thispath,
 			query,
 			function(lamda){
 				//_this.storage_type = "mysql";

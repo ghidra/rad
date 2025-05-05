@@ -29,3 +29,11 @@ rad.indexstringtoarray=function(str){
 	}
 	return a;
 }
+rad.cleararraypastindex=function(array,index){
+	if (index >= array.length || index < 0) {
+		console.log("cleararraypastindex, index out of bounds")
+		return array;
+	}
+	array.splice(index);
+	return array;
+}

@@ -11,6 +11,7 @@ rad.chainsaw=function(width, height){
 	this.preloadImageCount=0;
 	this.preloadImageCounter=0;
 	this.images=[];
+	this.images_src=[];//for saving in data base
 	return this.init();
 }
 rad.chainsaw.prototype.init=function(){
@@ -24,6 +25,8 @@ rad.chainsaw.prototype.init=function(){
 	this.spriteBufferArray = new Float32Array(1024);  // allow for 512 sprites
 	this.spriteBufferId = this.createBuffer();
 	this.spriteBufferMousePosition = {x:0.0,y:0.0};
+	this.spriteCount=0;
+	this.spriteBufferStride = 5;//how many elements per sprite
 	this.setBufferFloatData(this.spriteBufferId,this.spriteBufferArray);
 }
 rad.chainsaw.prototype.loadVertexShader=function(source) {
@@ -109,6 +112,14 @@ rad.chainsaw.prototype.modifySpriteBuffer=function(SpriteIndex,x,y,z,sid,tid){
 	this.spriteBufferArray[(SpriteIndex*5)+2] = z||0.0;
 	this.spriteBufferArray[(SpriteIndex*5)+3] = sid||0.0;
 	this.spriteBufferArray[(SpriteIndex*5)+4] = tid||0.0;
+}
+rad.chainsaw.prototype.newSpriteBuffer=function(floatArray){
+	this.spriteBufferArray = new Float32Array(1024);
+	for(var i=0; i<floatArray.length; i++){
+		this.spriteBufferArray[i] =	floatArray[i];
+	}
+	this.spriteCount=floatArray.length/this.spriteBufferStride;
+	console.log("loaded "+this.spriteCount+" sprites");
 }
 rad.chainsaw.prototype.uploadSpriteBuffer=function(program_index,spritePosition_attribute){
 	//const loc = this.gl.getAttribLocation(this.shaderPrograms[program_index], 'spritePosition');
@@ -196,6 +207,7 @@ rad.chainsaw.prototype.preloadImages=function(images,callback){
 	for(var i=0;i<images.length;i++){
 		const image = new Image();
 		this.images.push(image);
+		this.images_src.push(images[i]);
 		image.src = images[i];
 		image.onload = function() {
 			//_this.preloadImageComplete(callback);
