@@ -26,7 +26,7 @@ rad.chainsaw.prototype.init=function(){
 	this.spriteBufferId = this.createBuffer();
 	this.spriteBufferMousePosition = {x:0.0,y:0.0};
 	this.spriteCount=0;
-	this.spriteBufferStride = 5;//how many elements per sprite
+	this.spriteBufferStride = 6;//how many elements per sprite
 	this.setBufferFloatData(this.spriteBufferId,this.spriteBufferArray);
 }
 rad.chainsaw.prototype.loadVertexShader=function(source) {
@@ -106,12 +106,13 @@ rad.chainsaw.prototype.uploadFloatBuffer=function(buffer_index,program_index,att
 	this.gl.enableVertexAttribArray(attribLocation);
 	this.gl.vertexAttribPointer(attribLocation, size, this.gl.FLOAT, normalize, stride, offset);
 }
-rad.chainsaw.prototype.modifySpriteBuffer=function(SpriteIndex,x,y,z,sid,tid){
-	this.spriteBufferArray[SpriteIndex*5] = x||0.0;  // x-value
-	this.spriteBufferArray[(SpriteIndex*5)+1] = y||0.0;  // y-value
-	this.spriteBufferArray[(SpriteIndex*5)+2] = z||0.0;
-	this.spriteBufferArray[(SpriteIndex*5)+3] = sid||0.0;
-	this.spriteBufferArray[(SpriteIndex*5)+4] = tid||0.0;
+rad.chainsaw.prototype.modifySpriteBuffer=function(SpriteIndex,x,y,z,w,sid,tid){
+	this.spriteBufferArray[SpriteIndex*this.spriteBufferStride] = x||0.0;  // x-value
+	this.spriteBufferArray[(SpriteIndex*this.spriteBufferStride)+1] = y||0.0;  // y-value
+	this.spriteBufferArray[(SpriteIndex*this.spriteBufferStride)+2] = z||0.0;
+	this.spriteBufferArray[(SpriteIndex*this.spriteBufferStride)+3] = w||0.0; //layer
+	this.spriteBufferArray[(SpriteIndex*this.spriteBufferStride)+4] = sid||0.0; //sprite sheet sprite id
+	this.spriteBufferArray[(SpriteIndex*this.spriteBufferStride)+5] = tid||0.0; //texture id
 }
 rad.chainsaw.prototype.newSpriteBuffer=function(floatArray){
 	this.spriteBufferArray = new Float32Array(1024);
@@ -127,12 +128,13 @@ rad.chainsaw.prototype.uploadSpriteBuffer=function(program_index,spritePosition_
 	const sid = this.shaderProgramsAttributeMap[program_index].get("aSpriteID");
 	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[this.spriteBufferId]);
 
+	const byte = 4;//this is here specifically for ease of understanding offset
 	this.gl.enableVertexAttribArray(loc);
 	this.gl.vertexAttribPointer(loc,
-	    3,  this.gl.FLOAT,false,5*4,0);  // because it was a vec2, // starts at start of array
+	    4,  this.gl.FLOAT,false,this.spriteBufferStride*byte,0);  // because it was a vec2, // starts at start of array
 	this.gl.enableVertexAttribArray(sid);
 	this.gl.vertexAttribPointer(sid,
-	    2,  this.gl.FLOAT,false,5*4,3*4);///5 values * 4 bytes... 2 to offset past the first values
+	    2,  this.gl.FLOAT,false,this.spriteBufferStride*byte,4*byte);///5 values * 4 bytes... 2 to offset past the first values
 
 	this.gl.bufferData(this.gl.ARRAY_BUFFER, this.spriteBufferArray, this.gl.STATIC_DRAW);  // upload data
 }
