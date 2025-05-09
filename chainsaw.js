@@ -23,15 +23,7 @@ rad.chainsaw.prototype.init=function(){
 	this.canvas.height = this.height;
 	this.gl = this.canvas.getContext('webgl',{premultipliedAlpha: false, alpha:false}) || this.canvas.getContext('experimental-webgl');
 
-	//create a general purpose sprite buffer... the array is stored for easy manipulation
-	this.spriteBufferArray = new Float32Array(1024);  // allow for 512 sprites
-	this.spriteBufferId = this.createBuffer();
-	//this.spriteBufferMousePosition = {x:0.0,y:0.0};
-	this.spriteCount=0;
-	this.spriteBufferStride = 6;//how many elements per sprite
-	this.setBufferFloatData(this.spriteBufferId,this.spriteBufferArray);
-
-	this.spriteBuffers.push(this.newSpriteBuffer(1024));
+	this.spriteBuffers.push(this.newSpriteBuffer(2048));
 }
 rad.chainsaw.prototype.newSpriteBuffer=function(size=1024,stride=6){
 	var sb={};
@@ -120,31 +112,18 @@ rad.chainsaw.prototype.uploadFloatBuffer=function(buffer_index,program_index,att
 	this.gl.enableVertexAttribArray(attribLocation);
 	this.gl.vertexAttribPointer(attribLocation, size, this.gl.FLOAT, normalize, stride, offset);
 }
-rad.chainsaw.prototype.modifySpriteBuffer=function(BufferIndex,SpriteIndex,x,y,z,w,sid,tid){
-	/*this.spriteBufferArray[SpriteIndex*this.spriteBufferStride] = x||0.0;  // x-value
-	this.spriteBufferArray[(SpriteIndex*this.spriteBufferStride)+1] = y||0.0;  // y-value
-	this.spriteBufferArray[(SpriteIndex*this.spriteBufferStride)+2] = z||0.0;
-	this.spriteBufferArray[(SpriteIndex*this.spriteBufferStride)+3] = w||0.0; //layer
-	this.spriteBufferArray[(SpriteIndex*this.spriteBufferStride)+4] = sid||0.0; //sprite sheet sprite id
-	this.spriteBufferArray[(SpriteIndex*this.spriteBufferStride)+5] = tid||0.0; //texture id
-*/ //----
+rad.chainsaw.prototype.modifySpriteBuffer=function(BufferIndex,SpriteIndex,x,y,z,w,size,sid,tid){
 	let a = this.spriteBuffers[BufferIndex].array;
 	let s = this.spriteBuffers[BufferIndex].stride;
 	a[SpriteIndex*s] = x||0.0;  // x-value
 	a[(SpriteIndex*s)+1] = y||0.0;  // y-value
 	a[(SpriteIndex*s)+2] = z||0.0;
 	a[(SpriteIndex*s)+3] = w||0.0; //layer
-	a[(SpriteIndex*s)+4] = sid||0.0; //sprite sheet sprite id
-	a[(SpriteIndex*s)+5] = tid||0.0; //texture id
+	a[(SpriteIndex*s)+4] = size||64.0; //size
+	a[(SpriteIndex*s)+5] = sid||0.0; //sprite sheet sprite id
+	a[(SpriteIndex*s)+6] = tid||0.0; //texture id
 }
 rad.chainsaw.prototype.refreshSpriteBuffer=function(bufferIndex,floatArray){
-	/*this.spriteBufferArray = new Float32Array(1024);
-	for(var i=0; i<floatArray.length; i++){
-		this.spriteBufferArray[i] =	floatArray[i];
-	}
-	this.spriteCount=floatArray.length/this.spriteBufferStride;
-	console.log("loaded "+this.spriteCount+" sprites");
-*/ //-----
 	let b = this.spriteBuffers[bufferIndex]
 	b.array = new Float32Array(b.size);
 	for(var i=0; i<floatArray.length; i++){
@@ -155,20 +134,22 @@ rad.chainsaw.prototype.refreshSpriteBuffer=function(bufferIndex,floatArray){
 }
 rad.chainsaw.prototype.uploadSpriteBuffer=function(program_index,buffer_index=0){
 	//const loc = this.gl.getAttribLocation(this.shaderPrograms[program_index], 'spritePosition');
-	let b = this.spriteBuffers[buffer_index];
+	const b = this.spriteBuffers[buffer_index];
 	const loc = this.shaderProgramsAttributeMap[program_index].get("aSpritePosition");
 	const sid = this.shaderProgramsAttributeMap[program_index].get("aSpriteID");
-	//this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[this.spriteBufferId]);
+	const ssz = this.shaderProgramsAttributeMap[program_index].get("aSpriteSize");
+
 	this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[b.id]);
 
 	const byte = 4;//this is here specifically for ease of understanding offset
 	const stride = b.stride;//this.spriteBufferStride;
 	this.gl.enableVertexAttribArray(loc);
 	this.gl.vertexAttribPointer(loc, 4, this.gl.FLOAT,false,stride*byte,0);  // because it was a vec2, // starts at start of array
+	this.gl.enableVertexAttribArray(ssz);
+	this.gl.vertexAttribPointer(ssz, 1,  this.gl.FLOAT,false,stride*byte,4*byte);///5 values * 4 bytes... 2 to offset past the first values
 	this.gl.enableVertexAttribArray(sid);
-	this.gl.vertexAttribPointer(sid, 2,  this.gl.FLOAT,false,stride*byte,4*byte);///5 values * 4 bytes... 2 to offset past the first values
+	this.gl.vertexAttribPointer(sid, 2,  this.gl.FLOAT,false,stride*byte,5*byte);///5 values * 4 bytes... 2 to offset past the first values
 
-	//this.gl.bufferData(this.gl.ARRAY_BUFFER, this.spriteBufferArray, this.gl.STATIC_DRAW);  // upload data
 	this.gl.bufferData(this.gl.ARRAY_BUFFER, b.array, this.gl.STATIC_DRAW);  // upload data
 }
 rad.chainsaw.prototype.loadImage=function(program_index,image,uniform_name){
