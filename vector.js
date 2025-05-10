@@ -19,6 +19,12 @@ rad.vector2.prototype.sub=function(v){
 	n.y-=v.y;
 	return n;
 }
+rad.vector2.prototype.multiply=function(v){
+	var n = new rad.vector2(this.x,this.y);
+	n.x*=v.x;
+	n.y*=v.y;
+	return n;
+}
 rad.vector2.prototype.distance=function(v){
 	var n = this.sub(v);
 	return Math.sqrt( (n.x*n.x)+(n.y*n.y) );
@@ -28,6 +34,14 @@ rad.vector2.prototype.dot=function(v){
 }
 rad.vector2.prototype.len=function(){
 	return Math.sqrt( (this.x*this.x) + (this.y*this.y) );
+}
+rad.vector2.prototype.normalize=function(){
+	const l = this.len();
+	if(l>0){
+		return new rad.vector2(this.x/l, this.y/l );
+	}else{
+		return new rad.vector2(0.0,0.0);
+	}
 }
 rad.vector2.prototype.neg=function(){
 	return new rad.vector2(-this.x,-this.y);
