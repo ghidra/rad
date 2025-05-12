@@ -29,6 +29,7 @@ rad.chainsaw.prototype.newSpriteBuffer=function(size=1024,stride=6){
 	var sb={};
 	sb.id = this.createBuffer();
 	sb.array = new Float32Array(size);  // allow for 512 sprites
+	//sb.array_standard = [];///a basic array for easy removal and changes
 	sb.count=0;
 	sb.size=size;
 	sb.stride = stride;//how many elements per sprite
