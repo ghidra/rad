@@ -37,3 +37,8 @@ rad.cleararraypastindex=function(array,index){
 	array.splice(index);
 	return array;
 }
+rad.pushunique=function(arr,item){
+	if(arr.indexOf(item) === -1) {
+    	arr.push(item);
+	}
+}

@@ -25,7 +25,7 @@ rad.chainsaw.prototype.init=function(){
 
 	this.spriteBuffers.push(this.newSpriteBuffer(2048));
 }
-rad.chainsaw.prototype.newSpriteBuffer=function(size=1024,stride=6){
+rad.chainsaw.prototype.newSpriteBuffer=function(size=1024,stride=7){
 	var sb={};
 	sb.id = this.createBuffer();
 	sb.array = new Float32Array(size);  // allow for 512 sprites
@@ -113,16 +113,29 @@ rad.chainsaw.prototype.uploadFloatBuffer=function(buffer_index,program_index,att
 	this.gl.enableVertexAttribArray(attribLocation);
 	this.gl.vertexAttribPointer(attribLocation, size, this.gl.FLOAT, normalize, stride, offset);
 }
-rad.chainsaw.prototype.modifySpriteBuffer=function(BufferIndex,SpriteIndex,x,y,z,w,size,sid,tid){
-	let a = this.spriteBuffers[BufferIndex].array;
-	let s = this.spriteBuffers[BufferIndex].stride;
-	a[SpriteIndex*s] = x||0.0;  // x-value
-	a[(SpriteIndex*s)+1] = y||0.0;  // y-value
-	a[(SpriteIndex*s)+2] = z||0.0;
-	a[(SpriteIndex*s)+3] = w||0.0; //layer
-	a[(SpriteIndex*s)+4] = size||64.0; //size
-	a[(SpriteIndex*s)+5] = sid||0.0; //sprite sheet sprite id
-	a[(SpriteIndex*s)+6] = tid||0.0; //texture id
+rad.chainsaw.prototype.modifySpriteBuffer=function(BufferIndex,SpriteIndex,x,y,z=0,w=0,size=64,sid=0,tid=0){
+	const a = this.spriteBuffers[BufferIndex].array;
+	const s = this.spriteBuffers[BufferIndex].stride*SpriteIndex;
+	a[s] = x||0.0;  // x-value
+	a[s+1] = y||0.0;  // y-value
+	a[s+2] = z||0.0;
+	a[s+3] = w||0.0; //layer -1 should be treated as invisible
+	a[s+4] = size||64.0; //size
+	a[s+5] = sid||0.0; //sprite sheet sprite id
+	a[s+6] = tid||0.0; //texture id
+}
+rad.chainsaw.prototype.getSpriteBufferValue=function(BufferIndex,SpriteIndex){
+	const a = this.spriteBuffers[BufferIndex].array;
+	const s = this.spriteBuffers[BufferIndex].stride*SpriteIndex;
+	return {
+		'x' : a[s],
+		'y' : a[s+1],
+		'z' : a[s+2],
+		'w' : a[s+3],
+		'size' : a[s+4],
+		'sid' : a[s+5],
+		'tid' : a[s+6]
+	};
 }
 rad.chainsaw.prototype.refreshSpriteBuffer=function(bufferIndex,floatArray){
 	let b = this.spriteBuffers[bufferIndex]
