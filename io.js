@@ -139,8 +139,9 @@ rad.io.prototype.save=function(attributes){//name,src,sanitize){//optional sanit
 		//var new_file = {};
 		//new_file[name]=src_clean;
 
+		_this = this;
 		_thispath = this.path;///pass the reference to this for access in ajax callback
-		
+
 		var query={}
 		query.q = "save";
 		query.user = this.user.name;
@@ -148,7 +149,7 @@ rad.io.prototype.save=function(attributes){//name,src,sanitize){//optional sanit
 		query.name = name;
 		query.data = JSON.stringify(src_clean);
 
-		console.log(src_clean)
+		//console.log(src_clean)
 
 		this.a.post(
 			_thispath,

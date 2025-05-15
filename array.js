@@ -40,5 +40,8 @@ rad.cleararraypastindex=function(array,index){
 rad.pushunique=function(arr,item){
 	if(arr.indexOf(item) === -1) {
     	arr.push(item);
+    	return true;
+	}else{
+		return false;
 	}
 }
