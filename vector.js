@@ -68,21 +68,21 @@ rad.vector2.prototype.set=function(x,y,z){
 	this.z=(z)?z:0.0;
 }
 rad.vector3.prototype.add=function(v){
-	var n = new rad.vector2(this.x,this.y,this.z);
+	var n = new rad.vector3(this.x,this.y,this.z);
 	n.x+=v.x;
 	n.y+=v.y;
 	n.z+=v.z;
 	return n;
 }
 rad.vector3.prototype.sub=function(v){
-	var n = new rad.vector2(this.x,this.y,this.z);
+	var n = new rad.vector3(this.x,this.y,this.z);
 	n.x-=v.x;
 	n.y-=v.y;
 	n.z-=v.z;
 	return n;
 }
 rad.vector3.prototype.distance=function(v){
-	var n = this.sub(v);
+	const n = this.sub(v);
 	return Math.sqrt( (n.x*n.x)+(n.y*n.y)+(n.z*n.z) );
 }
 rad.vector3.prototype.dot=function(v){
