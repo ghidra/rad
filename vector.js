@@ -19,6 +19,12 @@ rad.vector2.prototype.sub=function(v){
 	n.y-=v.y;
 	return n;
 }
+rad.vector2.prototype.mul=function(v){
+	var n = new rad.vector2(this.x,this.y);
+	n.x*=v.x;
+	n.y*=v.y;
+	return n;
+}
 rad.vector2.prototype.multiply=function(v){
 	var n = new rad.vector2(this.x,this.y);
 	n.x*=v.x;
@@ -79,6 +85,13 @@ rad.vector3.prototype.sub=function(v){
 	n.x-=v.x;
 	n.y-=v.y;
 	n.z-=v.z;
+	return n;
+}
+rad.vector3.prototype.mul=function(v){
+	var n = new rad.vector3(this.x,this.y,this.z);
+	n.x*=v.x;
+	n.y*=v.y;
+	n.z*=v.z;
 	return n;
 }
 rad.vector3.prototype.distance=function(v){
