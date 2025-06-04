@@ -2,17 +2,15 @@ rad.chainsaw=class{
 	constructor(width, height){
 		this.width=width||640;
 		this.height=height||480;
-		this.shaders=[];//hold the shaders
-		this.vertShaderIds=[];
-		this.fragShaderIds=[];
+		this.shaders={};//hold the shaders
 		this.shaderPrograms=[];//hold shader programs
 		this.shaderProgramsAttributeMap=[];//hold relevant attributes to the shader program
 		this.shaderProgramsUniformMap=[];//hold uniforms
 		this.buffers=[];//hold buffers
 		this.preloadImageCount=0;
 		this.preloadImageCounter=0;
-		this.images=[];
-		this.images_src=[];//for saving in data base
+		this.images={};
+		this.images_src=[];//for saving in data base... can remove this soon
 		//make and array to hold sprite buffers
 		this.spriteBuffers=[];//
 		//init
@@ -25,31 +23,18 @@ rad.chainsaw=class{
 		this.spriteBuffers.push(this.newSpriteBuffer(2048));
 	}
 
-	loadVertexShader(source) {
-	  	this.shaders.push(this.loadShader(source,this.gl.VERTEX_SHADER));
-	  	this.vertShaderIds.push(this.shaders.length-1);
-	  	return this.shaders.length-1;
+	loadVertexShader(id,source) {
+	  	this.shaders[id]= new rad.chainsaw.shader(this.gl,id,source,"vertex");
 	}
-	loadFragmentShader(source) {
-		this.shaders.push(this.loadShader(source,this.gl.FRAGMENT_SHADER));
-		this.fragShaderIds.push(this.shaders.length-1);
-		return this.shaders.length-1;
+	loadFragmentShader(id,source) {
+		this.shaders[id]= new rad.chainsaw.shader(this.gl,id,source,"fragment");
 	}
-	loadShader(source,type) {
-	  	const shader = this.gl.createShader(type);
-	  	this.gl.shaderSource(shader, source);
-	  	this.gl.compileShader(shader);
+	createProgram(id,vert_index,frag_index,attributes_array,uniforms_array) {
+		//(this.gl,this.shaders[vert_index].shader,this.shaders[frag_index].shader,attributes_array,uniforms_array);
 
-	  	const status = this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS);
-	  	if (!status) {
-	    	throw new TypeError(`couldn't compile shader:\n${this.gl.getShaderInfoLog(shader)}`);
-	  	}
-	  	return shader;
-	}
-	createProgram(vert_index,frag_index,attributes_array,uniforms_array) {
 		var program = this.gl.createProgram();
-		this.gl.attachShader(program, this.shaders[vert_index]);
-		this.gl.attachShader(program, this.shaders[frag_index]);
+		this.gl.attachShader(program, this.shaders[vert_index].shader);
+		this.gl.attachShader(program, this.shaders[frag_index].shader);
 		this.gl.linkProgram(program);
 
 		const status = this.gl.getProgramParameter(program, this.gl.LINK_STATUS);
@@ -208,7 +193,7 @@ rad.chainsaw=class{
 		//_this=this;
 		for(var i=0;i<images.length;i++){
 			const image = new Image();
-			this.images.push(image);
+			this.images[images[i]]=image;
 			this.images_src.push(images[i]);
 			image.src = images[i];
 			image.onload = function() {
@@ -226,8 +211,8 @@ rad.chainsaw=class{
 }
 //
 rad.chainsaw.shader=class{
-	constructor(id, gl,source,type){
-	  	this.id = id;
+	constructor(gl, id, source, type){
+		this.id = id;
 
 		var shader_type = gl.VERTEX_SHADER;
 		if(type=="fragment") shader_type = gl.FRAGMENT_SHADER;
@@ -239,17 +224,48 @@ rad.chainsaw.shader=class{
 
 	  	const status = gl.getShaderParameter(this.shader, gl.COMPILE_STATUS);
 	  	if (!status) {
-	    	throw new TypeError(`couldn't compile shader:\n${gl.getShaderInfoLog(shader)}`);
+	    	throw new TypeError(`couldn't compile shader:\n${gl.getShaderInfoLog(this.shader)}`);
 	  	}
 	}
 }
 //
 rad.chainsaw.program=class{
+	constructor(gl,vert,frag,attributes,uniforms){
+		this.program = gl.createProgram();
+		gl.attachShader(this.program, vert);
+		gl.attachShader(this.program, frag);
+		gl.linkProgram(this.program);
 
-}
-//
-rad.chainsaw.image=class{
-	
+		const status = gl.getProgramParameter(this.program, gl.LINK_STATUS);
+		if (!status) {
+	  		throw new TypeError(`couldn't link shader program:\n${gl.getProgramInfoLog(this.program)}`);
+		}
+		//now deal with attributes
+		var attributeMap=new Map();//hold the attribute indicies
+		for(var a=0; a<attributes.length; a++){
+			const attribLocation = gl.getAttribLocation(this.program, attributes[a]);
+			if(attribLocation<0){
+				console.log("Missing shader attribute: "+attributes[a]);
+			}else{
+				attributeMap.set(attributes[a],attribLocation);
+			}
+		}
+		//now deal with uniforms
+		var uniformMap=new Map();//hold the attribute indicies
+		for(var u=0; u<uniforms.length; u++){
+			const uniformLocation = gl.getUniformLocation(this.program, uniforms[u]);
+			if(uniformLocation<0){
+				console.log("Missing shader uniform: "+uniforms[u]);
+			}else{
+				uniformMap.set(uniforms[u],uniformLocation);
+			}
+		}
+		//save it
+		this.attributeMap=attributeMap;
+		this.uniformMap=uniformMap;
+		//this.shaderPrograms.push(program);//hold shader programs
+		//return this.shaderPrograms.length-1;
+	}
 }
 //
 rad.chainsaw.spriteBuffer=class{
