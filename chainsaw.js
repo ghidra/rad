@@ -2,17 +2,17 @@ rad.chainsaw=class{
 	constructor(width, height){
 		this.width=width||640;
 		this.height=height||480;
+
 		this.shaders={};//hold the shaders
-		this.shaderPrograms=[];//hold shader programs
-		this.shaderProgramsAttributeMap=[];//hold relevant attributes to the shader program
-		this.shaderProgramsUniformMap=[];//hold uniforms
-		this.buffers=[];//hold buffers
+		this.programs={};//hold shader programs
+		this.buffers={};//hold buffers
+		this.spriteBuffers={};//
+
 		this.preloadImageCount=0;
 		this.preloadImageCounter=0;
 		this.images={};
 		this.images_src=[];//for saving in data base... can remove this soon
-		//make and array to hold sprite buffers
-		this.spriteBuffers=[];//
+		
 		//init
 		//set the canvas
 		this.canvas = document.createElement('canvas');
@@ -20,7 +20,7 @@ rad.chainsaw=class{
 		this.canvas.height = this.height;
 		this.gl = this.canvas.getContext('webgl',{premultipliedAlpha: false, alpha:false}) || this.canvas.getContext('experimental-webgl');
 
-		this.spriteBuffers.push(this.newSpriteBuffer(2048));
+		this.newSpriteBuffer("main",2048);//make a main buffer
 	}
 
 	loadVertexShader(id,source) {
@@ -29,70 +29,33 @@ rad.chainsaw=class{
 	loadFragmentShader(id,source) {
 		this.shaders[id]= new rad.chainsaw.shader(this.gl,id,source,"fragment");
 	}
-	createProgram(id,vert_index,frag_index,attributes_array,uniforms_array) {
-		//(this.gl,this.shaders[vert_index].shader,this.shaders[frag_index].shader,attributes_array,uniforms_array);
-
-		var program = this.gl.createProgram();
-		this.gl.attachShader(program, this.shaders[vert_index].shader);
-		this.gl.attachShader(program, this.shaders[frag_index].shader);
-		this.gl.linkProgram(program);
-
-		const status = this.gl.getProgramParameter(program, this.gl.LINK_STATUS);
-		if (!status) {
-	  		throw new TypeError(`couldn't link shader program:\n${this.gl.getProgramInfoLog(program)}`);
-		}
-		//now deal with attributes
-		var attributeMap=new Map();//hold the attribute indicies
-		for(var a=0; a<attributes_array.length; a++){
-			const attribLocation = this.gl.getAttribLocation(program, attributes_array[a]);
-			if(attribLocation<0){
-				console.log("Missing shader attribute: "+attributes_array[a]);
-			}else{
-				attributeMap.set(attributes_array[a],attribLocation);
-			}
-		}
-		//now deal with uniforms
-		var uniformMap=new Map();//hold the attribute indicies
-		for(var u=0; u<uniforms_array.length; u++){
-			const uniformLocation = this.gl.getUniformLocation(program, uniforms_array[u]);
-			if(uniformLocation<0){
-				console.log("Missing shader uniform: "+uniforms_array[u]);
-			}else{
-				uniformMap.set(uniforms_array[u],uniformLocation);
-			}
-		}
-		//save it
-		this.shaderProgramsAttributeMap.push(attributeMap);
-		this.shaderProgramsUniformMap.push(uniformMap);
-		this.shaderPrograms.push(program);//hold shader programs
-		return this.shaderPrograms.length-1;
+	createProgram(id,vert,frag,attributes,uniforms) {
+		this.programs[id]= new rad.chainsaw.program(this.gl,this.shaders[vert].shader,this.shaders[frag].shader,attributes,uniforms);
 	}
-	createBuffer(){
-		this.buffers.push(this.gl.createBuffer());
-		return this.buffers.length-1;
+	createBuffer(id){
+		this.buffers[id]=this.gl.createBuffer();
 	}
-	setBufferFloatData(buffer_index,data){
-		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[buffer_index]);
+	setBufferFloatData(id,data){
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[id]);
 		this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER,null);
 	}
-	uploadFloatBuffer(buffer_index,program_index,attribute,size,normalize,stride,offset){
+	uploadFloatBuffer(buffer,program,attribute,size,normalize,stride,offset){
 		size=size||2;
 		normalize=normalize||false;
 		stride=stride||0;
 		offset=offset||0;
-		const attribLocation = this.shaderProgramsAttributeMap[program_index].get(attribute);
-		//var attribLocation = this.gl.getAttribLocation(this.shaderPrograms[program_index], attribute);
-		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[buffer_index]);
+		const attribLocation = this.programs[program].attributeMap.get(attribute);
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[buffer]);
 		this.gl.enableVertexAttribArray(attribLocation);
 		this.gl.vertexAttribPointer(attribLocation, size, this.gl.FLOAT, normalize, stride, offset);
 	}
 	//sprite buffer methods
-	newSpriteBuffer(size=1024,stride=7){
-		const id = this.createBuffer();
+	newSpriteBuffer(id,size=1024,stride=7){
+		this.createBuffer(id);
 		const sb = new rad.chainsaw.spriteBuffer(id,size,stride);
 		this.setBufferFloatData(id,sb.array);
-		return sb;
+		this.spriteBuffers[id]=sb;
 	}
 	modifySpriteBuffer(BufferIndex,SpriteIndex,x,y,z=0,w=0,size=64,sid=0,tid=0){
 		this.spriteBuffers[BufferIndex].modify(SpriteIndex,x,y,z,w,size,sid,tid);
@@ -103,25 +66,8 @@ rad.chainsaw=class{
 	refreshSpriteBuffer(bufferIndex,floatArray){
 		this.spriteBuffers[bufferIndex].refresh(floatArray);
 	}
-	uploadSpriteBuffer(program_index,buffer_index=0){
-		//const loc = this.gl.getAttribLocation(this.shaderPrograms[program_index], 'spritePosition');
-		const b = this.spriteBuffers[buffer_index];
-		const loc = this.shaderProgramsAttributeMap[program_index].get("aSpritePosition");
-		const sid = this.shaderProgramsAttributeMap[program_index].get("aSpriteID");
-		const ssz = this.shaderProgramsAttributeMap[program_index].get("aSpriteSize");
-
-		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[b.id]);
-
-		const byte = 4;//this is here specifically for ease of understanding offset
-		const stride = b.stride;//this.spriteBufferStride;
-		this.gl.enableVertexAttribArray(loc);
-		this.gl.vertexAttribPointer(loc, 4, this.gl.FLOAT,false,stride*byte,0);  // because it was a vec2, // starts at start of array
-		this.gl.enableVertexAttribArray(ssz);
-		this.gl.vertexAttribPointer(ssz, 1,  this.gl.FLOAT,false,stride*byte,4*byte);///5 values * 4 bytes... 2 to offset past the first values
-		this.gl.enableVertexAttribArray(sid);
-		this.gl.vertexAttribPointer(sid, 2,  this.gl.FLOAT,false,stride*byte,5*byte);///5 values * 4 bytes... 2 to offset past the first values
-
-		this.gl.bufferData(this.gl.ARRAY_BUFFER, b.array, this.gl.STATIC_DRAW);  // upload data
+	uploadSpriteBuffer(program_index,buffer_index="main"){
+		this.spriteBuffers[buffer_index].upload(this.gl,this.programs[program_index],this.buffers[buffer_index]);
 	}
 	loadImage(program_index,image,uniform_name){
 		// Create a texture.
@@ -138,7 +84,7 @@ rad.chainsaw=class{
 		this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, image);
 
 		//this.gl.uniform1i(this.gl.getUniformLocation(this.shaderPrograms[program_index], uniform_name), 0);
-		this.gl.uniform1i(this.shaderProgramsUniformMap[program_index].get(uniform_name), 0);	
+		this.gl.uniform1i(this.programs[program_index].uniformMap.get(uniform_name), 0);	
 	}
 	////This is from a DOM example
 	setDomTexture(dom_element,uniform_name){
@@ -180,9 +126,11 @@ rad.chainsaw=class{
 			1.0,  0.0,
 			1.0,  1.0,
 		]);
-		var pbuffer = this.createBuffer();
+		const pbuffer = "rect_p";
+		const tbuffer = "rect_t";
+		this.createBuffer(pbuffer);
 		this.setBufferFloatData(pbuffer,p);
-		var tbuffer = this.createBuffer();
+		this.createBuffer(tbuffer);
 		this.setBufferFloatData(tbuffer,t);
 
 		return [pbuffer,tbuffer];
@@ -263,8 +211,6 @@ rad.chainsaw.program=class{
 		//save it
 		this.attributeMap=attributeMap;
 		this.uniformMap=uniformMap;
-		//this.shaderPrograms.push(program);//hold shader programs
-		//return this.shaderPrograms.length-1;
 	}
 }
 //
@@ -286,7 +232,7 @@ rad.chainsaw.spriteBuffer=class{
 		this.array[s+4] = size; //size
 		this.array[s+5] = sid; //sprite sheet sprite id
 		this.array[s+6] = tid; //texture id
-	}
+	}rect
 	getValue(SpriteIndex){
 		const s = this.stride*SpriteIndex;
 		return {
@@ -306,5 +252,23 @@ rad.chainsaw.spriteBuffer=class{
 		}
 		this.count=floatArray.length/this.stride;
 		console.log("loaded buffer array "+this.count+" sprites");
+	}
+	upload(gl,program,buffer){
+		const loc = program.attributeMap.get("aSpritePosition");
+		const ssz = program.attributeMap.get("aSpriteSize");
+		const sid = program.attributeMap.get("aSpriteID");
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+		const byte = 4;//this is here specifically for ease of understanding offset
+		const stride = this.stride;//this.spriteBufferStride;
+		gl.enableVertexAttribArray(loc);
+		gl.vertexAttribPointer(loc, 4, gl.FLOAT,false,stride*byte,0);  // because it was a vec2, // starts at start of array
+		gl.enableVertexAttribArray(ssz);
+		gl.vertexAttribPointer(ssz, 1,  gl.FLOAT,false,stride*byte,4*byte);///5 values * 4 bytes... 2 to offset past the first values
+		gl.enableVertexAttribArray(sid);
+		gl.vertexAttribPointer(sid, 2,  gl.FLOAT,false,stride*byte,5*byte);///5 values * 4 bytes... 2 to offset past the first values
+
+		gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW);  // upload data
 	}
 }
