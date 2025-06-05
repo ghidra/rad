@@ -69,7 +69,7 @@ rad.chainsaw=class{
 	uploadSpriteBuffer(program_index,buffer_index="main"){
 		this.spriteBuffers[buffer_index].upload(this.gl,this.programs[program_index],this.buffers[buffer_index]);
 	}
-	loadImage(program_index,image,uniform_name){
+	loadImage(program_index,image,uniform_name,locationIndex=0){
 		// Create a texture.
 		const texture = this.gl.createTexture();
 		this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
@@ -84,7 +84,9 @@ rad.chainsaw=class{
 		this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, image);
 
 		//this.gl.uniform1i(this.gl.getUniformLocation(this.shaderPrograms[program_index], uniform_name), 0);
-		this.gl.uniform1i(this.programs[program_index].uniformMap.get(uniform_name), 0);	
+		this.gl.uniform1i(this.programs[program_index].uniformMap.get(uniform_name), locationIndex);	
+	
+		return texture;
 	}
 	////This is from a DOM example
 	setDomTexture(dom_element,uniform_name){
@@ -138,13 +140,14 @@ rad.chainsaw=class{
 	preloadImages(images,callback){
 		this.preloadImageCount=images.length;
 		const _preload = rad.closure(this,this.preloadImageComplete);
-		//_this=this;
+
 		for(var i=0;i<images.length;i++){
-			const image = new Image();
-			this.images[images[i]]=image;
-			this.images_src.push(images[i]);
-			image.src = images[i];
-			image.onload = function() {
+			//const image = ;
+			images[i].setImage(new Image());
+			this.images[images[i].path] = images[i];
+			this.images_src.push(images[i].path);
+			images[i].image.src = images[i].path;
+			images[i].image.onload = function() {
 				//_this.preloadImageComplete(callback);
 				_preload(callback);
 			}
@@ -270,5 +273,18 @@ rad.chainsaw.spriteBuffer=class{
 		gl.vertexAttribPointer(sid, 2,  gl.FLOAT,false,stride*byte,5*byte);///5 values * 4 bytes... 2 to offset past the first values
 
 		gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW);  // upload data
+	}
+}
+//
+rad.chainsaw.imageData=class{
+	constructor(path,w,h,sw=32,sh=32){
+		this.path = path;
+		this.w = w;
+		this.h = h;
+		this.sw = sw;
+		this.sh = sh;
+	}
+	setImage(image){
+		this.image=image;
 	}
 }
