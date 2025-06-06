@@ -69,24 +69,12 @@ rad.chainsaw=class{
 	uploadSpriteBuffer(program_index,buffer_index="main"){
 		this.spriteBuffers[buffer_index].upload(this.gl,this.programs[program_index],this.buffers[buffer_index]);
 	}
-	loadImage(program_index,image,uniform_name,locationIndex=0){
-		// Create a texture.
-		const texture = this.gl.createTexture();
-		this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-
-		// Set the parameters so we can render any size image.
-		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
-		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-
-		// Upload the image into the texture.
-		this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, image);
+	loadTexture(program,texture,uniform,index=0){
+		this.gl.activeTexture(this.gl.TEXTURE0+index);
+  		this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
 
 		//this.gl.uniform1i(this.gl.getUniformLocation(this.shaderPrograms[program_index], uniform_name), 0);
-		this.gl.uniform1i(this.programs[program_index].uniformMap.get(uniform_name), locationIndex);	
-	
-		return texture;
+		this.gl.uniform1i(this.programs[program].uniformMap.get(uniform), index);	
 	}
 	////This is from a DOM example
 	setDomTexture(dom_element,uniform_name){
@@ -140,15 +128,18 @@ rad.chainsaw=class{
 	preloadImages(images,callback){
 		this.preloadImageCount=images.length;
 		const _preload = rad.closure(this,this.preloadImageComplete);
+		const _this = this;
 
 		for(var i=0;i<images.length;i++){
-			//const image = ;
+			const _imageData = images[i];
 			images[i].setImage(new Image());
-			this.images[images[i].path] = images[i];
-			this.images_src.push(images[i].path);
+			
+			this.images[images[i].path] = images[i];//give object to chainsaw
+			this.images_src.push(images[i].path);//redundant.. to be removed once save function is updated
+			
 			images[i].image.src = images[i].path;
 			images[i].image.onload = function() {
-				//_this.preloadImageComplete(callback);
+				_imageData.loadImage(_this.gl);
 				_preload(callback);
 			}
 		}
@@ -156,6 +147,7 @@ rad.chainsaw=class{
 	preloadImageComplete(callback){
 		this.preloadImageCounter+=1;
 		if(this.preloadImageCounter>=this.preloadImageCount){
+			//console.log("hae");
 			callback();
 		}
 	}
@@ -286,5 +278,19 @@ rad.chainsaw.imageData=class{
 	}
 	setImage(image){
 		this.image=image;
+	}
+	loadImage(gl){
+		this.texture = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, this.texture);
+
+		// Set the parameters so we can render any size image.
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+		// Upload the image into the texture.
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
+		//console.log(this.image);
 	}
 }
