@@ -227,7 +227,7 @@ rad.chainsaw.spriteBuffer=class{
 		this.array[s+4] = size; //size
 		this.array[s+5] = sid; //sprite sheet sprite id
 		this.array[s+6] = tid; //texture id
-	}rect
+	}
 	getValue(SpriteIndex){
 		const s = this.stride*SpriteIndex;
 		return {

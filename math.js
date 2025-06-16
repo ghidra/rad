@@ -14,6 +14,12 @@ rad.rand=function(seed){
   seed = seed||Math.round(Math.random()*999);
   return Math.abs(Math.sin(seed++));
 }
+rad.randint=function(min, max, seed = 0.23211) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  //return Math.floor(Math.random() * (max - min + 1)) + min;
+  return Math.floor(rad.rand(seed) * (max - min + 1)) + min;
+}
 rad.degtorad = function(d) {
     return d*(3.14159/180);
 }
