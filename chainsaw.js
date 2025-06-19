@@ -20,7 +20,7 @@ rad.chainsaw=class{
 		this.canvas.height = this.height;
 		this.gl = this.canvas.getContext('webgl',{premultipliedAlpha: false, alpha:false}) || this.canvas.getContext('experimental-webgl');
 
-		this.newSpriteBuffer("main",10,false);//make a main buffer.. i kind of want to remove this
+		//this.newSpriteBuffer("main",10,false);//make a main buffer.. i kind of want to remove this
 	}
 
 	loadVertexShader(id,source) {
@@ -70,7 +70,7 @@ rad.chainsaw=class{
 	refreshSpriteBuffer(bufferIndex,floatArray){
 		this.spriteBuffers[bufferIndex].refresh(floatArray);
 	}
-	uploadSpriteBuffer(program_index,buffer_index="main"){
+	uploadSpriteBuffer(program_index,buffer_index="tiles"){
 		this.spriteBuffers[buffer_index].upload(this.gl,this.programs[program_index],this.buffers[buffer_index]);
 	}
 	loadTexture(program,texture,uniform,index=0){
