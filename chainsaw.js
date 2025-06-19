@@ -20,7 +20,7 @@ rad.chainsaw=class{
 		this.canvas.height = this.height;
 		this.gl = this.canvas.getContext('webgl',{premultipliedAlpha: false, alpha:false}) || this.canvas.getContext('experimental-webgl');
 
-		this.newSpriteBuffer("main",2048);//make a main buffer
+		this.newSpriteBuffer("main",10,false);//make a main buffer.. i kind of want to remove this
 	}
 
 	loadVertexShader(id,source) {
@@ -51,9 +51,13 @@ rad.chainsaw=class{
 		this.gl.vertexAttribPointer(attribLocation, size, this.gl.FLOAT, normalize, stride, offset);
 	}
 	//sprite buffer methods
-	newSpriteBuffer(id,size=1024,stride=7){
+	newSpriteBuffer(id,size=146,poweroftwo=false,stride=7){
+		var nsprites = size*stride;
+		if(poweroftwo){
+			nsprites = rad.nextpoweroftwo(nsprites);
+		}
 		this.createBuffer(id);
-		const sb = new rad.chainsaw.spriteBuffer(id,size,stride);
+		const sb = new rad.chainsaw.spriteBuffer(id,nsprites,stride);
 		this.setBufferFloatData(id,sb.array);
 		this.spriteBuffers[id]=sb;
 	}

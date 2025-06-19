@@ -26,3 +26,28 @@ rad.degtorad = function(d) {
 rad.radtodeg = function(r){
     return r*(180/3.14159)
 }
+
+rad.nextpoweroftwo = function(n) {
+  // If n is already a power of two, return n.
+  if (n && !(n & (n - 1))) {
+    return n;
+  }
+
+  // Handle cases where n is 0 or 1.
+  if (n <= 1) {
+    return 1;
+  }
+
+  // Set all bits to the right of the most significant bit.
+  n--; 
+  n |= n >> 1;
+  n |= n >> 2;
+  n |= n >> 4;
+  n |= n >> 8;
+  n |= n >> 16;
+
+  // Increment to get the next power of 2.
+  n++;
+  return n;
+}
+
