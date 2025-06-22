@@ -18,8 +18,17 @@ rad.chainsaw=class{
 		this.canvas = document.createElement('canvas');
 		this.canvas.width = this.width;
 		this.canvas.height = this.height;
-		this.gl = this.canvas.getContext('webgl',{premultipliedAlpha: false, alpha:false}) || this.canvas.getContext('experimental-webgl');
+		this.gl = this.canvas.getContext('webgl2',{premultipliedAlpha: false, alpha:false}) || this.canvas.getContext('experimental-webgl');
 
+		//const version = this.canvas.getContext("webgl2");
+		//if (!version) {
+		// fallback to WebGL1
+		//}
+			//instancing
+		//this.ext = this.gl.getExtension('ANGLE_instanced_arrays');
+		//if (!this.ext) {
+		//	throw new Error('ANGLE_instanced_arrays not supported');
+		//}
 		//this.newSpriteBuffer("main",10,false);//make a main buffer.. i kind of want to remove this
 	}
 
@@ -263,12 +272,48 @@ rad.chainsaw.spriteBuffer=class{
 		const stride = this.stride;//this.spriteBufferStride;
 		gl.enableVertexAttribArray(loc);
 		gl.vertexAttribPointer(loc, 4, gl.FLOAT,false,stride*byte,0);  // because it was a vec2, // starts at start of array
+		gl.vertexAttribDivisor(loc, 0); // Advance per vertex
+		
 		gl.enableVertexAttribArray(ssz);
 		gl.vertexAttribPointer(ssz, 1,  gl.FLOAT,false,stride*byte,4*byte);///5 values * 4 bytes... 2 to offset past the first values
+		gl.vertexAttribDivisor(ssz, 0); // Advance per vertex
+		
 		gl.enableVertexAttribArray(sid);
 		gl.vertexAttribPointer(sid, 2,  gl.FLOAT,false,stride*byte,5*byte);///5 values * 4 bytes... 2 to offset past the first values
+		gl.vertexAttribDivisor(sid, 0); // Advance per vertex
 
 		gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW);  // upload data
+	}
+	uploadInstanced(gl,program,buffer){
+		// Set up regular attributes with divisor 0 (advance per vertex)
+		//const spriteLoc = program.attributeMap.get("aSpritePosition");
+		//const spriteSize = program.attributeMap.get("aSpriteSize");
+		//const spriteId = program.attributeMap.get("aSpriteID");
+		
+		// Set up instanced attributes with divisor 1 (advance per instance)
+		const instLoc = program.attributeMap.get("aInstancePosition");
+		const instSize = program.attributeMap.get("aInstanceSize");
+		const instId = program.attributeMap.get("aInstanceID");	
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+		const byte = 4;
+		const stride = this.stride;
+		
+		// Set up instanced attributes
+		gl.enableVertexAttribArray(instLoc);
+		gl.vertexAttribPointer(instLoc, 4, gl.FLOAT, false, stride*byte, 0);
+		gl.vertexAttribDivisor(instLoc, 1); // Advance once per instance
+		
+		gl.enableVertexAttribArray(instSize);
+		gl.vertexAttribPointer(instSize, 1, gl.FLOAT, false, stride*byte, 4*byte);
+		gl.vertexAttribDivisor(instSize, 1); // Advance once per instance
+		
+		gl.enableVertexAttribArray(instId);
+		gl.vertexAttribPointer(instId, 2, gl.FLOAT, false, stride*byte, 5*byte);
+		gl.vertexAttribDivisor(instId, 1); // Advance once per instance
+
+		gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW);
 	}
 }
 //
