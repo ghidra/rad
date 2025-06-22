@@ -267,11 +267,12 @@ rad.chainsaw.spriteBuffer=class{
 		const sid = program.attributeMap.get("aSpriteID");
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+		gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW);  // upload data
 
 		const byte = 4;//this is here specifically for ease of understanding offset
 		const stride = this.stride;//this.spriteBufferStride;
 		gl.enableVertexAttribArray(loc);
-		gl.vertexAttribPointer(loc, 4, gl.FLOAT,false,stride*byte,0);  // because it was a vec2, // starts at start of array
+		gl.vertexAttribPointer(loc, 4, gl.FLOAT, false, stride*byte, 0);  // because it was a vec2, // starts at start of array
 		gl.vertexAttribDivisor(loc, 0); // Advance per vertex
 		
 		gl.enableVertexAttribArray(ssz);
@@ -281,26 +282,22 @@ rad.chainsaw.spriteBuffer=class{
 		gl.enableVertexAttribArray(sid);
 		gl.vertexAttribPointer(sid, 2,  gl.FLOAT,false,stride*byte,5*byte);///5 values * 4 bytes... 2 to offset past the first values
 		gl.vertexAttribDivisor(sid, 0); // Advance per vertex
-
-		gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW);  // upload data
 	}
-	uploadInstanced(gl,program,buffer){
-		// Set up regular attributes with divisor 0 (advance per vertex)
-		//const spriteLoc = program.attributeMap.get("aSpritePosition");
-		//const spriteSize = program.attributeMap.get("aSpriteSize");
-		//const spriteId = program.attributeMap.get("aSpriteID");
+	uploadInstanced(gl,program,instanceBuffer){
+		// First, bind the base buffer and set up base attributes
 		
-		// Set up instanced attributes with divisor 1 (advance per instance)
-		const instLoc = program.attributeMap.get("aInstancePosition");
-		const instSize = program.attributeMap.get("aInstanceSize");
-		const instId = program.attributeMap.get("aInstanceID");	
-
-		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-
 		const byte = 4;
 		const stride = this.stride;
 		
-		// Set up instanced attributes
+		// Now bind the instance buffer and set up instance attributes
+		gl.bindBuffer(gl.ARRAY_BUFFER, instanceBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW);
+
+		const instLoc = program.attributeMap.get("aInstancePosition");
+		const instSize = program.attributeMap.get("aInstanceSize");
+		const instId = program.attributeMap.get("aInstanceID");
+		
+		// Set up instance attributes with divisor 1
 		gl.enableVertexAttribArray(instLoc);
 		gl.vertexAttribPointer(instLoc, 4, gl.FLOAT, false, stride*byte, 0);
 		gl.vertexAttribDivisor(instLoc, 1); // Advance once per instance
@@ -312,8 +309,6 @@ rad.chainsaw.spriteBuffer=class{
 		gl.enableVertexAttribArray(instId);
 		gl.vertexAttribPointer(instId, 2, gl.FLOAT, false, stride*byte, 5*byte);
 		gl.vertexAttribDivisor(instId, 1); // Advance once per instance
-
-		gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW);
 	}
 }
 //
