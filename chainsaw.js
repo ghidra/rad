@@ -259,7 +259,7 @@ rad.chainsaw.spriteBuffer=class{
 			this.array[i] = floatArray[i];
 		}
 		this.count=floatArray.length/this.stride;
-		console.log("loaded buffer array "+this.count+" sprites");
+		//console.log("loaded buffer array "+this.count+" sprites");
 	}
 	upload(gl,program,buffer){
 		const loc = program.attributeMap.get("aSpritePosition");
