@@ -86,6 +86,10 @@ rad.chainsaw=class{
 		this.gl.activeTexture(this.gl.TEXTURE0+index);
   		this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
 
+  		//set texture sampling to wrap
+  		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.REPEAT);
+		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.REPEAT);
+
 		//this.gl.uniform1i(this.gl.getUniformLocation(this.shaderPrograms[program_index], uniform_name), 0);
 		this.gl.uniform1i(this.programs[program].uniformMap.get(uniform), index);	
 	}
