@@ -18,8 +18,13 @@ rad.chainsaw=class{
 		this.canvas = document.createElement('canvas');
 		this.canvas.width = this.width;
 		this.canvas.height = this.height;
-		this.gl = this.canvas.getContext('webgl2',{premultipliedAlpha: false, alpha:false}) || this.canvas.getContext('experimental-webgl');
-
+		this.gl = this.canvas.getContext('webgl2',{premultipliedAlpha: false, alpha:false});// || this.canvas.getContext('experimental-webgl');
+		if(this.gl){
+			console.log('webgl2 successful');
+		}else{
+			this.canvas.getContext('experimental-webgl');
+			console.log('webgl2 not available, fallback to experiemental-webgl');
+		}
 		//const version = this.canvas.getContext("webgl2");
 		//if (!version) {
 		// fallback to WebGL1
@@ -58,6 +63,11 @@ rad.chainsaw=class{
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[buffer]);
 		this.gl.enableVertexAttribArray(attribLocation);
 		this.gl.vertexAttribPointer(attribLocation, size, this.gl.FLOAT, normalize, stride, offset);
+	}
+	setUniformBufferData(id,data){
+		this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffers[id]);
+		this.gl.bufferData(this.gl.UNIFORM_BUFFER, data, this.gl.STATIC_DRAW);
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER,null);
 	}
 	//sprite buffer methods
 	newSpriteBuffer(id,size=146,poweroftwo=false,stride=7){
@@ -225,7 +235,6 @@ rad.chainsaw.program=class{
 		this.uniformMap=uniformMap;
 	}
 }
-//
 rad.chainsaw.spriteBuffer=class{
 	constructor(id,size=1024,stride=7){
 		this.id = id;
