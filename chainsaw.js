@@ -213,6 +213,10 @@ rad.chainsaw=class{
 		);
 		//this.gl.drawBuffers([]); // no color buffer
 	}
+	createShadowMeshBuffer(name,positions){
+		this.createBuffer(name);
+		this.setBufferFloatData(name,positions);
+	}
 	//https://github.com/toji/gl-matrix/blob/master/src/mat4.js
 	lookatMatrix(eye=new rad.vector3(0.0,0.0,1.0), center=new rad.vector3(0.0,0.0,0.0), up=new rad.vector3(0.0,1.0,0.0)){
 		let out = new Float32Array(16);
