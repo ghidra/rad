@@ -24,7 +24,12 @@ rad.chainsaw=class{
 		}else{
 			this.canvas.getContext('experimental-webgl');
 			console.log('webgl2 not available, fallback to experiemental-webgl');
+			//extensions
+			const depthtexture = this.gl.getExtension('WEBGL_depth_texture');
+			if(!depthtexture) console.log("no webgl depth texture available");
 		}
+
+
 		//const version = this.canvas.getContext("webgl2");
 		//if (!version) {
 		// fallback to WebGL1
@@ -181,29 +186,31 @@ rad.chainsaw=class{
 	createShadowTexture(size=2048){
 		this.shadowTexSize=size;
 		this.shadowTex = this.gl.createTexture();
-		this.shadowVolumeMat4 = this.orthoMat4(-size, size,-size, size,0.1, 50.0);
+		this.shadowProjection = this.orthoMat4(-size, size,-size, size,0.1, 200.0);
 		
 		this.gl.bindTexture(this.gl.TEXTURE_2D, this.shadowTex);
 		this.gl.texImage2D(
 			this.gl.TEXTURE_2D,
 			0,
-			this.gl.DEPTH_COMPONENT16,
+			this.gl.DEPTH_COMPONENT32F,
 			size, size, // shadow resolution
 			0,
 			this.gl.DEPTH_COMPONENT,
-			this.gl.UNSIGNED_SHORT,
+			this.gl.FLOAT,
 			null
 		);
+		//this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_COMPARE_MODE, this.gl.NONE);
+		//this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_COMPARE_FUNC, this.gl.LEQUAL);
 		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
 		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
 		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
 		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
 
-		//attach it to a frame buffer.. this might need it's own function call later?
+		//attach it to a frame buffer..
 
 		this.shadowFBO = this.gl.createFramebuffer();
 		
-		//this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.shadowFBO);
+		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.shadowFBO);
 		this.gl.framebufferTexture2D(
 			this.gl.FRAMEBUFFER,
 			this.gl.DEPTH_ATTACHMENT,
@@ -211,12 +218,40 @@ rad.chainsaw=class{
 			this.shadowTex,
 			0
 		);
-		//this.gl.drawBuffers([]); // no color buffer
+		///create a color texture
+		/*this.testTexture = this.gl.createTexture();
+		this.gl.bindTexture(this.gl.TEXTURE_2D, this.testTexture);
+		this.gl.texImage2D(
+		    this.gl.TEXTURE_2D,
+		    0,
+		    this.gl.RGBA,
+		    size, size,
+		    0,
+		    this.gl.RGBA,
+		    this.gl.UNSIGNED_BYTE,
+		    null,
+		);
+		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+		this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+		 
+		// attach it to the framebuffer
+		this.gl.framebufferTexture2D(
+		    this.gl.FRAMEBUFFER,        // target
+		    this.gl.COLOR_ATTACHMENT0,  // attachment point
+		    this.gl.TEXTURE_2D,         // texture target
+		    this.testTexture,         // texture
+		    0);                    // mip level
+		*/
+		this.gl.drawBuffers([]);
+		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
 	}
 	createShadowMeshBuffer(name,positions){
 		this.createBuffer(name);
 		this.setBufferFloatData(name,positions);
 	}
+	//I need to make a new rad class to deal with this:
 	//https://github.com/toji/gl-matrix/blob/master/src/mat4.js
 	lookatMatrix(eye=new rad.vector3(0.0,0.0,1.0), center=new rad.vector3(0.0,0.0,0.0), up=new rad.vector3(0.0,1.0,0.0)){
 		let out = new Float32Array(16);
@@ -233,9 +268,9 @@ rad.chainsaw=class{
 		let centerz = center.z;
 
 		if (
-			Math.abs(eyex - centerx) < glMatrix.EPSILON &&
-			Math.abs(eyey - centery) < glMatrix.EPSILON &&
-			Math.abs(eyez - centerz) < glMatrix.EPSILON
+			Math.abs(eyex - centerx) < 0.000001 &&
+			Math.abs(eyey - centery) < 0.000001 &&
+			Math.abs(eyez - centerz) < 0.000001
 		) {
 			return identity(out);
 		}
@@ -322,19 +357,64 @@ rad.chainsaw=class{
 		out[15] = 1;
 		return out;
 	}
-	drawShadowPass(shadowProgram){
-		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.shadowFBO);
-		this.gl.viewport(0, 0, this.shadowTexSize, this.shadowTexSize);
-		this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
+	multiplyMat4(a, b) {
+		let out = new Float32Array(16);
+		let a00 = a[0],
+			a01 = a[1],
+			a02 = a[2],
+			a03 = a[3];
+		let a10 = a[4],
+			a11 = a[5],
+			a12 = a[6],
+			a13 = a[7];
+		let a20 = a[8],
+			a21 = a[9],
+			a22 = a[10],
+			a23 = a[11];
+		let a30 = a[12],
+			a31 = a[13],
+			a32 = a[14],
+			a33 = a[15];
 
-		// Use shadow program
-		this.gl.useProgram(shadowProgram);
+		// Cache only the current line of the second matrix
+		let b0 = b[0],
+			b1 = b[1],
+			b2 = b[2],
+			b3 = b[3];
+		out[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+		out[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+		out[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+		out[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
 
-		// Set uLightViewProj
-		//this.gl.uniformMatrix4fv(lightVPUniform, false, lightViewProj);
+		b0 = b[4];
+		b1 = b[5];
+		b2 = b[6];
+		b3 = b[7];
+		out[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+		out[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+		out[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+		out[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
 
-		//drawSceneDepthOnly();
+		b0 = b[8];
+		b1 = b[9];
+		b2 = b[10];
+		b3 = b[11];
+		out[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+		out[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+		out[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+		out[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+		b0 = b[12];
+		b1 = b[13];
+		b2 = b[14];
+		b3 = b[15];
+		out[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+		out[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+		out[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+		out[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+		return out;
 	}
+
 }
 //
 rad.chainsaw.shader=class{
