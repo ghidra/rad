@@ -29,7 +29,6 @@ rad.chainsaw=class{
 			if(!depthtexture) console.log("no webgl depth texture available");
 		}
 
-
 		//const version = this.canvas.getContext("webgl2");
 		//if (!version) {
 		// fallback to WebGL1
@@ -186,7 +185,6 @@ rad.chainsaw=class{
 	createShadowTexture(size=2048){
 		this.shadowTexSize=size;
 		this.shadowTex = this.gl.createTexture();
-		this.shadowProjection = this.orthoMat4(-size, size,-size, size,0.1, 200.0);
 		
 		this.gl.bindTexture(this.gl.TEXTURE_2D, this.shadowTex);
 		this.gl.texImage2D(
@@ -253,7 +251,7 @@ rad.chainsaw=class{
 	}
 	//I need to make a new rad class to deal with this:
 	//https://github.com/toji/gl-matrix/blob/master/src/mat4.js
-	lookatMatrix(eye=new rad.vector3(0.0,0.0,1.0), center=new rad.vector3(0.0,0.0,0.0), up=new rad.vector3(0.0,1.0,0.0)){
+	lookatMatrix(eye=new rad.vector3(0.0,0.0,1.0), center=new rad.vector3(0.0,0.0,0.0), up=new rad.vector3(0.0,0.0,1.0)){
 		let out = new Float32Array(16);
 
 		let x0, x1, x2, y0, y1, y2, z0, z1, z2, len;
@@ -272,7 +270,7 @@ rad.chainsaw=class{
 			Math.abs(eyey - centery) < 0.000001 &&
 			Math.abs(eyez - centerz) < 0.000001
 		) {
-			return identity(out);
+			return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]);
 		}
 
 		z0 = eyex - centerx;
@@ -544,21 +542,21 @@ rad.chainsaw.spriteBuffer=class{
 		gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW);
 
 		const instLoc = program.attributeMap.get("aInstancePosition");
-		const instSize = program.attributeMap.get("aInstanceSize");
-		const instId = program.attributeMap.get("aInstanceID");
+		//const instSize = program.attributeMap.get("aInstanceSize");
+		//const instId = program.attributeMap.get("aInstanceID");
 		
 		// Set up instance attributes with divisor 1
 		gl.enableVertexAttribArray(instLoc);
 		gl.vertexAttribPointer(instLoc, 4, gl.FLOAT, false, stride*byte, 0);
 		gl.vertexAttribDivisor(instLoc, 1); // Advance once per instance
-		
+		/*
 		gl.enableVertexAttribArray(instSize);
 		gl.vertexAttribPointer(instSize, 1, gl.FLOAT, false, stride*byte, 4*byte);
 		gl.vertexAttribDivisor(instSize, 1); // Advance once per instance
 		
 		gl.enableVertexAttribArray(instId);
 		gl.vertexAttribPointer(instId, 2, gl.FLOAT, false, stride*byte, 5*byte);
-		gl.vertexAttribDivisor(instId, 1); // Advance once per instance
+		gl.vertexAttribDivisor(instId, 1); // Advance once per instance*/
 	}
 }
 //
