@@ -107,6 +107,14 @@ rad.vector3.prototype.len=function(){
 rad.vector3.prototype.cross=function(v){
 	return rad.vector3((this.y * v.z) - (this.z * v.y) ,(this.z * v.x) - (this.x * v.z) ,(this.x * v.y) - (this.y * v.x));
 }
+rad.vector3.prototype.normalize=function(){
+	const l = this.len();
+	if(l>0){
+		return new rad.vector3(this.x/l, this.y/l, this.z/l );
+	}else{
+		return new rad.vector3(0.0,0.0,0.0);
+	}
+}
 rad.vector3.prototype.neg=function(){
 	return new rad.vector3(-this.x,-this.y,-this.z);
 }
