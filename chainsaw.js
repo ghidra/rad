@@ -251,6 +251,14 @@ rad.chainsaw=class{
 	}
 	//I need to make a new rad class to deal with this:
 	//https://github.com/toji/gl-matrix/blob/master/src/mat4.js
+	identityMat4(){
+		return new Float32Array([
+			1.0,0.0,0.0,0.0,
+			0.0,1.0,0.0,0.0,
+			0.0,0.0,1.0,0.0,
+			0.0,0.0,0.0,1.0
+		]); 
+	}
 	lookatMatrix(eye=new rad.vector3(0.0,0.0,1.0), center=new rad.vector3(0.0,0.0,0.0), up=new rad.vector3(0.0,1.0,0.0)){
 		let out = new Float32Array(16);
 
