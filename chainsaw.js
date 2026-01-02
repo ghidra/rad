@@ -8,8 +8,8 @@ rad.chainsaw=class{
 		this.buffers={};//hold buffers
 		this.spriteBuffers={};//
 
-		this.preloadImageCount=0;
-		this.preloadImageCounter=0;
+		//this.preloadImageCount=0;
+		//this.preloadImageCounter=0;
 		this.images={};
 		this.images_src=[];//for saving in data base... can remove this soon
 		
@@ -157,7 +157,7 @@ rad.chainsaw=class{
 
 		return [pbuffer,tbuffer];
 	}
-	preloadImages(images,callback){
+	/*preloadImages(images,callback){
 		this.preloadImageCount=images.length;
 		const _preload = rad.closure(this,this.preloadImageComplete);
 		const _this = this;
@@ -182,7 +182,7 @@ rad.chainsaw=class{
 			//console.log("hae");
 			callback();
 		}
-	}
+	}*/
 	createShadowTexture(size=2048){
 		this.shadowTexSize=size;
 		this.shadowTex = this.gl.createTexture();
@@ -251,6 +251,37 @@ rad.chainsaw=class{
 		this.setBufferFloatData(name,positions);
 	}
 
+}
+//
+rad.chainsaw.imagePreloader = class{
+	constructor(chainsaw,images,name,callback){
+		this.preloadImageCount=images.length;
+		this.preloadImageCounter=0;
+		this.name = name;//this is usually attached to a scene.. this allows me to delete this object once images are loaded
+		const _preload = rad.closure(this,this.preloadImageComplete);
+		const _this = this;
+
+		for(var i=0;i<images.length;i++){
+			const _imageData = images[i];
+			images[i].setImage(new Image());
+			
+			chainsaw.images[images[i].path] = images[i];//give object to chainsaw
+			chainsaw.images_src.push(images[i].path);//redundant.. to be removed once save function is updated
+			
+			images[i].image.src = images[i].path;
+			images[i].image.onload = function() {
+				_imageData.loadImage(chainsaw.gl);
+				_preload(callback);
+			}
+		}
+	}
+	preloadImageComplete(callback){
+		this.preloadImageCounter+=1;
+		if(this.preloadImageCounter>=this.preloadImageCount){
+			//console.log("hae");
+			callback(this);
+		}
+	}
 }
 //
 rad.chainsaw.shader=class{

@@ -110,3 +110,7 @@ rad.windowdoneresizing=function(callback){
     _this.timeout = setTimeout(callback,500);
   });
 }
+
+rad.getwindowsize=function(){
+  return rad.vector2(window.innerWidth,window.innerHeight);
+}

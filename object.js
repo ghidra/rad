@@ -10,12 +10,12 @@ rad.objisempty=function(obj){
    }
    return true;
 }
-rad.objhasprop=function(o){
-	for(var prop in o) {
+rad.objhasprop=function(o,prop){
+	//for(var prop in o) {
     		if (Object.prototype.hasOwnProperty.call(o, prop)) {
       			return true;
     		}
-  	}
+  	//}
   	return false;
 }
 rad.objfindprop=function(o,prop){
