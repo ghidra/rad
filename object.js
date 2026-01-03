@@ -34,6 +34,16 @@ rad.objlength=function(o){
   }
   return count;
 }
+rad.objPropertiesToArray=function(o){
+  //return the number of unique properties
+  var count = [];
+  for (var prop in o){
+    if( Object.prototype.hasOwnProperty.call(o, prop) ){
+      count.push(prop);
+    }
+  }
+  return count;
+}
 rad.objclonefast=function(o){
   //http://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-clone-an-object
   //dones not clone functions.. this is just for simple data cases
