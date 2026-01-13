@@ -1,669 +1,1020 @@
 // !!!! requires mouse module and object
 
-rad.defaults.ui={
-	//"width_label":60,
-	"dtype":"px",
-	"style":{
-		"width":140,
-		"height":"auto",
-		"margin":0,
-		"fontSize":10,
-		"clear":"both",
-		"float":"none"
+rad.defaults.ui = {
+	"dtype": "px",
+	"style": {
+		"width": 140,
+		"height": "auto",
+		"margin": 0,
+		"fontSize": 10,
+		"clear": "both",
+		"float": "none"
 	},
-	"slider":{
-		"settings":{
-			"clamp":false,
-			"upper":1,
-			"lower":-1,
-			"max_upper":10,
-			"max_lower":-10,
-			"int":false,
-			"update":false
-		},
-		"slider":{
-			"style":{
-				"float":"right"
-			}
-		},
-		"bg":{
-			"className":"slider_BG",
-			"style":{
-				"height":22,
-  				"backgroundColor":"#ccc",
-  				"float":"right"
-  			}
-		},
-		"fg":{
-			"className":"slider_FG",
-			"style":{
-				"height":20,
-	    			"margin":1,
-	    			"backgroundColor":"white",
-	    			"float":"left"
-			}
-		},
-		"in":{
-			"className":"slider_IN",
-			"type":"text",
-			"style":{
-				"width":40,
-				"float":"right",
-		    		"color":"black"
-	    		}
+	"label": {
+		"className": "rad_ui_label",
+		"style": {
+			"float": "left",
+			"width": 60
 		}
 	},
-	"dropdown":{
-		"style":{}
+	"dropdown": {
+		"style": {}
 	},
-	"textbox":{
-		"type":"text",
-		"style":{
-			"width":80,
-			"float":"right"
+	"textbox": {
+		"type": "text",
+		"style": {
+			"width": 80,
+			"float": "right"
 		}
 	},
-	"button":{
-		"style":{
-			"float":"right"
-		}
-	},
-	"dialogue":{
-		"window":{
-			"className":"rad_dialogue",
-			"style":{
-				"backgroundColor":"white",
-				"color":"black",
-				"clear":"both",
-				"margin":2,
-				"height":"100%",
-				"overflowY":"scroll"
+	"slider": {
+		"settings": {
+			"clamp": false,
+			"upper": 1,
+			"lower": -1,
+			"max_upper": 10,
+			"max_lower": -10,
+			"int": false,
+			"update": false
+		},
+		"slider": {
+			"style": {
+				"float": "right"
 			}
 		},
-		"close_button":{
-			"id":"close_button",
-			"style":{
-				"width":8,
-				"height":8,
-				"margin":1,
-				"outline":"1px solid black",
-				"float":"right",
-				"cursor":"hand"
+		"bg": {
+			"className": "slider_BG",
+			"style": {
+				"height": 22,
+				"backgroundColor": "#ccc",
+				"float": "right"
+			}
+		},
+		"fg": {
+			"className": "slider_FG",
+			"style": {
+				"height": 20,
+				"margin": 1,
+				"backgroundColor": "white",
+				"float": "left"
+			}
+		},
+		"in": {
+			"className": "slider_IN",
+			"type": "text",
+			"style": {
+				"width": 40,
+				"float": "right",
+				"color": "black"
 			}
 		}
 	},
-	"label":{
-		"className":"rad_ui_label",
-		"style":{
-			"float":"left",
-			"width":60
+	"button": {
+		"style": {
+			"float": "right"
+		}
+	},
+	"dialogue": {
+		"window": {
+			"className": "rad_dialogue",
+			"style": {
+				"backgroundColor": "white",
+				"color": "black",
+				"clear": "both",
+				"margin": 2,
+				"height": "100%",
+				"overflowY": "scroll"
+			}
+		},
+		"close_button": {
+			"id": "close_button",
+			"style": {
+				"width": 8,
+				"height": 8,
+				"margin": 1,
+				"outline": "1px solid black",
+				"float": "right",
+				"cursor": "hand"
+			}
+		}
+	},
+	"checkbox": {
+		"style": {
+			"display": "flex",
+			"alignItems": "center",
+			"gap": "3px"
+		},
+		"input": {
+			"style": {
+				"margin": 0,
+				"cursor": "pointer"
+			}
+		},
+		"label": {
+			"style": {
+				"cursor": "pointer",
+				"userSelect": "none"
+			}
+		}
+	},
+	"collapsible": {
+		"style": {
+			"position": "static",
+			"width": "100%",
+			"background": "#2a2a2a",
+			"border": "1px solid #444",
+			"padding": 0,
+			"borderRadius": "5px",
+			"margin": 0
+		},
+		"title": {
+			"style": {
+				"color": "white",
+				"background": "#222",
+				"margin": 0,
+				"fontSize": "14px",
+				"padding": "10px",
+				"borderRadius": "5px 5px 0 0",
+				"cursor": "pointer",
+				"userSelect": "none"
+			}
+		},
+		"content": {
+			"style": {
+				"padding": "10px",
+				"background": "#2a2a2a",
+				"borderRadius": "0 0 5px 5px"
+			}
+		}
+	},
+	"section": {
+		"style": {
+			"border": "1px solid #555",
+			"background": "#1a1a1a",
+			"padding": "8px",
+			"marginBottom": "10px",
+			"borderRadius": "3px"
+		},
+		"title": {
+			"style": {
+				"color": "#ccc",
+				"margin": "0 0 8px 0",
+				"fontSize": "12px"
+			}
+		},
+		"content": {
+			"style": {}
+		}
+	},
+	"list": {
+		"style": {
+			"overflowY": "auto",
+			"border": "1px solid #333",
+			"background": "#0a0a0a",
+			"padding": "5px"
+		},
+		"item": {
+			"style": {
+				"padding": "5px",
+				"margin": "2px 0",
+				"background": "#222",
+				"border": "1px solid #333",
+				"borderRadius": "3px",
+				"cursor": "pointer",
+				"color": "#ccc",
+				"fontSize": "11px"
+			}
+		},
+		"item_selected": {
+			"style": {
+				"background": "#3a3a3a",
+				"border": "1px solid #666"
+			}
+		},
+		"item_hover": {
+			"style": {
+				"background": "#3a3a3a"
+			}
+		},
+		"empty": {
+			"style": {
+				"color": "#666",
+				"fontStyle": "italic",
+				"textAlign": "center",
+				"padding": "10px"
+			}
+		}
+	},
+	"group": {
+		"style": {
+			"display": "flex",
+			"gap": "5px",
+			"flexWrap": "wrap",
+			"alignItems": "center",
+			"justifyContent": "flex-start"
 		}
 	}
 };
+
+// Namespace for all UI components
+rad.ui = {};
+
 //-----------base class
-rad.ui=function(){
-	return this;
-}
-rad.ui.prototype.init=function(d){
-
-	//make the container, the main element that will hold the children
-	var tmp = {
-		"id":d.id,
-		"style":rad.defaults.ui.style
-	};
-	this.container = new rad.element("DIV",tmp);
-
-	this.id = (d.id!=undefined)?d.id:"";
-	this.label = (d.label!=undefined)?d.label:"";//for easy data access, as ids are using these vars
-	this.value = (d.value!=undefined)?d.value:"0";
-	this.uitype = 'none';//the type of ui element this is, set automatically
-
-	//init the css style
-	this.container.appendstyle(rad.defaults.ui.style);
-	this.container.appendstyle(d.style);
-	this.container.setstyle();//set/apply the style yo the element
-	//this.style=(d.style!=undefined)?d.style:{};//passed in style to overwrite default values
-
-	//this.dtype=(d.dtype!=undefined)?d.dtype:rad.defaults.ui.dtype;////switch this to measure later
-
-	//this.width_label = (d.width_label!=undefined)?d.width_label:60;
-
-	//this.width = (d.width)?d.width:this.style.width;
-	//this.height = (d.width)?d.height:this.style.height;
-	//this.margin = (d.margin!=undefined)?d.margin:this.style.margin;
-	//this.fontsize = (d.fontsize)?d.fontsize:this.style.fontSize;
-
-	//this.element = document.createElement("DIV");
-	//this.element.id = this.id;
-
-	//this.setstyle(this.element,this.style);//set the style of the top level element
-
-	//now we can do the label element
-	this.label_container = new rad.element("DIV",rad.defaults.ui.label,"&nbsp;"+d.label);
-	this.label_container.appendstyle(d.style_label);
-	this.label_container.setstyle();
-
-	if(this.label_container.style.width>0){
-		this.container.element.appendChild(this.label_container.element);
-	}
-}
-
-
-rad.ui.prototype.getelement=function(){
-	return this.container.element;
-}
-rad.ui.prototype.getvalue=function(){
-	var v;
-	switch(this.uitype){
-		case "dropdown":
-			v = document.getElementById("dd_"+this.id+"_"+this.label).value
-			break;
-		case "textbox":
-			v = document.getElementById("tb_"+this.id+"_"+this.label).value;
-			break;
-		case "slider":
-			v = this.value;
-			break;
-		case "button":
-			break;
-	}
-	return v;
-}
-rad.ui.prototype.getguielement=function(){
-	var v;
-	switch(this.uitype){
-		case "dropdown":
-			v = document.getElementById("dd_"+this.id+"_"+this.label);
-			break;
-		case "textbox":
-			v = document.getElementById("tb_"+this.id+"_"+this.label);
-			break;
-		case "slider":
-			break;
-		case "button":
-			break;
-	}
-	return v;
-}
-
-//-----------dropdown
-rad.dropdown=function(d){
-	/*{
-		"label":"graph size",
-	    "id":"graphsize",
-	    "style":{//if the main container
-	      "clear":"none",
-	      "float":"left"
-	    },
-	    "label_style":{"width":0},
-	    "dropdown_style":{},
-	    "options":{
-	      0:"4x4",
-	      1:"8x8",
-	      2:"16x16",
-	      3:"32x32"
-	    },//or as an array as well
-	    "value": "3",
-		"callback":function(){}
-	}*/
-	rad.ui.prototype.init.call(this,d);
-	this.uitype="dropdown";
-
-	this.options = (d.options)?d.options:[];
-
-	//make the DROPDOWN ELEMENT
-	var tmp = rad.defaults.ui.dropdown;
-	tmp.id="dd_"+d.id+"_"+d.label;
-	var dd = new rad.element("SELECT",tmp);
-	dd.appendstyle({"width":this.container.style.width-this.label_container.style.width});//add in the width minus the label
-	dd.appendstyle(d.style_dropdown);//we might be overwritting the above width calc, so di it first
-	dd.setstyle();
-
-	//the function
-	var _this = this;
-
-	if(rad.objhasfunction(d,"callback")){
-		dd.element.onchange=function(e){d.callback(_this)};////was _this
-	}
-
-	//POPULATE THE DROPDOWN ELEMENT
-	for (var option in d.options){
-		var opt = document.createElement("OPTION");
-		var opt_string = (Array.isArray(d.options))?d.options[option]:option;
-		//var opt_string = (typeof d.options === 'object')?option:d.options[option];
-		opt.value = opt_string;
-		if(opt_string===d.value){
-			opt.selected = true;
-		}
-		opt.innerHTML = d.options[option];
-		dd.element.appendChild(opt);
-	}
-	this.container.element.appendChild(dd.element);
-	
-	return this;
-
-}
-rad.dropdown.prototype=new rad.ui();
-rad.dropdown.prototype.constructor=rad.ui;
-
-
-//-----------textbox
-rad.textbox=function(d){
-	/*{
-		 "id":"numberofframe",
-	    "label":"frames",
-	    "value": "1",
-	    "style":{
-	      "clear":"none",
-	      "float":"left",
-	      "width":40
-	    },
-	    "style_textbox":{
-	      "width":40
-	    },
-	    "style_label":{
-	      "width":0
-	    },
-		"callback":function(){}
-	}*/
-	rad.ui.prototype.init.call(this,d);
-	this.uitype="textbox";
-	
-	var tmp = rad.defaults.ui.textbox;
-	tmp.id="tb_"+d.id+"_"+d.label;
-	tmp.value=this.value;
-	if(rad.objhasprop(d,"name")){tmp.name = d.name;}
-
-	var tb = new rad.element("INPUT",tmp);
-	tb.appendstyle(d.style_textbox);
-	tb.setstyle();
-	/*var s = document.createElement("INPUT");
-	s.type = "text";
-	s.value=this.value;*/
-
-	
-	/*this.style_textbox = rad.objclonefast(rad.defaults.ui.textbox.style);
-	if(d.style_textbox!=undefined){
-		this.appendstyle(this.style_textbox, d.style_textbox);
-	}
-	this.setstyle(s,this.style_textbox);
-
-	s.id = "tb_"+this.id+"_"+this.label;*/
-	var _this = this;
-	if(rad.objhasfunction(d,"callback")){
-		tb.element.onchange=function(e){d.callback(_this)};
-	}
-
-	//if(this.width_label>0)this.element.appendChild(s_label);
-	this.container.element.appendChild(tb.element);
-
-	return this;
-}
-rad.textbox.prototype=new rad.ui();
-rad.textbox.prototype.constructor=rad.ui;
-
-
-//-----------slider
-rad.slider=function(d){
-	rad.ui.prototype.init.call(this,d);
-	this.uitype="slider";
-
-	this.keep=false;//what is this shit?
-	//this.width_in = (d.width_input)?d.width_input:40;//with of the input box
-	
-	//get width    this.container.style.width
-
-	this.callback=d.callback;
-
-	//lets store any settings that are passed in for use
-	this.settings=rad.defaults.ui.slider.settings;
-	this.set_settings(d.settings);//pass on the settings
-
-	//this.element = document.createElement("DIV");
-	//var s_label = document.createElement("DIV");
-	this.con = new rad.element("DIV",rad.defaults.ui.slider.slider);//document.createElement("DIV");
-	this.bg = new rad.element("DIV",rad.defaults.ui.slider.bg);//document.createElement("DIV");
-	this.fg = new rad.element("DIV",rad.defaults.ui.slider.fg);//document.createElement("DIV");
-
-	var tmp = rad.defaults.ui.slider.in;
-
-	tmp.value=(this.settings.int)?Math.round(this.value):this.value;
-	tmp.id="stb_"+this.id+"_"+this.label;
-	this.in = new rad.element("INPUT",tmp);//document.createElement("INPUT");
-
-	if(d.slider!=undefined)
-	{
-		if(d.slider.slider!=undefined)
-		{
-			this.con.appendstyle(d.slider.slider.stlye);
-			this.in.appendstyle(d.slider.in.stlye);
-		}
-	}
-
-	this.width_max = this.container.style.width-this.in.style.width-(this.container.style.margin*3)-2;
-
-	if(d.slider!=undefined)
-	{
-		if(d.slider.bg!=undefined)
-		{
-			this.bg.appendstyle(d.slider.bg.stlye);
-		}
-	}
-	var tmpbgst={
-		"width":this.width_max,//need to maybe add the measure or dtype eventually
-		"marginTop":this.container.style.margin,
-		"marginBottom":this.container.style.margin
-	}
-	this.bg.appendstyle(tmpbgst);
-
-	if(d.slider!=undefined)
-	{
-		if(d.slider.fg!=undefined)
-		{
-			this.fg.appendstyle(d.slider.fg.stlye);
-		}
-	}
-	//set it to the desired initial width
-	var fgwidth;
-	if(this.settings.clamped){
-		fgwidth=rad.remap(this.value,this.settings.lower,this.settings.upper,0,this.width_max);
-	}else{
-		fgwidth=this.width_max/2;
-	}
-	tmpfgst={
-		"width":fgwidth,//need to maybe add the measure or dtype eventually
-		"maxWidth": this.width_max
-	}
-	this.fg.appendstyle(tmpfgst);
-	
-
-	this.con.setstyle();//con is only an object for the possibilty in the future that might be useeful
-	this.bg.setstyle();
-	this.fg.setstyle();
-	this.in.setstyle();
-
-	//this.element.style.clear="both";
-
-	/*if(this.width_label){
-		s_label.className="slider_label_ui";
-		s_label.innerHTML = "&nbsp;"+this.label;
-		s_label.style.maxWidth = this.width_label+this.dtype;
-		s_label.style.margin = this.margin+"px";
-		s_label.style.fontSize=(d.fontsize)?d.fontsize:10;
-	}*/
-
-	//s_con.style.float="right";
-
-/*	this.bg.className="slider_BG";
-	this.fg.className="slider_FG";
-	this.input.className="slider_IN";
-	this.input.style.width = this.width_in-2;
-	this.input.style.float = "right";
-	this.input.type="text";
-	this.input.value=this.value;
-
-	this.bg.style.width=(this.width-this.width_in-(this.margin*2))+this.dtype;
-	this.bg.style.marginTop=this.margin+this.dtype;
-	this.bg.style.marginRight=this.margin+this.dtype;
-
-	this.fg.style.width=(Math.round(this.width_max/2))+this.dtype;//for debug
-	this.fg.style.maxWidth = this.width_max+this.dtype
-	//dd.id = "dd_node_"+id+"_"+parm;
-*/
-	if(rad.objhasfunction(d,"callback")){
+rad.ui.base = class {
+	constructor(d) {
+		// Common property setup - NO DOM creation here
+		this.id = (d.id != undefined) ? d.id : "";
+		this.label = (d.label != undefined) ? d.label : "";
+		this.value = (d.value != undefined) ? d.value : "0";
+		this.uitype = 'none';
 		this.callback = d.callback;
 	}
 
-	this.bg.element.appendChild(this.fg.element);
-	this.con.element.appendChild(this.bg.element);
-	this.container.element.appendChild(this.in.element);
-	this.container.element.appendChild(this.con.element);
-
-	var _this = this;
-	this.bg.element.onmousedown=function(e){_this.mousedown(e)};
-	this.in.element.onchange=function(e){_this.input_changed(e)};
-
-	return this;
-}
-
-rad.slider.prototype=new rad.ui();
-rad.slider.prototype.constructor=rad.ui
-
-rad.slider.prototype.set_settings=function(d){
-	if(d!=undefined){
-		for (var s in d){
-			this.settings[s]=d[s];
-		}
-	}
-}
-
-rad.slider.prototype.mousedown=function(e){
-	if(!this.keep){
-		this.value = this.in.element.value;
-		this.keep=true;
-	}
-	this.update(e);
-	var _this = this;
-	this.tmp_updater = function(e){_this.update(e)};//js.closure(this,this.update);
-	this.tmp_release = function(e){_this.release(e)};//js.closure(this,this.release);
-	rad.dragevent(this.tmp_updater,this.tmp_release);
-}
-rad.slider.prototype.input_changed=function(e){
-	//I NEED TO MAKE IT SO THAT IT CLAMPS AT MAX_UPPER AND LOWER, and update values
-	var new_value = parseFloat(this.in.element.value);
-	var rval;
-	if ( isNaN(new_value) ){
-		this.in.element.value=this.value;//rest it back
-	}else{
-		if(this.settings.clamped){
-			//we are clamped, update the values propperly
-			if(new_value>this.settings.max_upper){//we put in a higher value than the max clamped
-				new_value=this.settings.max_upper;
-				this.settings.upper=this.settings.max_upper;
+	// Utility to apply styles from a defaults key + overrides to an element
+	applystyle(element, defaultsKey, overrides) {
+		var defaults = rad.defaults.ui[defaultsKey];
+		if (defaults && defaults.style) {
+			for (var prop in defaults.style) {
+				element.style[prop] = defaults.style[prop];
 			}
-			if(new_value<this.settings.max_lower){//we put in a higher value than the max clamped
-				new_value=this.settings.max_lower;
-				this.settings.lower=this.settings.max_lower;
+		}
+		if (overrides) {
+			for (var prop in overrides) {
+				element.style[prop] = overrides[prop];
 			}
-			rval=(this.settings.int)?Math.round(new_value):new_value
-			this.fg.element.style.width=rad.remap(rval,this.settings.lower,this.settings.upper,0,this.width_max);
-		}else{
-			//we are not clamped, just reset the slider to center
-			var bounds = this.bounds(new_value);
-			rval=(this.settings.int)?Math.round(new_value):new_value
-			this.fg.element.style.width=rad.remap(rval,this.settings.lower,this.settings.upper,0,this.width_max/2);
-			//this.fg.element.style.width = this.width_max/2;
 		}
-		//now set the nodes value
-		this.value = rval;
-		if(this.settings.int){
-			this.in.element.value = rval;
+	}
+
+	// Apply styles from a nested defaults path (e.g., "collapsible.title")
+	applystylepath(element, path, overrides) {
+		var parts = path.split(".");
+		var defaults = rad.defaults.ui;
+		for (var i = 0; i < parts.length; i++) {
+			if (defaults[parts[i]]) {
+				defaults = defaults[parts[i]];
+			} else {
+				defaults = null;
+				break;
+			}
 		}
-		if (typeof this.callback === "function"){
-			this.callback(this);
+		if (defaults && defaults.style) {
+			for (var prop in defaults.style) {
+				element.style[prop] = defaults.style[prop];
+			}
 		}
-		//draft.scripts[draft.activescript].nodes[this.id].class.inputs_values[this.parm]=this.val;
+		if (overrides) {
+			for (var prop in overrides) {
+				element.style[prop] = overrides[prop];
+			}
+		}
+	}
+
+	// Common interface - subclasses should set this.container
+	getelement() {
+		return this.container;
+	}
+
+	getvalue() {
+		return this.value;
+	}
+
+	getguielement() {
+		return null;
 	}
 }
-rad.slider.prototype.update=function(e){
-	var c = rad.mouseposition(e);
-	var p = rad.domposition(this.bg.element);
 
-	var mouse_offset = c.x-p.x;
+//-----------dropdown
+rad.ui.dropdown = class extends rad.ui.base {
+	constructor(d) {
+		super(d);
+		this.uitype = "dropdown";
+		this.options = (d.options) ? d.options : [];
 
-	var new_position = rad.clamp(mouse_offset,1,this.width_max);//i need to know the width to go to
-	var new_val;
-	if(this.settings.clamped){
-		new_val = rad.remap(new_position,1,this.width_max,this.settings.lower,this.settings.upper);
-	}else{
-		var bounds = this.bounds(this.value);
-		new_val = rad.remap(new_position,1,this.width_max,bounds.min,bounds.max);
+		// Create container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystyle(this.container, "style", d.style);
+
+		// Create label if width > 0
+		var labelStyle = rad.defaults.ui.label.style || {};
+		var labelWidth = (d.style_label && d.style_label.width !== undefined) ? d.style_label.width : labelStyle.width;
+		if (labelWidth > 0) {
+			this.label_container = document.createElement("DIV");
+			this.label_container.innerHTML = "&nbsp;" + this.label;
+			this.applystylepath(this.label_container, "label", d.style_label);
+			this.container.appendChild(this.label_container);
+		}
+
+		// Create dropdown element
+		this.dropdown = document.createElement("SELECT");
+		this.dropdown.id = "dd_" + this.id + "_" + this.label;
+		var containerWidth = d.style && d.style.width ? d.style.width : rad.defaults.ui.style.width;
+		var dropdownWidth = containerWidth - (labelWidth || 0);
+		this.applystyle(this.dropdown, "dropdown", { width: dropdownWidth + "px" });
+		if (d.style_dropdown) {
+			for (var prop in d.style_dropdown) {
+				this.dropdown.style[prop] = d.style_dropdown[prop];
+			}
+		}
+
+		// Callback
+		var _this = this;
+		if (typeof d.callback === "function") {
+			this.dropdown.onchange = function(e) { d.callback(_this); };
+		}
+
+		// Populate options
+		for (var option in d.options) {
+			var opt = document.createElement("OPTION");
+			var opt_string = (Array.isArray(d.options)) ? d.options[option] : option;
+			opt.value = opt_string;
+			if (opt_string === d.value) {
+				opt.selected = true;
+			}
+			opt.innerHTML = d.options[option];
+			this.dropdown.appendChild(opt);
+		}
+
+		this.container.appendChild(this.dropdown);
 	}
-	//console.log(bounds.min+":"+bounds.max);
-	this.fg.element.style.width = new_position;
-	
-	var rval = (this.settings.int)?Math.round(new_val):new_val.toFixed(2);
-	this.in.element.value = rval;
 
-	//do the callback if we are set to
-	if (typeof this.callback === "function" && this.settings.update){
-		if(this.settings.int){
-			if(rval!=this.value){//do the call back only when the value has changed
+	getelement() {
+		return this.container;
+	}
+
+	getvalue() {
+		return this.dropdown.value;
+	}
+
+	getguielement() {
+		return this.dropdown;
+	}
+}
+
+//-----------textbox
+rad.ui.textbox = class extends rad.ui.base {
+	constructor(d) {
+		super(d);
+		this.uitype = "textbox";
+
+		// Create container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystyle(this.container, "style", d.style);
+
+		// Create label if width > 0
+		var labelStyle = rad.defaults.ui.label.style || {};
+		var labelWidth = (d.style_label && d.style_label.width !== undefined) ? d.style_label.width : labelStyle.width;
+		if (labelWidth > 0) {
+			this.label_container = document.createElement("DIV");
+			this.label_container.innerHTML = "&nbsp;" + this.label;
+			this.applystylepath(this.label_container, "label", d.style_label);
+			this.container.appendChild(this.label_container);
+		}
+
+		// Create textbox element
+		this.textbox = document.createElement("INPUT");
+		this.textbox.type = "text";
+		this.textbox.id = "tb_" + this.id + "_" + this.label;
+		this.textbox.value = this.value;
+		if (d.name) this.textbox.name = d.name;
+		this.applystyle(this.textbox, "textbox", d.style_textbox);
+
+		// Callback
+		var _this = this;
+		if (typeof d.callback === "function") {
+			this.textbox.onchange = function(e) { d.callback(_this); };
+		}
+
+		this.container.appendChild(this.textbox);
+	}
+
+	getelement() {
+		return this.container;
+	}
+
+	getvalue() {
+		return this.textbox.value;
+	}
+
+	getguielement() {
+		return this.textbox;
+	}
+}
+
+//-----------slider
+rad.ui.slider = class extends rad.ui.base {
+	constructor(d) {
+		super(d);
+		this.uitype = "slider";
+		this.keep = false;
+
+		// Settings
+		this.settings = Object.assign({}, rad.defaults.ui.slider.settings);
+		if (d.settings) {
+			for (var s in d.settings) {
+				this.settings[s] = d.settings[s];
+			}
+		}
+
+		// Create container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystyle(this.container, "style", d.style);
+		var containerWidth = this.container.style.width ? parseInt(this.container.style.width) : rad.defaults.ui.style.width;
+		var containerMargin = this.container.style.margin ? parseInt(this.container.style.margin) : rad.defaults.ui.style.margin;
+
+		// Create label if width > 0
+		var labelStyle = rad.defaults.ui.label.style || {};
+		var labelWidth = (d.style_label && d.style_label.width !== undefined) ? d.style_label.width : labelStyle.width;
+		if (labelWidth > 0) {
+			this.label_container = document.createElement("DIV");
+			this.label_container.innerHTML = "&nbsp;" + this.label;
+			this.applystylepath(this.label_container, "label", d.style_label);
+			this.container.appendChild(this.label_container);
+		}
+
+		// Create slider elements
+		this.con = document.createElement("DIV");
+		this.applystylepath(this.con, "slider.slider", d.slider && d.slider.slider ? d.slider.slider.style : null);
+
+		this.bg = document.createElement("DIV");
+		this.bg.className = "slider_BG";
+		this.applystylepath(this.bg, "slider.bg", d.slider && d.slider.bg ? d.slider.bg.style : null);
+
+		this.fg = document.createElement("DIV");
+		this.fg.className = "slider_FG";
+		this.applystylepath(this.fg, "slider.fg", d.slider && d.slider.fg ? d.slider.fg.style : null);
+
+		this.in = document.createElement("INPUT");
+		this.in.type = "text";
+		this.in.className = "slider_IN";
+		this.in.id = "stb_" + this.id + "_" + this.label;
+		this.in.value = (this.settings.int) ? Math.round(this.value) : this.value;
+		this.applystylepath(this.in, "slider.in", d.slider && d.slider.in ? d.slider.in.style : null);
+
+		var inputWidth = this.in.style.width ? parseInt(this.in.style.width) : rad.defaults.ui.slider.in.style.width;
+		this.width_max = containerWidth - inputWidth - (containerMargin * 3) - 2;
+
+		this.bg.style.width = this.width_max + "px";
+		this.bg.style.marginTop = containerMargin + "px";
+		this.bg.style.marginBottom = containerMargin + "px";
+
+		var fgwidth;
+		if (this.settings.clamped) {
+			fgwidth = rad.remap(this.value, this.settings.lower, this.settings.upper, 0, this.width_max);
+		} else {
+			fgwidth = this.width_max / 2;
+		}
+		this.fg.style.width = fgwidth + "px";
+		this.fg.style.maxWidth = this.width_max + "px";
+
+		// Callback
+		if (typeof d.callback === "function") {
+			this.callback = d.callback;
+		}
+
+		// Assemble
+		this.bg.appendChild(this.fg);
+		this.con.appendChild(this.bg);
+		this.container.appendChild(this.in);
+		this.container.appendChild(this.con);
+
+		// Events
+		var _this = this;
+		this.bg.onmousedown = function(e) { _this.mousedown(e); };
+		this.in.onchange = function(e) { _this.input_changed(e); };
+	}
+
+	getelement() {
+		return this.container;
+	}
+
+	getvalue() {
+		return this.value;
+	}
+
+	set_settings(d) {
+		if (d != undefined) {
+			for (var s in d) {
+				this.settings[s] = d[s];
+			}
+		}
+	}
+
+	mousedown(e) {
+		if (!this.keep) {
+			this.value = this.in.value;
+			this.keep = true;
+		}
+		this.update(e);
+		var _this = this;
+		this.tmp_updater = function(e) { _this.update(e); };
+		this.tmp_release = function(e) { _this.release(e); };
+		rad.dragevent(this.tmp_updater, this.tmp_release);
+	}
+
+	input_changed(e) {
+		var new_value = parseFloat(this.in.value);
+		var rval;
+		if (isNaN(new_value)) {
+			this.in.value = this.value;
+		} else {
+			if (this.settings.clamped) {
+				if (new_value > this.settings.max_upper) {
+					new_value = this.settings.max_upper;
+					this.settings.upper = this.settings.max_upper;
+				}
+				if (new_value < this.settings.max_lower) {
+					new_value = this.settings.max_lower;
+					this.settings.lower = this.settings.max_lower;
+				}
+				rval = (this.settings.int) ? Math.round(new_value) : new_value;
+				this.fg.style.width = rad.remap(rval, this.settings.lower, this.settings.upper, 0, this.width_max) + "px";
+			} else {
+				var bounds = this.bounds(new_value);
+				rval = (this.settings.int) ? Math.round(new_value) : new_value;
+				this.fg.style.width = rad.remap(rval, this.settings.lower, this.settings.upper, 0, this.width_max / 2) + "px";
+			}
+			this.value = rval;
+			if (this.settings.int) {
+				this.in.value = rval;
+			}
+			if (typeof this.callback === "function") {
 				this.callback(this);
 			}
-		}else{
+		}
+	}
+
+	update(e) {
+		var c = rad.mouseposition(e);
+		var p = rad.domposition(this.bg);
+
+		var mouse_offset = c.x - p.x;
+		var new_position = rad.clamp(mouse_offset, 1, this.width_max);
+		var new_val;
+		if (this.settings.clamped) {
+			new_val = rad.remap(new_position, 1, this.width_max, this.settings.lower, this.settings.upper);
+		} else {
+			var bounds = this.bounds(this.value);
+			new_val = rad.remap(new_position, 1, this.width_max, bounds.min, bounds.max);
+		}
+		this.fg.style.width = new_position + "px";
+
+		var rval = (this.settings.int) ? Math.round(new_val) : new_val.toFixed(2);
+		this.in.value = rval;
+
+		if (typeof this.callback === "function" && this.settings.update) {
+			if (this.settings.int) {
+				if (rval != this.value) {
+					this.callback(this);
+				}
+			} else {
+				this.callback(this);
+			}
+			this.value = rval;
+		}
+	}
+
+	refresh() {
+		var new_position = rad.remap(this.value, this.settings.lower, this.settings.upper, 0, this.width_max);
+		this.fg.style.width = new_position + "px";
+		this.in.value = this.value;
+	}
+
+	release(e) {
+		rad.removedragevent(this.tmp_updater, this.tmp_release);
+
+		var rval = parseFloat(document.getElementById("stb_" + this.id + "_" + this.label).value);
+		this.value = (this.settings.int) ? Math.round(rval) : rval;
+		if (this.settings.int) {
+			this.fg.style.width = rad.remap(this.value, this.settings.lower, this.settings.upper, 0, this.width_max) + "px";
+		}
+		if (typeof this.callback === "function") {
 			this.callback(this);
 		}
-		this.value=rval;
+	}
+
+	bounds(val) {
+		val = parseFloat(val);
+		var span = (val == 0) ? 10 : val;
+		var v = Math.abs(span);
+		return { min: val - v, max: val + v };
+	}
+
+	set_to_minimum() {
+		this.value = this.settings.lower;
+		this.refresh();
+	}
+
+	set_to_maximum() {
+		this.value = this.settings.upper;
+		this.refresh();
 	}
 }
-rad.slider.prototype.refresh=function(){
-	//updates without event, on value change from outside call
-	var new_position = rad.remap(this.value,this.settings.lower,this.settings.upper,0,this.width_max);
-
-	this.fg.element.style.width = new_position;
-	this.in.element.value=this.value;
-}
-rad.slider.prototype.release=function(e){
-	rad.removedragevent(this.tmp_updater,this.tmp_release);
-	//now i need to set the value on the node
-	//console.log(this.in)
-	
-	var rval =  parseFloat( document.getElementById("stb_"+this.id+"_"+this.label).value );
-	this.value =  (this.settings.int)?Math.round(rval):rval;
-	if(this.settings.int){
-		this.fg.element.style.width=rad.remap(this.value,this.settings.lower,this.settings.upper,0,this.width_max);
-	}
-	if (typeof this.callback === "function"){
-		this.callback(this);
-	}
-	//draft.scripts[draft.activescript].nodes[this.id].class.inputs_values[this.parm]=this.val; 
-}
-rad.slider.prototype.bounds=function(val){
-	val = parseFloat(val);	
-	var span = (val==0)? 10 : val;
-	var v = Math.abs(span);
-
-	return {min:val-v, max:val+v};
-}
-rad.slider.prototype.set_to_minimum=function(){
-	this.value=this.settings.lower;
-	this.refresh();
-}
-rad.slider.prototype.set_to_maximum=function(){
-	this.value=this.settings.upper;
-	this.refresh();
-}
-
 
 //-----------button
-rad.button=function(d){
-	//button needs to be updated to use the same method as the rest of the UI elements
-	/*{
-		"id":"",
-		"label":"",
-		"width":1,
-		"width_label":0,
-		"margin":0,
-		"fontsize":1,
-		"callback":function(){}
-	}*/
-	rad.ui.prototype.init.call(this,d);
-	this.uitype="button";
+rad.ui.button = class extends rad.ui.base {
+	constructor(d) {
+		super(d);
+		this.uitype = "button";
 
-	this.container.get_element().removeChild(this.container.get_element().childNodes[0]);//remove the label
-	//this.label_container.appendstyle({"width":0});
-	//this.label_container.setstyle();
+		// Create container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystyle(this.container, "style", d.style);
 
-	var tmp = rad.defaults.ui.button;
-	tmp.id="bu_"+d.id+"_"+d.label;
-	var bu = new rad.element("BUTTON",tmp,this.label);
-	bu.appendstyle(d.style_button);
-	bu.setstyle();
+		// Create button element (no label for buttons)
+		this.button = document.createElement("BUTTON");
+		this.button.id = "bu_" + this.id + "_" + this.label;
+		this.button.textContent = this.label;
+		this.applystyle(this.button, "button", d.style_button);
 
-	var _this = this;
-	bu.element.onclick=function(e){d.callback(_this)};
-	//bu.element.onclick=function(e){console.log("fack")};
+		// Callback
+		var _this = this;
+		if (typeof d.callback === "function") {
+			this.button.onclick = function(e) { d.callback(_this); };
+		}
 
-	//if(this.width_label>0)this.element.appendChild(bu_label);
-	this.container.element.appendChild(bu.element);
-
-	return this;
-}
-rad.button.prototype=new rad.ui();
-rad.button.prototype.constructor=rad.ui;
-
-///-----
-
-rad.dialogue=function(d,inner,show_close_button){
-	//this is gonna have to be used differently... as in the container is the auto margin etc
-	rad.ui.prototype.init.call(this,d);
-	this.uitype="dialogue";
-
-	show_close_button=show_close_button||1;
-
-	//this.container.get_element().removeChild(this.container.get_element().childNodes[0]);//remove the label
-	//this.label_container.appendstyle({"width":0});
-	//this.label_container.setstyle();
-
-	//lets make a close box in the top right
-	if(show_close_button>0){
-		var close = new rad.element("DIV",rad.defaults.ui.dialogue.close_button);
-		close.appendstyle(d.style_close_button);
-		close.setstyle();
-		var _cont = this.container;
-		close.get_element().onmousedown=function(e){
-			_cont.remove();
-		};
+		this.container.appendChild(this.button);
 	}
-	
 
-	//now make the wondow that holds the data we care about
-	var tmp = rad.defaults.ui.dialogue.window;
-	tmp.id=d.id;;
-	var dia = new rad.element("DIV",tmp);
-	dia.appendstyle(d.style_dialogue);
-	var dia_dimensions = {"width":this.container.style.width-4,"height":this.container.style.height-14};
-	dia.appendstyle(dia_dimensions);
-	dia.setstyle();
-	//i have to manually set the 0 values here, since I ignnore them in the elemment creation
-	//dia.element.style.top=0;
-	//dia.element.style.bottom=0;
-	//dia.element.style.left=0;
-	//dia.element.style.right=0;
+	getelement() {
+		return this.container;
+	}
 
-	var d = this.getposition();
-
-	this.container.element.style.position="absolute"
-	this.container.element.style.top=d.y;
-	this.container.element.style.left=d.x;
-
-	dia.element.innerHTML=inner;
-
-	var _this = this;
-	//bu.element.onclick=function(e){d.callback(_this)};
-	//bu.element.onclick=function(e){console.log("fack")};
-
-	//if(this.width_label>0)this.element.appendChild(bu_label);
-	if(show_close_button>0) this.container.element.appendChild( close.get_element() );
-	this.container.element.appendChild( dia.get_element() );
-
-	return this;
+	getguielement() {
+		return this.button;
+	}
 }
-rad.dialogue.prototype=new rad.ui();
-rad.dialogue.prototype.constructor=rad.ui;
 
-rad.dialogue.prototype.getposition=function(){
-	//this gets my position to place it based on the size for the container
-	var d = rad.bodysize();
-	var px = d.x/2.0;
-	var py = d.y/2.0;
- 	if(this.container.element.style.height!="auto"){
- 		px -= rad.parseint(this.container.element.style.width)/2.0;
- 	}
- 	if(this.container.element.style.height!="auto"){
- 		py -= rad.parseint(this.container.element.style.height)/2.0;
- 	}
+//-----------dialogue
+rad.ui.dialogue = class extends rad.ui.base {
+	constructor(d, inner, show_close_button) {
+		super(d);
+		this.uitype = "dialogue";
+		show_close_button = show_close_button || 1;
 
-	return rad.vector2(px,py);
+		// Create container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystyle(this.container, "style", d.style);
+		this.container.style.position = "absolute";
+
+		// Close button
+		if (show_close_button > 0) {
+			this.close = document.createElement("DIV");
+			this.applystylepath(this.close, "dialogue.close_button", d.style_close_button);
+			var _cont = this.container;
+			this.close.onmousedown = function(e) {
+				_cont.parentNode.removeChild(_cont);
+			};
+			this.container.appendChild(this.close);
+		}
+
+		// Dialogue window
+		this.window = document.createElement("DIV");
+		this.window.className = "rad_dialogue";
+		this.applystylepath(this.window, "dialogue.window", d.style_dialogue);
+		var containerWidth = d.style && d.style.width ? d.style.width : rad.defaults.ui.style.width;
+		var containerHeight = d.style && d.style.height ? d.style.height : rad.defaults.ui.style.height;
+		if (containerHeight !== "auto") {
+			this.window.style.width = (containerWidth - 4) + "px";
+			this.window.style.height = (containerHeight - 14) + "px";
+		}
+		this.window.innerHTML = inner;
+		this.container.appendChild(this.window);
+
+		// Position
+		var pos = this.getposition();
+		this.container.style.top = pos.y + "px";
+		this.container.style.left = pos.x + "px";
+	}
+
+	getelement() {
+		return this.container;
+	}
+
+	getposition() {
+		var d = rad.bodysize();
+		var px = d.x / 2.0;
+		var py = d.y / 2.0;
+		var w = parseInt(this.container.style.width) || rad.defaults.ui.style.width;
+		var h = parseInt(this.container.style.height) || 0;
+		px -= w / 2.0;
+		if (h > 0) py -= h / 2.0;
+		return { x: px, y: py };
+	}
+}
+
+//-----------checkbox
+rad.ui.checkbox = class extends rad.ui.base {
+	constructor(d) {
+		super(d);
+		this.uitype = "checkbox";
+		this.checked = (d.checked != undefined) ? d.checked : false;
+
+		// Create container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystyle(this.container, "checkbox", d.style);
+
+		// Create checkbox input
+		this.checkbox = document.createElement("INPUT");
+		this.checkbox.type = "checkbox";
+		this.checkbox.id = "cb_" + this.id + "_" + this.label;
+		this.checkbox.checked = this.checked;
+		this.applystylepath(this.checkbox, "checkbox.input", d.style_checkbox);
+
+		// Create label
+		this.label_element = document.createElement("LABEL");
+		this.label_element.textContent = this.label;
+		this.label_element.htmlFor = this.checkbox.id;
+		this.applystylepath(this.label_element, "checkbox.label", d.style_label);
+
+		// Callback
+		var _this = this;
+		this.checkbox.onchange = function(e) {
+			_this.checked = _this.checkbox.checked;
+			if (typeof _this.callback === "function") {
+				_this.callback(_this);
+			}
+		};
+
+		this.container.appendChild(this.checkbox);
+		this.container.appendChild(this.label_element);
+	}
+
+	getelement() {
+		return this.container;
+	}
+
+	getvalue() {
+		return this.checkbox.checked;
+	}
+
+	setvalue(checked) {
+		this.checked = checked;
+		this.checkbox.checked = checked;
+	}
+
+	getguielement() {
+		return this.checkbox;
+	}
+}
+
+//-----------collapsible
+rad.ui.collapsible = class extends rad.ui.base {
+	constructor(d) {
+		super(d);
+		this.uitype = "collapsible";
+		this.collapsed = (d.collapsed != undefined) ? d.collapsed : false;
+
+		// Create main container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystyle(this.container, "collapsible", d.style);
+
+		// Create title/header
+		this.title = document.createElement("DIV");
+		this.title.textContent = this.label;
+		this.applystylepath(this.title, "collapsible.title", d.style_title);
+
+		// Create content area
+		this.content = document.createElement("DIV");
+		this.applystylepath(this.content, "collapsible.content", d.style_content);
+		this.content.style.display = this.collapsed ? 'none' : 'block';
+
+		// Click handler
+		var _this = this;
+		this.title.onclick = function() {
+			_this.toggle();
+		};
+
+		this.container.appendChild(this.title);
+		this.container.appendChild(this.content);
+	}
+
+	getelement() {
+		return this.container;
+	}
+
+	getcontentelement() {
+		return this.content;
+	}
+
+	toggle() {
+		this.collapsed = !this.collapsed;
+		this.content.style.display = this.collapsed ? 'none' : 'block';
+		if (typeof this.callback === "function") {
+			this.callback(this, this.collapsed);
+		}
+	}
+
+	expand() {
+		if (this.collapsed) {
+			this.toggle();
+		}
+	}
+
+	collapse() {
+		if (!this.collapsed) {
+			this.toggle();
+		}
+	}
+
+	settitle(text) {
+		this.label = text;
+		this.title.textContent = text;
+	}
+}
+
+//-----------section
+rad.ui.section = class extends rad.ui.base {
+	constructor(d) {
+		super(d);
+		this.uitype = "section";
+
+		// Create main container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystyle(this.container, "section", d.style);
+
+		// Create title if provided
+		if (this.label) {
+			this.title = document.createElement("H4");
+			this.title.textContent = this.label;
+			this.applystylepath(this.title, "section.title", d.style_title);
+			this.container.appendChild(this.title);
+		}
+
+		// Create content area
+		this.content = document.createElement("DIV");
+		this.applystylepath(this.content, "section.content", d.style_content);
+		this.container.appendChild(this.content);
+	}
+
+	getelement() {
+		return this.container;
+	}
+
+	getcontentelement() {
+		return this.content;
+	}
+
+	settitle(text) {
+		this.label = text;
+		if (this.title) {
+			this.title.textContent = text;
+		}
+	}
+}
+
+//-----------list
+rad.ui.list = class extends rad.ui.base {
+	constructor(d) {
+		super(d);
+		this.uitype = "list";
+		this.items = (d.items != undefined) ? d.items : [];
+		this.selected = (d.selected != undefined) ? d.selected : null;
+		this.maxHeight = (d.maxHeight != undefined) ? d.maxHeight : 200;
+		this.emptyMessage = (d.emptyMessage != undefined) ? d.emptyMessage : "No items";
+
+		// Store custom style overrides
+		this.style_item = d.style_item || {};
+		this.style_item_selected = d.style_item_selected || {};
+		this.style_item_hover = d.style_item_hover || {};
+
+		// Create main container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystyle(this.container, "list", d.style);
+		this.container.style.maxHeight = this.maxHeight + "px";
+
+		// Render initial items
+		this.refresh();
+	}
+
+	getelement() {
+		return this.container;
+	}
+
+	getvalue() {
+		return this.selected;
+	}
+
+	getselected() {
+		return this.selected;
+	}
+
+	setitems(items) {
+		this.items = items;
+		this.selected = null;
+		this.refresh();
+	}
+
+	select(item) {
+		this.selected = item;
+		this.refresh();
+		if (typeof this.callback === "function") {
+			this.callback(this, this.selected);
+		}
+	}
+
+	refresh() {
+		this.container.innerHTML = '';
+
+		if (this.items.length === 0) {
+			var emptyDiv = document.createElement("DIV");
+			emptyDiv.textContent = this.emptyMessage;
+			this.applystylepath(emptyDiv, "list.empty");
+			this.container.appendChild(emptyDiv);
+			return;
+		}
+
+		var _this = this;
+		this.items.forEach(function(item, index) {
+			var itemDiv = document.createElement("DIV");
+			var isSelected = (_this.selected === item) ||
+				(_this.selected && item && _this.selected.value === item.value);
+
+			itemDiv.textContent = item.label || item.toString();
+
+			// Apply base item style
+			_this.applystylepath(itemDiv, "list.item", _this.style_item);
+
+			// Apply selected style
+			if (isSelected) {
+				_this.applystylepath(itemDiv, "list.item_selected", _this.style_item_selected);
+			}
+
+			// Hover effect
+			var defaultBg = itemDiv.style.background;
+			var hoverBg = rad.defaults.ui.list.item_hover.style.background || '#3a3a3a';
+			itemDiv.onmouseenter = function() {
+				if (!isSelected) {
+					itemDiv.style.background = hoverBg;
+				}
+			};
+			itemDiv.onmouseleave = function() {
+				if (!isSelected) {
+					itemDiv.style.background = defaultBg;
+				}
+			};
+
+			// Click handler
+			itemDiv.onclick = function() {
+				_this.select(item);
+			};
+
+			_this.container.appendChild(itemDiv);
+		});
+	}
+}
+
+//-----------group
+rad.ui.group = class extends rad.ui.base {
+	constructor(d) {
+		super(d);
+		this.uitype = "group";
+		this.direction = (d.direction != undefined) ? d.direction : "row";
+		this.gap = (d.gap != undefined) ? d.gap : 5;
+		this.wrap = (d.wrap != undefined) ? d.wrap : true;
+		this.align = (d.align != undefined) ? d.align : "center";
+		this.justify = (d.justify != undefined) ? d.justify : "flex-start";
+
+		// Create container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystyle(this.container, "group", d.style);
+
+		// Apply group-specific layout
+		this.container.style.flexDirection = this.direction;
+		this.container.style.gap = this.gap + "px";
+		this.container.style.flexWrap = this.wrap ? 'wrap' : 'nowrap';
+		this.container.style.alignItems = this.align;
+		this.container.style.justifyContent = this.justify;
+	}
+
+	getelement() {
+		return this.container;
+	}
+
+	getcontentelement() {
+		return this.container;
+	}
+
+	add(element) {
+		if (element.getelement && typeof element.getelement === "function") {
+			this.container.appendChild(element.getelement());
+		} else if (element.nodeType) {
+			this.container.appendChild(element);
+		}
+		return this;
+	}
+
+	clear() {
+		this.container.innerHTML = '';
+		return this;
+	}
 }
