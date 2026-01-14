@@ -1,7 +1,16 @@
 // !!!! requires mouse module and object
 
-rad.defaults.ui = {
+// Namespace for all UI components
+rad.ui = {};
+
+// Theme system - stores multiple named themes
+rad.ui.themes = {};
+
+// Default theme
+rad.ui.themes.default = {
 	"dtype": "px",
+
+	// Base container styles
 	"style": {
 		"width": 140,
 		"height": "auto",
@@ -10,6 +19,45 @@ rad.defaults.ui = {
 		"clear": "both",
 		"float": "none"
 	},
+
+	// Shared elements - reusable across components
+	"shared": {
+		"titlebar": {
+			"style": {
+				"color": "white",
+				"background": "#222",
+				"margin": 0,
+				"fontSize": "14px",
+				"padding": "10px",
+				"cursor": "pointer",
+				"userSelect": "none",
+				"display": "flex",
+				"alignItems": "center",
+				"justifyContent": "space-between"
+			},
+			"icon": {
+				"style": {
+					"fontSize": "10px",
+					"marginLeft": "8px",
+					"transition": "transform 0.2s"
+				}
+			}
+		},
+		"content": {
+			"style": {
+				"padding": "10px",
+				"background": "#2a2a2a"
+			}
+		},
+		"container": {
+			"style": {
+				"background": "#2a2a2a",
+				"border": "1px solid #444",
+				"borderRadius": "5px"
+			}
+		}
+	},
+
 	"label": {
 		"className": "rad_ui_label",
 		"style": {
@@ -117,32 +165,20 @@ rad.defaults.ui = {
 			}
 		}
 	},
+	"titlebar": {
+		"style": {
+			"borderRadius": "5px 5px 0 0"
+		}
+	},
 	"collapsible": {
 		"style": {
 			"position": "static",
 			"width": "100%",
-			"background": "#2a2a2a",
-			"border": "1px solid #444",
 			"padding": 0,
-			"borderRadius": "5px",
 			"margin": 0
-		},
-		"title": {
-			"style": {
-				"color": "white",
-				"background": "#222",
-				"margin": 0,
-				"fontSize": "14px",
-				"padding": "10px",
-				"borderRadius": "5px 5px 0 0",
-				"cursor": "pointer",
-				"userSelect": "none"
-			}
 		},
 		"content": {
 			"style": {
-				"padding": "10px",
-				"background": "#2a2a2a",
 				"borderRadius": "0 0 5px 5px"
 			}
 		}
@@ -159,7 +195,10 @@ rad.defaults.ui = {
 			"style": {
 				"color": "#ccc",
 				"margin": "0 0 8px 0",
-				"fontSize": "12px"
+				"fontSize": "12px",
+				"background": "transparent",
+				"padding": 0,
+				"cursor": "default"
 			}
 		},
 		"content": {
@@ -213,11 +252,94 @@ rad.defaults.ui = {
 			"alignItems": "center",
 			"justifyContent": "flex-start"
 		}
+	},
+	"textpanel": {
+		"style": {
+			"position": "absolute",
+			"background": "rgba(0, 0, 0, 0.85)",
+			"color": "#fff",
+			"padding": "8px 12px",
+			"borderRadius": "6px",
+			"borderWidth": "1px",
+			"borderStyle": "solid",
+			"borderColor": "#555",
+			"fontSize": "12px",
+			"fontFamily": "sans-serif",
+			"lineHeight": "1.4",
+			"boxSizing": "border-box",
+			"pointerEvents": "none",
+			"zIndex": "1000",
+			"whiteSpace": "pre-wrap",
+			"wordWrap": "break-word"
+		},
+		"defaults": {
+			"minWidth": 50,
+			"maxWidth": 300,
+			"maxHeight": 200,
+			"maxLength": 0,
+			"anchorX": 0.5,
+			"anchorY": 1.0,
+			"offsetX": 0,
+			"offsetY": -10
+		}
+	},
+	"vessel": {
+		"style": {
+			"position": "fixed",
+			"zIndex": "1000",
+			"display": "flex",
+			"flexDirection": "column",
+			"gap": "10px",
+			"pointerEvents": "none",
+			"boxSizing": "border-box"
+		},
+		"draghandle": {
+			"style": {
+				"background": "#222",
+				"padding": "6px 10px",
+				"cursor": "move",
+				"userSelect": "none",
+				"borderRadius": "5px 5px 0 0",
+				"fontSize": "12px",
+				"color": "#ccc",
+				"pointerEvents": "auto"
+			}
+		},
+		"defaults": {
+			"width": 300,
+			"zIndex": 1000
+		}
 	}
 };
 
-// Namespace for all UI components
-rad.ui = {};
+// Active theme pointer - defaults to default theme
+rad.ui.theme = rad.ui.themes.default;
+
+// Switch global theme by name or object
+rad.ui.settheme = function(themeNameOrObj) {
+	if (typeof themeNameOrObj === 'string') {
+		if (rad.ui.themes[themeNameOrObj]) {
+			rad.ui.theme = rad.ui.themes[themeNameOrObj];
+		} else {
+			console.warn('rad.ui: Theme "' + themeNameOrObj + '" not found');
+		}
+	} else if (typeof themeNameOrObj === 'object') {
+		rad.ui.theme = themeNameOrObj;
+	}
+};
+
+// Get a theme by name
+rad.ui.gettheme = function(name) {
+	return rad.ui.themes[name] || null;
+};
+
+// Register a new theme
+rad.ui.registertheme = function(name, themeObj) {
+	rad.ui.themes[name] = themeObj;
+};
+
+// Legacy compatibility - point rad.defaults.ui to active theme
+rad.defaults.ui = rad.ui.themes.default;
 
 //-----------base class
 rad.ui.base = class {
@@ -228,11 +350,28 @@ rad.ui.base = class {
 		this.value = (d.value != undefined) ? d.value : "0";
 		this.uitype = 'none';
 		this.callback = d.callback;
+
+		// Per-instance theme override - defaults to global theme
+		this.theme = d.theme || rad.ui.theme;
 	}
 
-	// Utility to apply styles from a defaults key + overrides to an element
+	// Get the active theme for this instance
+	gettheme() {
+		return this.theme;
+	}
+
+	// Set theme for this instance
+	settheme(themeNameOrObj) {
+		if (typeof themeNameOrObj === 'string') {
+			this.theme = rad.ui.themes[themeNameOrObj] || rad.ui.theme;
+		} else if (typeof themeNameOrObj === 'object') {
+			this.theme = themeNameOrObj;
+		}
+	}
+
+	// Utility to apply styles from a theme key + overrides to an element
 	applystyle(element, defaultsKey, overrides) {
-		var defaults = rad.defaults.ui[defaultsKey];
+		var defaults = this.theme[defaultsKey];
 		if (defaults && defaults.style) {
 			for (var prop in defaults.style) {
 				element.style[prop] = defaults.style[prop];
@@ -245,12 +384,51 @@ rad.ui.base = class {
 		}
 	}
 
-	// Apply styles from a nested defaults path (e.g., "collapsible.title")
+	// Apply styles from a nested theme path (e.g., "collapsible.content")
 	applystylepath(element, path, overrides) {
 		var parts = path.split(".");
-		var defaults = rad.defaults.ui;
+		var defaults = this.theme;
 		for (var i = 0; i < parts.length; i++) {
 			if (defaults[parts[i]]) {
+				defaults = defaults[parts[i]];
+			} else {
+				defaults = null;
+				break;
+			}
+		}
+		if (defaults && defaults.style) {
+			for (var prop in defaults.style) {
+				element.style[prop] = defaults.style[prop];
+			}
+		}
+		if (overrides) {
+			for (var prop in overrides) {
+				element.style[prop] = overrides[prop];
+			}
+		}
+	}
+
+	// Apply shared styles from theme.shared (e.g., "titlebar", "content")
+	applysharedstyle(element, sharedKey, overrides) {
+		var shared = this.theme.shared;
+		if (shared && shared[sharedKey] && shared[sharedKey].style) {
+			for (var prop in shared[sharedKey].style) {
+				element.style[prop] = shared[sharedKey].style[prop];
+			}
+		}
+		if (overrides) {
+			for (var prop in overrides) {
+				element.style[prop] = overrides[prop];
+			}
+		}
+	}
+
+	// Apply shared nested styles (e.g., "titlebar.icon")
+	applysharedstylepath(element, path, overrides) {
+		var parts = path.split(".");
+		var defaults = this.theme.shared;
+		for (var i = 0; i < parts.length; i++) {
+			if (defaults && defaults[parts[i]]) {
 				defaults = defaults[parts[i]];
 			} else {
 				defaults = null;
@@ -280,6 +458,91 @@ rad.ui.base = class {
 
 	getguielement() {
 		return null;
+	}
+}
+
+//-----------titlebar (reusable sub-component)
+rad.ui.titlebar = class extends rad.ui.base {
+	constructor(d) {
+		super(d);
+		this.uitype = "titlebar";
+		this.showIcon = (d.showIcon != undefined) ? d.showIcon : false;
+		this.iconCollapsed = (d.iconCollapsed != undefined) ? d.iconCollapsed : "\u25B6"; // right arrow
+		this.iconExpanded = (d.iconExpanded != undefined) ? d.iconExpanded : "\u25BC"; // down arrow
+		this.collapsed = (d.collapsed != undefined) ? d.collapsed : false;
+		this.clickable = (d.clickable != undefined) ? d.clickable : true;
+
+		// Create container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id ? this.id + "_titlebar" : "";
+
+		// Apply shared titlebar styles, then component-specific, then overrides
+		this.applysharedstyle(this.container, "titlebar");
+		if (d.componentKey) {
+			this.applystylepath(this.container, d.componentKey + ".title");
+		}
+		if (d.style) {
+			for (var prop in d.style) {
+				this.container.style[prop] = d.style[prop];
+			}
+		}
+
+		// Non-clickable titlebar adjustments
+		if (!this.clickable) {
+			this.container.style.cursor = "default";
+		}
+
+		// Create text element
+		this.textElement = document.createElement("SPAN");
+		this.textElement.textContent = this.label;
+		this.container.appendChild(this.textElement);
+
+		// Create icon element if needed
+		if (this.showIcon) {
+			this.iconElement = document.createElement("SPAN");
+			this.applysharedstylepath(this.iconElement, "titlebar.icon", d.style_icon);
+			this.updateIcon();
+			this.container.appendChild(this.iconElement);
+		}
+
+		// Click handler
+		if (this.clickable) {
+			var _this = this;
+			this.container.onclick = function(e) {
+				if (typeof _this.callback === "function") {
+					_this.callback(_this, e);
+				}
+			};
+		}
+	}
+
+	getelement() {
+		return this.container;
+	}
+
+	settitle(text) {
+		this.label = text;
+		this.textElement.textContent = text;
+	}
+
+	gettitle() {
+		return this.label;
+	}
+
+	setcollapsed(collapsed) {
+		this.collapsed = collapsed;
+		this.updateIcon();
+	}
+
+	updateIcon() {
+		if (this.iconElement) {
+			this.iconElement.textContent = this.collapsed ? this.iconCollapsed : this.iconExpanded;
+		}
+	}
+
+	setclickable(clickable) {
+		this.clickable = clickable;
+		this.container.style.cursor = clickable ? "pointer" : "default";
 	}
 }
 
@@ -770,28 +1033,34 @@ rad.ui.collapsible = class extends rad.ui.base {
 		this.uitype = "collapsible";
 		this.collapsed = (d.collapsed != undefined) ? d.collapsed : false;
 
-		// Create main container
+		// Create main container with shared container + collapsible styles
 		this.container = document.createElement("DIV");
 		this.container.id = this.id;
+		this.applysharedstyle(this.container, "container");
 		this.applystyle(this.container, "collapsible", d.style);
 
-		// Create title/header
-		this.title = document.createElement("DIV");
-		this.title.textContent = this.label;
-		this.applystylepath(this.title, "collapsible.title", d.style_title);
+		// Create titlebar sub-component
+		var _this = this;
+		this.titlebar = new rad.ui.titlebar({
+			id: this.id,
+			label: this.label,
+			theme: this.theme,
+			showIcon: true,
+			collapsed: this.collapsed,
+			componentKey: "titlebar",
+			style: d.style_title,
+			callback: function() {
+				_this.toggle();
+			}
+		});
 
-		// Create content area
+		// Create content area with shared content + collapsible content styles
 		this.content = document.createElement("DIV");
+		this.applysharedstyle(this.content, "content");
 		this.applystylepath(this.content, "collapsible.content", d.style_content);
 		this.content.style.display = this.collapsed ? 'none' : 'block';
 
-		// Click handler
-		var _this = this;
-		this.title.onclick = function() {
-			_this.toggle();
-		};
-
-		this.container.appendChild(this.title);
+		this.container.appendChild(this.titlebar.getelement());
 		this.container.appendChild(this.content);
 	}
 
@@ -806,6 +1075,7 @@ rad.ui.collapsible = class extends rad.ui.base {
 	toggle() {
 		this.collapsed = !this.collapsed;
 		this.content.style.display = this.collapsed ? 'none' : 'block';
+		this.titlebar.setcollapsed(this.collapsed);
 		if (typeof this.callback === "function") {
 			this.callback(this, this.collapsed);
 		}
@@ -825,7 +1095,7 @@ rad.ui.collapsible = class extends rad.ui.base {
 
 	settitle(text) {
 		this.label = text;
-		this.title.textContent = text;
+		this.titlebar.settitle(text);
 	}
 }
 
@@ -840,16 +1110,23 @@ rad.ui.section = class extends rad.ui.base {
 		this.container.id = this.id;
 		this.applystyle(this.container, "section", d.style);
 
-		// Create title if provided
+		// Create titlebar if label provided (non-clickable for sections)
 		if (this.label) {
-			this.title = document.createElement("H4");
-			this.title.textContent = this.label;
-			this.applystylepath(this.title, "section.title", d.style_title);
-			this.container.appendChild(this.title);
+			this.titlebar = new rad.ui.titlebar({
+				id: this.id,
+				label: this.label,
+				theme: this.theme,
+				showIcon: false,
+				clickable: false,
+				componentKey: "section",
+				style: d.style_title
+			});
+			this.container.appendChild(this.titlebar.getelement());
 		}
 
 		// Create content area
 		this.content = document.createElement("DIV");
+		this.applysharedstyle(this.content, "content");
 		this.applystylepath(this.content, "section.content", d.style_content);
 		this.container.appendChild(this.content);
 	}
@@ -864,8 +1141,8 @@ rad.ui.section = class extends rad.ui.base {
 
 	settitle(text) {
 		this.label = text;
-		if (this.title) {
-			this.title.textContent = text;
+		if (this.titlebar) {
+			this.titlebar.settitle(text);
 		}
 	}
 }
@@ -1016,5 +1293,550 @@ rad.ui.group = class extends rad.ui.base {
 	clear() {
 		this.container.innerHTML = '';
 		return this;
+	}
+}
+
+//-----------textpanel (absolutely positioned, auto-sizing text display)
+rad.ui.textpanel = class extends rad.ui.base {
+	constructor(d) {
+		super(d);
+		this.uitype = "textpanel";
+
+		// Get defaults from theme
+		var defaults = this.theme.textpanel.defaults || {};
+
+		// Sizing constraints
+		this.minWidth = (d.minWidth != undefined) ? d.minWidth : defaults.minWidth;
+		this.maxWidth = (d.maxWidth != undefined) ? d.maxWidth : defaults.maxWidth;
+		this.maxHeight = (d.maxHeight != undefined) ? d.maxHeight : defaults.maxHeight;
+		this.maxLength = (d.maxLength != undefined) ? d.maxLength : defaults.maxLength;
+
+		// Position and anchor
+		this.x = (d.x != undefined) ? d.x : 0;
+		this.y = (d.y != undefined) ? d.y : 0;
+		this.anchorX = (d.anchorX != undefined) ? d.anchorX : defaults.anchorX; // 0=left, 0.5=center, 1=right
+		this.anchorY = (d.anchorY != undefined) ? d.anchorY : defaults.anchorY; // 0=top, 0.5=center, 1=bottom
+		this.offsetX = (d.offsetX != undefined) ? d.offsetX : defaults.offsetX;
+		this.offsetY = (d.offsetY != undefined) ? d.offsetY : defaults.offsetY;
+
+		// Visibility
+		this.visible = (d.visible != undefined) ? d.visible : true;
+
+		// Text content
+		this.text = (d.text != undefined) ? d.text : "";
+
+		// Create container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystyle(this.container, "textpanel", d.style);
+
+		// Apply sizing constraints
+		this.container.style.minWidth = this.minWidth + "px";
+		this.container.style.maxWidth = this.maxWidth + "px";
+		this.container.style.maxHeight = this.maxHeight + "px";
+
+		// Set initial text
+		this.settext(this.text);
+
+		// Set initial position
+		this.setposition(this.x, this.y);
+
+		// Set initial visibility
+		if (!this.visible) {
+			this.hide();
+		}
+	}
+
+	getelement() {
+		return this.container;
+	}
+
+	gettext() {
+		return this.text;
+	}
+
+	settext(text) {
+		// Apply max length if set
+		if (this.maxLength > 0 && text.length > this.maxLength) {
+			text = text.substring(0, this.maxLength);
+		}
+		this.text = text;
+		this.container.textContent = text;
+
+		// Check if scrollbar is needed
+		this.updateoverflow();
+	}
+
+	appendtext(text) {
+		this.settext(this.text + text);
+	}
+
+	cleartext() {
+		this.settext("");
+	}
+
+	// Update overflow based on content height
+	updateoverflow() {
+		// Temporarily allow full height to measure
+		var prevMaxHeight = this.container.style.maxHeight;
+		this.container.style.overflow = "visible";
+		this.container.style.maxHeight = "none";
+
+		var contentHeight = this.container.scrollHeight;
+
+		// Restore constraints
+		this.container.style.maxHeight = prevMaxHeight;
+
+		if (contentHeight > this.maxHeight) {
+			this.container.style.overflow = "auto";
+			this.container.style.overflowX = "hidden";
+			this.container.style.pointerEvents = "auto"; // Enable pointer for scrolling
+		} else {
+			this.container.style.overflow = "visible";
+			this.container.style.pointerEvents = "none";
+		}
+	}
+
+	// Set position (will apply anchor offset)
+	setposition(x, y) {
+		this.x = x;
+		this.y = y;
+		this.updateposition();
+	}
+
+	// Update DOM position based on current x, y and anchor
+	updateposition() {
+		// Get element dimensions for anchor calculation
+		var width = this.container.offsetWidth || this.minWidth;
+		var height = this.container.offsetHeight || 0;
+
+		// Calculate final position with anchor and offset
+		var finalX = this.x - (width * this.anchorX) + this.offsetX;
+		var finalY = this.y - (height * this.anchorY) + this.offsetY;
+
+		this.container.style.left = finalX + "px";
+		this.container.style.top = finalY + "px";
+	}
+
+	// Set anchor point (0-1 for each axis)
+	setanchor(anchorX, anchorY) {
+		this.anchorX = anchorX;
+		this.anchorY = anchorY;
+		this.updateposition();
+	}
+
+	// Set offset from anchor
+	setoffset(offsetX, offsetY) {
+		this.offsetX = offsetX;
+		this.offsetY = offsetY;
+		this.updateposition();
+	}
+
+	// Show the panel
+	show() {
+		this.visible = true;
+		this.container.style.display = "block";
+		this.updateposition(); // Recalculate position when shown
+	}
+
+	// Hide the panel
+	hide() {
+		this.visible = false;
+		this.container.style.display = "none";
+	}
+
+	// Toggle visibility
+	toggle() {
+		if (this.visible) {
+			this.hide();
+		} else {
+			this.show();
+		}
+	}
+
+	isvisible() {
+		return this.visible;
+	}
+
+	// Set sizing constraints
+	setminwidth(width) {
+		this.minWidth = width;
+		this.container.style.minWidth = width + "px";
+		this.updateposition();
+	}
+
+	setmaxwidth(width) {
+		this.maxWidth = width;
+		this.container.style.maxWidth = width + "px";
+		this.updateposition();
+	}
+
+	setmaxheight(height) {
+		this.maxHeight = height;
+		this.container.style.maxHeight = height + "px";
+		this.updateoverflow();
+	}
+
+	setmaxlength(length) {
+		this.maxLength = length;
+		// Re-apply to current text if needed
+		if (this.maxLength > 0 && this.text.length > this.maxLength) {
+			this.settext(this.text);
+		}
+	}
+
+	// Style setters for common customizations
+	setbackground(color) {
+		this.container.style.background = color;
+	}
+
+	setcolor(color) {
+		this.container.style.color = color;
+	}
+
+	setborder(width, style, color) {
+		if (width != undefined) this.container.style.borderWidth = width + "px";
+		if (style != undefined) this.container.style.borderStyle = style;
+		if (color != undefined) this.container.style.borderColor = color;
+	}
+
+	setborderradius(radius) {
+		this.container.style.borderRadius = radius + "px";
+	}
+
+	setpadding(padding) {
+		this.container.style.padding = padding + "px";
+	}
+
+	setfontsize(size) {
+		this.container.style.fontSize = size + "px";
+	}
+
+	setfont(fontFamily) {
+		this.container.style.fontFamily = fontFamily;
+	}
+
+	setzindex(zIndex) {
+		this.container.style.zIndex = zIndex;
+	}
+
+	// Attach to a parent (usually document.body for absolute positioning)
+	attachto(parent) {
+		if (parent) {
+			parent.appendChild(this.container);
+		} else {
+			document.body.appendChild(this.container);
+		}
+		this.updateposition();
+	}
+
+	// Detach from parent
+	detach() {
+		if (this.container.parentNode) {
+			this.container.parentNode.removeChild(this.container);
+		}
+	}
+
+	// Get current dimensions
+	getsize() {
+		return {
+			width: this.container.offsetWidth,
+			height: this.container.offsetHeight
+		};
+	}
+
+	// Get current position
+	getposition() {
+		return {
+			x: this.x,
+			y: this.y
+		};
+	}
+}
+
+//-----------vessel (positioned, optionally draggable container)
+rad.ui.vessel = class extends rad.ui.base {
+	constructor(d) {
+		super(d);
+		this.uitype = "vessel";
+
+		// Get defaults from theme
+		var defaults = this.theme.vessel.defaults || {};
+
+		// Configuration
+		this.draggable = (d.draggable != undefined) ? d.draggable : false;
+		this.collapsible = (d.collapsible != undefined) ? d.collapsible : false;
+		this.collapsed = (d.collapsed != undefined) ? d.collapsed : false;
+		this.showHandle = (d.showHandle != undefined) ? d.showHandle : (this.draggable || this.collapsible || this.label);
+		this.width = (d.width != undefined) ? d.width : defaults.width;
+		this.zIndex = (d.zIndex != undefined) ? d.zIndex : defaults.zIndex;
+
+		// Position can be specified as {top, right, bottom, left} or {x, y}
+		this.position = d.position || { top: 10, right: 10 };
+
+		// Drag state
+		this.isDragging = false;
+		this.dragOffset = { x: 0, y: 0 };
+
+		// Create container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystyle(this.container, "vessel", d.style);
+		this.container.style.width = this.width + "px";
+		this.container.style.zIndex = this.zIndex;
+
+		// Apply position
+		this.applyposition(this.position);
+
+		// Create drag handle if needed
+		if (this.showHandle && this.label) {
+			this.dragHandle = document.createElement("DIV");
+			this.applystylepath(this.dragHandle, "vessel.draghandle", d.style_handle);
+			this.dragHandle.style.display = "flex";
+			this.dragHandle.style.alignItems = "center";
+			this.dragHandle.style.justifyContent = "space-between";
+
+			// Label text
+			this.labelElement = document.createElement("SPAN");
+			this.labelElement.textContent = this.label;
+			this.dragHandle.appendChild(this.labelElement);
+
+			// Collapse icon if collapsible
+			if (this.collapsible) {
+				this.collapseIcon = document.createElement("SPAN");
+				this.collapseIcon.style.cssText = `
+					font-size: 10px;
+					margin-left: 8px;
+					transition: transform 0.2s;
+				`;
+				this.updatecollapseicon();
+				this.dragHandle.appendChild(this.collapseIcon);
+			}
+
+			this.container.appendChild(this.dragHandle);
+
+			if (this.draggable) {
+				this.initdrag();
+			}
+
+			// Click to toggle collapse
+			if (this.collapsible) {
+				var _this = this;
+				this.dragHandle.onclick = function(e) {
+					// Only toggle if not dragging
+					if (!_this.isDragging && !_this._wasDragging) {
+						_this.toggle();
+					}
+					_this._wasDragging = false;
+				};
+			}
+		}
+
+		// Create content area
+		this.content = document.createElement("DIV");
+		this.content.style.cssText = `
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+		`;
+		if (this.collapsed) {
+			this.content.style.display = 'none';
+		}
+		this.container.appendChild(this.content);
+	}
+
+	updatecollapseicon() {
+		if (this.collapseIcon) {
+			this.collapseIcon.textContent = this.collapsed ? "\u25B6" : "\u25BC";
+		}
+	}
+
+	toggle() {
+		this.collapsed = !this.collapsed;
+		this.content.style.display = this.collapsed ? 'none' : 'flex';
+		this.updatecollapseicon();
+		if (typeof this.callback === "function") {
+			this.callback(this, this.collapsed);
+		}
+	}
+
+	expand() {
+		if (this.collapsed) {
+			this.toggle();
+		}
+	}
+
+	collapse() {
+		if (!this.collapsed) {
+			this.toggle();
+		}
+	}
+
+	getelement() {
+		return this.container;
+	}
+
+	getcontentelement() {
+		return this.content;
+	}
+
+	// Apply position from {top, right, bottom, left} or {x, y} format
+	applyposition(pos) {
+		// Clear any existing position properties
+		this.container.style.top = "";
+		this.container.style.right = "";
+		this.container.style.bottom = "";
+		this.container.style.left = "";
+
+		if (pos.x !== undefined || pos.y !== undefined) {
+			// x, y format - use left/top
+			if (pos.x !== undefined) this.container.style.left = pos.x + "px";
+			if (pos.y !== undefined) this.container.style.top = pos.y + "px";
+		} else {
+			// top/right/bottom/left format
+			if (pos.top !== undefined) this.container.style.top = pos.top + "px";
+			if (pos.right !== undefined) this.container.style.right = pos.right + "px";
+			if (pos.bottom !== undefined) this.container.style.bottom = pos.bottom + "px";
+			if (pos.left !== undefined) this.container.style.left = pos.left + "px";
+		}
+	}
+
+	setposition(pos) {
+		this.position = pos;
+		this.applyposition(pos);
+	}
+
+	initdrag() {
+		var _this = this;
+
+		this.dragHandle.onmousedown = function(e) {
+			e.preventDefault();
+			_this.startdrag(e);
+		};
+	}
+
+	startdrag(e) {
+		this.isDragging = true;
+		this._didMove = false;
+		this._startX = e.clientX;
+		this._startY = e.clientY;
+
+		// Get current position in pixels
+		var rect = this.container.getBoundingClientRect();
+		this.dragOffset.x = e.clientX - rect.left;
+		this.dragOffset.y = e.clientY - rect.top;
+
+		// Switch to x/y positioning for dragging
+		this.container.style.top = "";
+		this.container.style.right = "";
+		this.container.style.bottom = "";
+		this.container.style.left = rect.left + "px";
+		this.container.style.top = rect.top + "px";
+
+		var _this = this;
+		this._dragMove = function(e) { _this.drag(e); };
+		this._dragEnd = function(e) { _this.enddrag(e); };
+
+		document.addEventListener('mousemove', this._dragMove);
+		document.addEventListener('mouseup', this._dragEnd);
+	}
+
+	drag(e) {
+		if (!this.isDragging) return;
+
+		// Check if we've moved more than a few pixels (to distinguish from click)
+		var dx = Math.abs(e.clientX - this._startX);
+		var dy = Math.abs(e.clientY - this._startY);
+		if (dx > 3 || dy > 3) {
+			this._didMove = true;
+		}
+
+		var newX = e.clientX - this.dragOffset.x;
+		var newY = e.clientY - this.dragOffset.y;
+
+		// Clamp to viewport
+		var maxX = window.innerWidth - this.container.offsetWidth;
+		var maxY = window.innerHeight - this.container.offsetHeight;
+		newX = Math.max(0, Math.min(newX, maxX));
+		newY = Math.max(0, Math.min(newY, maxY));
+
+		this.container.style.left = newX + "px";
+		this.container.style.top = newY + "px";
+
+		this.position = { x: newX, y: newY };
+	}
+
+	enddrag(e) {
+		this.isDragging = false;
+		this._wasDragging = this._didMove;
+		document.removeEventListener('mousemove', this._dragMove);
+		document.removeEventListener('mouseup', this._dragEnd);
+	}
+
+	// Add a child element or rad.ui component
+	add(element) {
+		if (element.getelement && typeof element.getelement === "function") {
+			this.content.appendChild(element.getelement());
+		} else if (element.nodeType) {
+			this.content.appendChild(element);
+		}
+		return this;
+	}
+
+	// Clear all content
+	clear() {
+		this.content.innerHTML = '';
+		return this;
+	}
+
+	// Attach to parent (usually document.body)
+	attachto(parent) {
+		if (parent) {
+			parent.appendChild(this.container);
+		} else {
+			document.body.appendChild(this.container);
+		}
+		return this;
+	}
+
+	// Detach from parent
+	detach() {
+		if (this.container.parentNode) {
+			this.container.parentNode.removeChild(this.container);
+		}
+	}
+
+	// Show/hide
+	show() {
+		this.container.style.display = "flex";
+	}
+
+	hide() {
+		this.container.style.display = "none";
+	}
+
+	// Set width
+	setwidth(width) {
+		this.width = width;
+		this.container.style.width = width + "px";
+	}
+
+	// Set z-index
+	setzindex(zIndex) {
+		this.zIndex = zIndex;
+		this.container.style.zIndex = zIndex;
+	}
+
+	// Set draggable state
+	setdraggable(draggable) {
+		this.draggable = draggable;
+		if (this.dragHandle) {
+			this.dragHandle.style.cursor = draggable ? "move" : "default";
+			if (draggable && !this.dragHandle.onmousedown) {
+				this.initdrag();
+			} else if (!draggable) {
+				this.dragHandle.onmousedown = null;
+			}
+		}
 	}
 }
