@@ -119,7 +119,13 @@ rad.ui.themes.default = {
 	},
 	"button": {
 		"style": {
-			"float": "right"
+			"width": "100%",
+			"padding": "5px",
+			"background": "#4a4a4a",
+			"color": "white",
+			"border": "1px solid #555",
+			"borderRadius": "3px",
+			"cursor": "pointer"
 		}
 	},
 	"dialogue": {
@@ -1840,3 +1846,31 @@ rad.ui.vessel = class extends rad.ui.base {
 		}
 	}
 }
+
+// Apply theme styles to a DOM element from a theme key path
+// element: the DOM element to style
+// themeKey: dot-notation path into theme (e.g., "textbox", "shared.container", "slider.bg")
+// theme: optional theme object, defaults to rad.ui.theme
+rad.ui.applystyletohtml = function(element, themeKey, theme) {
+	if (!element) return;
+	theme = theme || rad.ui.theme;
+
+	// Navigate the theme object using dot notation
+	var parts = themeKey.split(".");
+	var styleObj = theme;
+	for (var i = 0; i < parts.length; i++) {
+		if (styleObj && styleObj[parts[i]]) {
+			styleObj = styleObj[parts[i]];
+		} else {
+			styleObj = null;
+			break;
+		}
+	}
+
+	// Apply the style object to the element
+	if (styleObj && styleObj.style) {
+		for (var prop in styleObj.style) {
+			element.style[prop] = styleObj.style[prop];
+		}
+	}
+};

@@ -42,6 +42,14 @@ rad.chainsaw=class{
 		//this.newSpriteBuffer("main",10,false);//make a main buffer.. i kind of want to remove this
 	}
 
+	resize(width, height){
+		this.width = width;
+		this.height = height;
+		this.canvas.width = width;
+		this.canvas.height = height;
+		this.gl.viewport(0, 0, width, height);
+	}
+
 	loadVertexShader(id,source) {
 	  	this.shaders[id]= new rad.chainsaw.shader(this.gl,id,source,"vertex");
 	}

@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>rad.ui Documentation</title>
+	<style>
+		* { box-sizing: border-box; }
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+			background: #1a1a1a;
+			color: #ccc;
+			margin: 0;
+			padding: 40px;
+			line-height: 1.6;
+			max-width: 1000px;
+		}
+		a { color: #6af; }
+		a:hover { color: #8cf; }
+		h1 {
+			color: #fff;
+			border-bottom: 1px solid #444;
+			padding-bottom: 10px;
+		}
+		h2 {
+			color: #fff;
+			margin-top: 40px;
+			border-bottom: 1px solid #333;
+			padding-bottom: 5px;
+		}
+		h3 {
+			color: #ddd;
+			margin-top: 25px;
+		}
+		h4 {
+			color: #aaa;
+			margin: 15px 0 5px 0;
+			font-size: 14px;
+		}
+		.back-link {
+			margin-bottom: 20px;
+			display: inline-block;
+		}
+		code {
+			background: #2a2a2a;
+			padding: 2px 6px;
+			border-radius: 3px;
+			font-family: "SF Mono", Monaco, "Courier New", monospace;
+			font-size: 13px;
+		}
+		pre {
+			background: #2a2a2a;
+			border: 1px solid #444;
+			border-radius: 5px;
+			padding: 15px;
+			overflow-x: auto;
+			font-family: "SF Mono", Monaco, "Courier New", monospace;
+			font-size: 13px;
+			line-height: 1.5;
+		}
+		pre code {
+			background: none;
+			padding: 0;
+		}
+		.component {
+			background: #222;
+			border: 1px solid #444;
+			border-radius: 5px;
+			padding: 20px;
+			margin: 20px 0;
+		}
+		.component h3 {
+			margin-top: 0;
+			color: #fff;
+		}
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 15px 0;
+			font-size: 14px;
+		}
+		th, td {
+			text-align: left;
+			padding: 8px 12px;
+			border: 1px solid #444;
+		}
+		th {
+			background: #2a2a2a;
+			color: #fff;
+		}
+		td { background: #222; }
+		.type { color: #f9a; }
+		.default { color: #9f9; }
+		.toc {
+			background: #222;
+			border: 1px solid #444;
+			border-radius: 5px;
+			padding: 20px;
+			margin: 20px 0;
+		}
+		.toc h4 {
+			margin-top: 0;
+			color: #fff;
+		}
+		.toc ul {
+			margin: 0;
+			padding-left: 20px;
+		}
+		.toc li { margin: 5px 0; }
+	</style>
+</head>
+<body>
+	<a href="index.html" class="back-link">&larr; Back to Index</a>
+
+	<h1>rad.ui</h1>
+
+	<p>The rad.ui module provides a themeable UI component system for building interfaces. All components inherit from a base class and support per-instance theming.</p>
+
+	<div class="toc">
+		<h4>Table of Contents</h4>
+		<ul>
+			<li><a href="#theme-system">Theme System</a></li>
+			<li><a href="#base-class">Base Class</a></li>
+			<li><a href="#components">Components</a>
+				<ul>
+					<li><a href="#textbox">textbox</a></li>
+					<li><a href="#button">button</a></li>
+					<li><a href="#slider">slider</a></li>
+					<li><a href="#dropdown">dropdown</a></li>
+					<li><a href="#checkbox">checkbox</a></li>
+					<li><a href="#collapsible">collapsible</a></li>
+					<li><a href="#section">section</a></li>
+					<li><a href="#list">list</a></li>
+					<li><a href="#group">group</a></li>
+					<li><a href="#titlebar">titlebar</a></li>
+					<li><a href="#dialogue">dialogue</a></li>
+					<li><a href="#textpanel">textpanel</a></li>
+					<li><a href="#vessel">vessel</a></li>
+				</ul>
+			</li>
+			<li><a href="#utility-functions">Utility Functions</a></li>
+		</ul>
+	</div>
+
+	<h2 id="theme-system">Theme System</h2>
+
+	<p>rad.ui uses a JSON-based theme system. Themes define styles for each component type and can be switched globally or per-instance.</p>
+
+	<h3>Global Theme</h3>
+	<pre><code>// Get the current global theme
+var theme = rad.ui.theme;
+
+// Switch global theme by name
+rad.ui.settheme('dark');
+
+// Switch to a custom theme object
+rad.ui.settheme(myThemeObject);
+
+// Register a new theme
+rad.ui.registertheme('custom', myThemeObject);
+
+// Get a theme by name
+var dark = rad.ui.gettheme('dark');</code></pre>
+
+	<h3>Theme Structure</h3>
+	<p>A theme is a nested object with style definitions for each component:</p>
+	<pre><code>rad.ui.themes.default = {
+    "dtype": "px",
+
+    // Base container styles
+    "style": {
+        "width": 140,
+        "height": "auto",
+        "margin": 0,
+        "fontSize": 10
+    },
+
+    // Shared styles (reusable across components)
+    "shared": {
+        "titlebar": {
+            "style": {
+                "color": "white",
+                "background": "#222",
+                "padding": "10px",
+                "cursor": "pointer"
+            }
+        },
+        "content": {
+            "style": {
+                "padding": "10px",
+                "background": "#2a2a2a"
+            }
+        },
+        "container": {
+            "style": {
+                "background": "#2a2a2a",
+                "border": "1px solid #444",
+                "borderRadius": "5px"
+            }
+        }
+    },
+
+    // Component-specific styles
+    "textbox": {
+        "type": "text",
+        "style": {
+            "width": 80,
+            "float": "right"
+        }
+    },
+
+    "button": {
+        "style": {
+            "float": "right"
+        }
+    }
+    // ... more components
+};</code></pre>
+
+	<h2 id="base-class">Base Class</h2>
+
+	<p><code>rad.ui.base</code> is the parent class for all UI components. It provides common functionality for theming and DOM management.</p>
+
+	<h3>Constructor Options (common to all components)</h3>
+	<table>
+		<tr>
+			<th>Option</th>
+			<th>Type</th>
+			<th>Description</th>
+		</tr>
+		<tr>
+			<td><code>id</code></td>
+			<td><span class="type">string</span></td>
+			<td>Element ID for the component</td>
+		</tr>
+		<tr>
+			<td><code>label</code></td>
+			<td><span class="type">string</span></td>
+			<td>Display label text</td>
+		</tr>
+		<tr>
+			<td><code>value</code></td>
+			<td><span class="type">any</span></td>
+			<td>Initial value</td>
+		</tr>
+		<tr>
+			<td><code>callback</code></td>
+			<td><span class="type">function</span></td>
+			<td>Called when value changes</td>
+		</tr>
+		<tr>
+			<td><code>theme</code></td>
+			<td><span class="type">object</span></td>
+			<td>Per-instance theme override</td>
+		</tr>
+	</table>
+
+	<h3>Base Methods</h3>
+	<table>
+		<tr>
+			<th>Method</th>
+			<th>Returns</th>
+			<th>Description</th>
+		</tr>
+		<tr>
+			<td><code>getelement()</code></td>
+			<td><span class="type">HTMLElement</span></td>
+			<td>Returns the component's container DOM element</td>
+		</tr>
+		<tr>
+			<td><code>getvalue()</code></td>
+			<td><span class="type">any</span></td>
+			<td>Returns the current value</td>
+		</tr>
+		<tr>
+			<td><code>getguielement()</code></td>
+			<td><span class="type">HTMLElement</span></td>
+			<td>Returns the inner input/control element</td>
+		</tr>
+		<tr>
+			<td><code>gettheme()</code></td>
+			<td><span class="type">object</span></td>
+			<td>Returns the active theme for this instance</td>
+		</tr>
+		<tr>
+			<td><code>settheme(theme)</code></td>
+			<td><span class="type">void</span></td>
+			<td>Set theme by name or object</td>
+		</tr>
+	</table>
+
+	<h2 id="components">Components</h2>
+
+	<!-- TEXTBOX -->
+	<div class="component" id="textbox">
+		<h3>rad.ui.textbox</h3>
+		<p>A text input field with optional label.</p>
+
+		<h4>Constructor Options</h4>
+		<table>
+			<tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+			<tr>
+				<td><code>style</code></td>
+				<td><span class="type">object</span></td>
+				<td><span class="default">{}</span></td>
+				<td>Container style overrides</td>
+			</tr>
+			<tr>
+				<td><code>style_label</code></td>
+				<td><span class="type">object</span></td>
+				<td><span class="default">{}</span></td>
+				<td>Label style overrides</td>
+			</tr>
+			<tr>
+				<td><code>style_textbox</code></td>
+				<td><span class="type">object</span></td>
+				<td><span class="default">{}</span></td>
+				<td>Input element style overrides</td>
+			</tr>
+			<tr>
+				<td><code>name</code></td>
+				<td><span class="type">string</span></td>
+				<td><span class="default">undefined</span></td>
+				<td>Form field name attribute</td>
+			</tr>
+		</table>
+
+		<h4>Example</h4>
+		<pre><code>var textbox = new rad.ui.textbox({
+    id: 'username',
+    label: 'Name',
+    value: 'default',
+    callback: function(component) {
+        console.log('Value:', component.getvalue());
+    }
+});
+document.body.appendChild(textbox.getelement());</code></pre>
+	</div>
+
+	<!-- BUTTON -->
+	<div class="component" id="button">
+		<h3>rad.ui.button</h3>
+		<p>A clickable button element.</p>
+
+		<h4>Constructor Options</h4>
+		<table>
+			<tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+			<tr>
+				<td><code>style</code></td>
+				<td><span class="type">object</span></td>
+				<td><span class="default">{}</span></td>
+				<td>Container style overrides</td>
+			</tr>
+			<tr>
+				<td><code>style_button</code></td>
+				<td><span class="type">object</span></td>
+				<td><span class="default">{}</span></td>
+				<td>Button element style overrides</td>
+			</tr>
+		</table>
+
+		<h4>Example</h4>
+		<pre><code>var btn = new rad.ui.button({
+    id: 'submit_btn',
+    label: 'Submit',
+    callback: function(component) {
+        console.log('Button clicked!');
+    }
+});
+document.body.appendChild(btn.getelement());</code></pre>
+	</div>
+
+	<!-- SLIDER -->
+	<div class="component" id="slider">
+		<h3>rad.ui.slider</h3>
+		<p>A draggable slider with numeric input for precise value entry.</p>
+
+		<h4>Constructor Options</h4>
+		<table>
+			<tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+			<tr>
+				<td><code>settings.clamp</code></td>
+				<td><span class="type">boolean</span></td>
+				<td><span class="default">false</span></td>
+				<td>Clamp value to bounds</td>
+			</tr>
+			<tr>
+				<td><code>settings.upper</code></td>
+				<td><span class="type">number</span></td>
+				<td><span class="default">1</span></td>
+				<td>Upper bound</td>
+			</tr>
+			<tr>
+				<td><code>settings.lower</code></td>
+				<td><span class="type">number</span></td>
+				<td><span class="default">-1</span></td>
+				<td>Lower bound</td>
+			</tr>
+			<tr>
+				<td><code>settings.int</code></td>
+				<td><span class="type">boolean</span></td>
+				<td><span class="default">false</span></td>
+				<td>Round to integers</td>
+			</tr>
+			<tr>
+				<td><code>settings.update</code></td>
+				<td><span class="type">boolean</span></td>
+				<td><span class="default">false</span></td>
+				<td>Call callback during drag</td>
+			</tr>
+		</table>
+
+		<h4>Methods</h4>
+		<table>
+			<tr><th>Method</th><th>Description</th></tr>
+			<tr><td><code>refresh()</code></td><td>Update slider position from current value</td></tr>
+			<tr><td><code>set_settings(d)</code></td><td>Update settings object</td></tr>
+			<tr><td><code>set_to_minimum()</code></td><td>Set value to lower bound</td></tr>
+			<tr><td><code>set_to_maximum()</code></td><td>Set value to upper bound</td></tr>
+		</table>
+
+		<h4>Example</h4>
+		<pre><code>var slider = new rad.ui.slider({
+    id: 'opacity',
+    label: 'Opacity',
+    value: 0.5,
+    settings: {
+        clamp: true,
+        lower: 0,
+        upper: 1
+    },
+    callback: function(component) {
+        console.log('Opacity:', component.getvalue());
+    }
+});
+document.body.appendChild(slider.getelement());</code></pre>
+	</div>
+
+	<!-- DROPDOWN -->
+	<div class="component" id="dropdown">
+		<h3>rad.ui.dropdown</h3>
+		<p>A select dropdown menu.</p>
+
+		<h4>Constructor Options</h4>
+		<table>
+			<tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+			<tr>
+				<td><code>options</code></td>
+				<td><span class="type">array|object</span></td>
+				<td><span class="default">[]</span></td>
+				<td>Array of option strings or {value: label} object</td>
+			</tr>
+			<tr>
+				<td><code>style_dropdown</code></td>
+				<td><span class="type">object</span></td>
+				<td><span class="default">{}</span></td>
+				<td>Select element style overrides</td>
+			</tr>
+		</table>
+
+		<h4>Example</h4>
+		<pre><code>var dropdown = new rad.ui.dropdown({
+    id: 'color_select',
+    label: 'Color',
+    options: ['Red', 'Green', 'Blue'],
+    value: 'Green',
+    callback: function(component) {
+        console.log('Selected:', component.getvalue());
+    }
+});</code></pre>
+	</div>
+
+	<!-- CHECKBOX -->
+	<div class="component" id="checkbox">
+		<h3>rad.ui.checkbox</h3>
+		<p>A checkbox input with label.</p>
+
+		<h4>Constructor Options</h4>
+		<table>
+			<tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+			<tr>
+				<td><code>checked</code></td>
+				<td><span class="type">boolean</span></td>
+				<td><span class="default">false</span></td>
+				<td>Initial checked state</td>
+			</tr>
+		</table>
+
+		<h4>Methods</h4>
+		<table>
+			<tr><th>Method</th><th>Description</th></tr>
+			<tr><td><code>setvalue(checked)</code></td><td>Set checked state programmatically</td></tr>
+		</table>
+
+		<h4>Example</h4>
+		<pre><code>var checkbox = new rad.ui.checkbox({
+    id: 'enable_feature',
+    label: 'Enable Feature',
+    checked: true,
+    callback: function(component) {
+        console.log('Checked:', component.getvalue());
+    }
+});</code></pre>
+	</div>
+
+	<!-- COLLAPSIBLE -->
+	<div class="component" id="collapsible">
+		<h3>rad.ui.collapsible</h3>
+		<p>A collapsible container with clickable titlebar.</p>
+
+		<h4>Constructor Options</h4>
+		<table>
+			<tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+			<tr>
+				<td><code>collapsed</code></td>
+				<td><span class="type">boolean</span></td>
+				<td><span class="default">false</span></td>
+				<td>Initial collapsed state</td>
+			</tr>
+			<tr>
+				<td><code>style_title</code></td>
+				<td><span class="type">object</span></td>
+				<td><span class="default">{}</span></td>
+				<td>Titlebar style overrides</td>
+			</tr>
+			<tr>
+				<td><code>style_content</code></td>
+				<td><span class="type">object</span></td>
+				<td><span class="default">{}</span></td>
+				<td>Content area style overrides</td>
+			</tr>
+		</table>
+
+		<h4>Methods</h4>
+		<table>
+			<tr><th>Method</th><th>Description</th></tr>
+			<tr><td><code>getcontentelement()</code></td><td>Returns the content container element</td></tr>
+			<tr><td><code>toggle()</code></td><td>Toggle collapsed state</td></tr>
+			<tr><td><code>expand()</code></td><td>Expand if collapsed</td></tr>
+			<tr><td><code>collapse()</code></td><td>Collapse if expanded</td></tr>
+			<tr><td><code>settitle(text)</code></td><td>Update titlebar text</td></tr>
+		</table>
+
+		<h4>Example</h4>
+		<pre><code>var collapsible = new rad.ui.collapsible({
+    id: 'settings_panel',
+    label: 'Settings',
+    collapsed: false,
+    callback: function(component, isCollapsed) {
+        console.log('Collapsed:', isCollapsed);
+    }
+});
+
+// Add content
+var content = collapsible.getcontentelement();
+content.appendChild(someOtherComponent.getelement());
+
+document.body.appendChild(collapsible.getelement());</code></pre>
+	</div>
+
+	<!-- SECTION -->
+	<div class="component" id="section">
+		<h3>rad.ui.section</h3>
+		<p>A static section container with title (non-collapsible).</p>
+
+		<h4>Constructor Options</h4>
+		<table>
+			<tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+			<tr>
+				<td><code>style_title</code></td>
+				<td><span class="type">object</span></td>
+				<td><span class="default">{}</span></td>
+				<td>Title style overrides</td>
+			</tr>
+			<tr>
+				<td><code>style_content</code></td>
+				<td><span class="type">object</span></td>
+				<td><span class="default">{}</span></td>
+				<td>Content area style overrides</td>
+			</tr>
+		</table>
+
+		<h4>Methods</h4>
+		<table>
+			<tr><th>Method</th><th>Description</th></tr>
+			<tr><td><code>getcontentelement()</code></td><td>Returns the content container element</td></tr>
+			<tr><td><code>settitle(text)</code></td><td>Update title text</td></tr>
+		</table>
+
+		<h4>Example</h4>
+		<pre><code>var section = new rad.ui.section({
+    id: 'info_section',
+    label: 'Information'
+});
+section.getcontentelement().innerHTML = 'Section content here';</code></pre>
+	</div>
+
+	<!-- LIST -->
+	<div class="component" id="list">
+		<h3>rad.ui.list</h3>
+		<p>A scrollable list with selectable items.</p>
+
+		<h4>Constructor Options</h4>
+		<table>
+			<tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+			<tr>
+				<td><code>items</code></td>
+				<td><span class="type">array</span></td>
+				<td><span class="default">[]</span></td>
+				<td>Array of items (strings or {label, value} objects)</td>
+			</tr>
+			<tr>
+				<td><code>selected</code></td>
+				<td><span class="type">any</span></td>
+				<td><span class="default">null</span></td>
+				<td>Initially selected item</td>
+			</tr>
+			<tr>
+				<td><code>maxHeight</code></td>
+				<td><span class="type">number</span></td>
+				<td><span class="default">200</span></td>
+				<td>Max height in pixels before scrolling</td>
+			</tr>
+			<tr>
+				<td><code>emptyMessage</code></td>
+				<td><span class="type">string</span></td>
+				<td><span class="default">"No items"</span></td>
+				<td>Message shown when list is empty</td>
+			</tr>
+		</table>
+
+		<h4>Methods</h4>
+		<table>
+			<tr><th>Method</th><th>Description</th></tr>
+			<tr><td><code>setitems(items)</code></td><td>Replace all items</td></tr>
+			<tr><td><code>select(item)</code></td><td>Select an item programmatically</td></tr>
+			<tr><td><code>getselected()</code></td><td>Get currently selected item</td></tr>
+			<tr><td><code>refresh()</code></td><td>Re-render the list</td></tr>
+		</table>
+
+		<h4>Example</h4>
+		<pre><code>var list = new rad.ui.list({
+    id: 'file_list',
+    items: [
+        { label: 'File 1', value: 'file1.txt' },
+        { label: 'File 2', value: 'file2.txt' }
+    ],
+    maxHeight: 150,
+    callback: function(component, selected) {
+        console.log('Selected:', selected.value);
+    }
+});</code></pre>
+	</div>
+
+	<!-- GROUP -->
+	<div class="component" id="group">
+		<h3>rad.ui.group</h3>
+		<p>A flex container for grouping components horizontally or vertically.</p>
+
+		<h4>Constructor Options</h4>
+		<table>
+			<tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+			<tr>
+				<td><code>direction</code></td>
+				<td><span class="type">string</span></td>
+				<td><span class="default">"row"</span></td>
+				<td>"row" or "column"</td>
+			</tr>
+			<tr>
+				<td><code>gap</code></td>
+				<td><span class="type">number</span></td>
+				<td><span class="default">5</span></td>
+				<td>Gap between items in pixels</td>
+			</tr>
+			<tr>
+				<td><code>wrap</code></td>
+				<td><span class="type">boolean</span></td>
+				<td><span class="default">true</span></td>
+				<td>Allow items to wrap</td>
+			</tr>
+			<tr>
+				<td><code>align</code></td>
+				<td><span class="type">string</span></td>
+				<td><span class="default">"center"</span></td>
+				<td>CSS align-items value</td>
+			</tr>
+			<tr>
+				<td><code>justify</code></td>
+				<td><span class="type">string</span></td>
+				<td><span class="default">"flex-start"</span></td>
+				<td>CSS justify-content value</td>
+			</tr>
+		</table>
+
+		<h4>Methods</h4>
+		<table>
+			<tr><th>Method</th><th>Description</th></tr>
+			<tr><td><code>add(element)</code></td><td>Add a component or DOM element</td></tr>
+			<tr><td><code>clear()</code></td><td>Remove all children</td></tr>
+			<tr><td><code>getcontentelement()</code></td><td>Returns the container element</td></tr>
+		</table>
+
+		<h4>Example</h4>
+		<pre><code>var group = new rad.ui.group({
+    id: 'button_row',
+    direction: 'row',
+    gap: 10
+});
+group.add(button1);
+group.add(button2);
+group.add(button3);</code></pre>
+	</div>
+
+	<!-- TITLEBAR -->
+	<div class="component" id="titlebar">
+		<h3>rad.ui.titlebar</h3>
+		<p>A reusable titlebar sub-component with optional collapse icon.</p>
+
+		<h4>Constructor Options</h4>
+		<table>
+			<tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+			<tr>
+				<td><code>showIcon</code></td>
+				<td><span class="type">boolean</span></td>
+				<td><span class="default">false</span></td>
+				<td>Show collapse/expand icon</td>
+			</tr>
+			<tr>
+				<td><code>collapsed</code></td>
+				<td><span class="type">boolean</span></td>
+				<td><span class="default">false</span></td>
+				<td>Initial collapsed state (for icon)</td>
+			</tr>
+			<tr>
+				<td><code>clickable</code></td>
+				<td><span class="type">boolean</span></td>
+				<td><span class="default">true</span></td>
+				<td>Enable click interaction</td>
+			</tr>
+		</table>
+
+		<h4>Methods</h4>
+		<table>
+			<tr><th>Method</th><th>Description</th></tr>
+			<tr><td><code>settitle(text)</code></td><td>Update title text</td></tr>
+			<tr><td><code>gettitle()</code></td><td>Get current title text</td></tr>
+			<tr><td><code>setcollapsed(collapsed)</code></td><td>Update collapsed state (icon)</td></tr>
+			<tr><td><code>setclickable(clickable)</code></td><td>Enable/disable click</td></tr>
+		</table>
+	</div>
+
+	<!-- DIALOGUE -->
+	<div class="component" id="dialogue">
+		<h3>rad.ui.dialogue</h3>
+		<p>A modal dialog box positioned at screen center.</p>
+
+		<h4>Constructor</h4>
+		<pre><code>new rad.ui.dialogue(options, innerHTML, showCloseButton)</code></pre>
+
+		<h4>Parameters</h4>
+		<table>
+			<tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+			<tr>
+				<td><code>options</code></td>
+				<td><span class="type">object</span></td>
+				<td>Standard options (id, style, etc.)</td>
+			</tr>
+			<tr>
+				<td><code>innerHTML</code></td>
+				<td><span class="type">string</span></td>
+				<td>HTML content for the dialog body</td>
+			</tr>
+			<tr>
+				<td><code>showCloseButton</code></td>
+				<td><span class="type">number</span></td>
+				<td>1 to show close button, 0 to hide</td>
+			</tr>
+		</table>
+
+		<h4>Example</h4>
+		<pre><code>var dialog = new rad.ui.dialogue(
+    { id: 'alert', style: { width: 300, height: 150 } },
+    '&lt;p&gt;Are you sure?&lt;/p&gt;',
+    1
+);
+document.body.appendChild(dialog.getelement());</code></pre>
+	</div>
+
+	<!-- TEXTPANEL -->
+	<div class="component" id="textpanel">
+		<h3>rad.ui.textpanel</h3>
+		<p>An absolutely positioned text display panel with auto-sizing and anchor positioning.</p>
+
+		<h4>Constructor Options</h4>
+		<table>
+			<tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+			<tr>
+				<td><code>text</code></td>
+				<td><span class="type">string</span></td>
+				<td><span class="default">""</span></td>
+				<td>Initial text content</td>
+			</tr>
+			<tr>
+				<td><code>x, y</code></td>
+				<td><span class="type">number</span></td>
+				<td><span class="default">0</span></td>
+				<td>Position coordinates</td>
+			</tr>
+			<tr>
+				<td><code>anchorX, anchorY</code></td>
+				<td><span class="type">number</span></td>
+				<td><span class="default">0.5, 1.0</span></td>
+				<td>Anchor point (0-1)</td>
+			</tr>
+			<tr>
+				<td><code>minWidth, maxWidth</code></td>
+				<td><span class="type">number</span></td>
+				<td><span class="default">50, 300</span></td>
+				<td>Size constraints</td>
+			</tr>
+			<tr>
+				<td><code>maxHeight</code></td>
+				<td><span class="type">number</span></td>
+				<td><span class="default">200</span></td>
+				<td>Max height before scrolling</td>
+			</tr>
+			<tr>
+				<td><code>visible</code></td>
+				<td><span class="type">boolean</span></td>
+				<td><span class="default">true</span></td>
+				<td>Initial visibility</td>
+			</tr>
+		</table>
+
+		<h4>Methods</h4>
+		<table>
+			<tr><th>Method</th><th>Description</th></tr>
+			<tr><td><code>settext(text)</code></td><td>Set text content</td></tr>
+			<tr><td><code>appendtext(text)</code></td><td>Append to existing text</td></tr>
+			<tr><td><code>cleartext()</code></td><td>Clear all text</td></tr>
+			<tr><td><code>setposition(x, y)</code></td><td>Update position</td></tr>
+			<tr><td><code>setanchor(x, y)</code></td><td>Update anchor point</td></tr>
+			<tr><td><code>show() / hide() / toggle()</code></td><td>Control visibility</td></tr>
+			<tr><td><code>attachto(parent)</code></td><td>Append to parent element</td></tr>
+			<tr><td><code>detach()</code></td><td>Remove from DOM</td></tr>
+		</table>
+
+		<h4>Example</h4>
+		<pre><code>var tooltip = new rad.ui.textpanel({
+    id: 'tooltip',
+    text: 'Hello World',
+    x: 100,
+    y: 100,
+    anchorX: 0.5,
+    anchorY: 1.0
+});
+tooltip.attachto(document.body);</code></pre>
+	</div>
+
+	<!-- VESSEL -->
+	<div class="component" id="vessel">
+		<h3>rad.ui.vessel</h3>
+		<p>A positioned container with optional dragging and collapse functionality. Ideal for floating panels.</p>
+
+		<h4>Constructor Options</h4>
+		<table>
+			<tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+			<tr>
+				<td><code>draggable</code></td>
+				<td><span class="type">boolean</span></td>
+				<td><span class="default">false</span></td>
+				<td>Allow dragging by titlebar</td>
+			</tr>
+			<tr>
+				<td><code>collapsible</code></td>
+				<td><span class="type">boolean</span></td>
+				<td><span class="default">false</span></td>
+				<td>Allow collapse/expand</td>
+			</tr>
+			<tr>
+				<td><code>collapsed</code></td>
+				<td><span class="type">boolean</span></td>
+				<td><span class="default">false</span></td>
+				<td>Initial collapsed state</td>
+			</tr>
+			<tr>
+				<td><code>width</code></td>
+				<td><span class="type">number</span></td>
+				<td><span class="default">300</span></td>
+				<td>Container width</td>
+			</tr>
+			<tr>
+				<td><code>position</code></td>
+				<td><span class="type">object</span></td>
+				<td><span class="default">{top:10, right:10}</span></td>
+				<td>Position as {top,right,bottom,left} or {x,y}</td>
+			</tr>
+			<tr>
+				<td><code>zIndex</code></td>
+				<td><span class="type">number</span></td>
+				<td><span class="default">1000</span></td>
+				<td>CSS z-index</td>
+			</tr>
+		</table>
+
+		<h4>Methods</h4>
+		<table>
+			<tr><th>Method</th><th>Description</th></tr>
+			<tr><td><code>add(element)</code></td><td>Add a component or DOM element</td></tr>
+			<tr><td><code>clear()</code></td><td>Remove all content</td></tr>
+			<tr><td><code>getcontentelement()</code></td><td>Returns the content container</td></tr>
+			<tr><td><code>setposition(pos)</code></td><td>Update position</td></tr>
+			<tr><td><code>toggle() / expand() / collapse()</code></td><td>Control collapsed state</td></tr>
+			<tr><td><code>show() / hide()</code></td><td>Control visibility</td></tr>
+			<tr><td><code>attachto(parent)</code></td><td>Append to parent (default: document.body)</td></tr>
+			<tr><td><code>detach()</code></td><td>Remove from DOM</td></tr>
+		</table>
+
+		<h4>Example</h4>
+		<pre><code>var panel = new rad.ui.vessel({
+    id: 'debug_panel',
+    label: 'Debug',
+    draggable: true,
+    collapsible: true,
+    position: { top: 10, right: 10 },
+    width: 250
+});
+
+panel.add(someSlider);
+panel.add(someButton);
+panel.attachto();</code></pre>
+	</div>
+
+	<h2 id="utility-functions">Utility Functions</h2>
+
+	<div class="component">
+		<h3>rad.ui.applystyletohtml(element, themeKey, theme)</h3>
+		<p>Apply theme styles to a DOM element. Useful for styling server-generated HTML with the same theme as rad.ui components.</p>
+
+		<h4>Parameters</h4>
+		<table>
+			<tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+			<tr>
+				<td><code>element</code></td>
+				<td><span class="type">HTMLElement</span></td>
+				<td>The DOM element to style</td>
+			</tr>
+			<tr>
+				<td><code>themeKey</code></td>
+				<td><span class="type">string</span></td>
+				<td>Dot-notation path into theme (e.g., "textbox", "shared.container")</td>
+			</tr>
+			<tr>
+				<td><code>theme</code></td>
+				<td><span class="type">object</span></td>
+				<td>Optional theme object, defaults to rad.ui.theme</td>
+			</tr>
+		</table>
+
+		<h4>Example</h4>
+		<pre><code>// Style a server-generated input
+var input = document.getElementById('login_username');
+rad.ui.applystyletohtml(input, 'textbox');
+
+// Style a container with shared styles
+var container = document.querySelector('.login_form');
+rad.ui.applystyletohtml(container, 'shared.container');
+
+// Use a custom theme
+rad.ui.applystyletohtml(element, 'button', myCustomTheme);</code></pre>
+	</div>
+
+</body>
+</html>

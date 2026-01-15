@@ -56,35 +56,39 @@ class login{
 		if($setup){
 			$empty = $this->mysql->table_is_empty($this->user_table);
 		}
-		
+
 		if($empty){//if we have not been set up before, fill out the nessisary information to proceed
 			///make 3 fields, one user name, 2 passwords
-			$page.='<div class="login_form">
- 			<form action="" method="post" name="login_form_new_user" id="login_form_new_user">
- 			<input name="setuser" type="text" id="setuser" value="" placeholder="user name" class="login_input">
- 			<input name="setpw1" type="password" id="setpw1" value="" placeholder="password" class="login_input">
- 			<input name="setpw2" type="password" id="setpw2" value="" placeholder="confirm password" class="login_input">
- 			<input type="button" name="Submit" value="Submit" onclick="process_login(\'login_form_new_user\')">
- 			</form>
- 			</div>';
+			$page.='<div class="login_form rad_ui_container">
+			<form action="" method="post" name="login_form_new_user" id="login_form_new_user">
+			<div class="rad_ui_textbox">
+				<input name="setuser" type="text" id="setuser" value="" placeholder="user name" class="rad_ui_input">
+			</div>
+			<div class="rad_ui_textbox">
+				<input name="setpw1" type="password" id="setpw1" value="" placeholder="password" class="rad_ui_input">
+			</div>
+			<div class="rad_ui_textbox">
+				<input name="setpw2" type="password" id="setpw2" value="" placeholder="confirm password" class="rad_ui_input">
+			</div>
+			<div class="rad_ui_button">
+				<button type="button" name="Submit" onclick="process_login(\'login_form_new_user\')">Submit</button>
+			</div>
+			</form>
+			</div>';
 		}else{
-			$page.='<div class="login_form">
- 			<form action="" method="post" name="login_form" id="login_form">
- 			<input name="txtUserid" type="text" id="txtUserid" value="" placeholder="user name" class="login_input">
- 			<input name="txtUserpw" type="password" id="txtUserpw" value="" placeholder="password" class="login_input">
- 			<input type="button" name="Submit" value="Submit" onclick="process_login(\'login_form\')">
- 			</form>
- 			</div>';
-
- 			// $page.='<div class="login_form">
- 			// register new user:
- 			// <form action="" method="post" name="login_form_new_user" id="login_form_new_user">
- 			// <input name="setuser" type="text" id="setuser" value="" placeholder="user name" class="login_input">
- 			// <input name="setpw1" type="password" id="setpw1" value="" placeholder="password" class="login_input">
- 			// <input name="setpw2" type="password" id="setpw2" value="" placeholder="confirm password" class="login_input">
- 			// <input type="button" name="Submit" value="Submit" onclick="process_login(\'login_form_new_user\')">
- 			// </form>
- 			// </div>';
+			$page.='<div class="login_form rad_ui_container">
+			<form action="" method="post" name="login_form" id="login_form">
+			<div class="rad_ui_textbox">
+				<input name="txtUserid" type="text" id="txtUserid" value="" placeholder="user name" class="rad_ui_input">
+			</div>
+			<div class="rad_ui_textbox">
+				<input name="txtUserpw" type="password" id="txtUserpw" value="" placeholder="password" class="rad_ui_input">
+			</div>
+			<div class="rad_ui_button">
+				<button type="button" name="Submit" onclick="process_login(\'login_form\')">Submit</button>
+			</div>
+			</form>
+			</div>';
 		}
 		return $page;
 	}
