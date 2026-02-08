@@ -68,7 +68,7 @@ rad.vector3=function(x,y,z){
 	this.z=(z)?z:0.0;
 	return this;
 }
-rad.vector2.prototype.set=function(x,y,z){
+rad.vector3.prototype.set=function(x,y,z){
 	this.x=(x)?x:0.0;
 	this.y=(y)?y:0.0;
 	this.z=(z)?z:0.0;
