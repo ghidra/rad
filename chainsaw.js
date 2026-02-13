@@ -19,7 +19,7 @@ rad.chainsaw=class{
 		this.canvas.width = this.width;
 		this.canvas.height = this.height;
 		this.canvas.style.cursor = "none";//hide the cursor
-		this.gl = this.canvas.getContext('webgl2',{premultipliedAlpha: false, alpha:false});// || this.canvas.getContext('experimental-webgl');
+		this.gl = this.canvas.getContext('webgl2',{premultipliedAlpha: false, alpha:false, preserveDrawingBuffer: true});// || this.canvas.getContext('experimental-webgl');
 		if(this.gl){
 			console.log('webgl2 successful');
 		}else{

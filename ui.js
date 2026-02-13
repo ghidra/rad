@@ -315,6 +315,77 @@ rad.ui.themes.default = {
 			"width": 300,
 			"zIndex": 1000
 		}
+	},
+	"menubar": {
+		"bar": {
+			"style": {
+				"position": "fixed",
+				"top": "0",
+				"left": "0",
+				"width": "100%",
+				"height": "28px",
+				"background": "transparent",
+				"display": "flex",
+				"flexDirection": "row",
+				"justifyContent": "flex-end",
+				"alignItems": "stretch",
+				"zIndex": "2000",
+				"boxSizing": "border-box",
+				"fontFamily": "sans-serif",
+				"fontSize": "13px",
+				"userSelect": "none",
+				"cursor": "default",
+				"pointerEvents": "none"
+			}
+		},
+		"menu_button": {
+			"style": {
+				"background": "transparent",
+				"color": "#ccc",
+				"border": "none",
+				"padding": "0 12px",
+				"cursor": "pointer",
+				"fontSize": "13px",
+				"lineHeight": "28px",
+				"whiteSpace": "nowrap",
+				"pointerEvents": "auto"
+			}
+		},
+		"dropdown": {
+			"style": {
+				"position": "absolute",
+				"top": "28px",
+				"right": "0",
+				"background": "#2a2a2e",
+				"border": "1px solid #555",
+				"borderTop": "none",
+				"boxShadow": "0 4px 12px rgba(0,0,0,0.5)",
+				"zIndex": "2001",
+				"minWidth": "180px",
+				"padding": "4px 0",
+				"pointerEvents": "auto",
+				"cursor": "default"
+			}
+		},
+		"menuitem": {
+			"style": {
+				"color": "#ccc",
+				"padding": "5px 20px 5px 8px",
+				"cursor": "pointer",
+				"fontSize": "13px",
+				"display": "flex",
+				"alignItems": "center",
+				"whiteSpace": "nowrap"
+			}
+		},
+		"separator": {
+			"style": {
+				"borderTop": "1px solid #444",
+				"margin": "4px 8px",
+				"height": "0",
+				"pointerEvents": "none"
+			}
+		}
 	}
 };
 
@@ -1844,6 +1915,253 @@ rad.ui.vessel = class extends rad.ui.base {
 				this.dragHandle.onmousedown = null;
 			}
 		}
+	}
+}
+
+//-----------menuitem (lightweight, does NOT extend rad.ui.base)
+rad.ui.menuitem = class {
+	constructor(d) {
+		this.type = d.type || "action"; // "action", "toggle", "separator"
+		this.label = d.label || "";
+		this.checked = d.checked || false;
+		this.shortcut = d.shortcut || "";
+		this.callback = d.callback || null;
+
+		this.container = document.createElement("DIV");
+
+		if (this.type === "separator") {
+			var theme = rad.ui.theme;
+			if (theme.menubar && theme.menubar.separator && theme.menubar.separator.style) {
+				for (var prop in theme.menubar.separator.style) {
+					this.container.style[prop] = theme.menubar.separator.style[prop];
+				}
+			}
+			return;
+		}
+
+		// Apply menuitem theme style
+		var theme = rad.ui.theme;
+		if (theme.menubar && theme.menubar.menuitem && theme.menubar.menuitem.style) {
+			for (var prop in theme.menubar.menuitem.style) {
+				this.container.style[prop] = theme.menubar.menuitem.style[prop];
+			}
+		}
+
+		// Check indicator
+		this.checkSpan = document.createElement("SPAN");
+		this.checkSpan.style.cssText = "width:14px;display:inline-block;text-align:center;margin-right:4px;font-size:12px;";
+		this.updatecheck();
+		this.container.appendChild(this.checkSpan);
+
+		// Label text
+		this.labelSpan = document.createElement("SPAN");
+		this.labelSpan.style.cssText = "flex:1;";
+		this.labelSpan.textContent = this.label;
+		this.container.appendChild(this.labelSpan);
+
+		// Shortcut text
+		if (this.shortcut) {
+			this.shortcutSpan = document.createElement("SPAN");
+			this.shortcutSpan.style.cssText = "color:#888;font-size:11px;margin-left:20px;";
+			this.shortcutSpan.textContent = this.shortcut;
+			this.container.appendChild(this.shortcutSpan);
+		}
+
+		// Hover effect
+		var _this = this;
+		this.container.onmouseenter = function() {
+			_this.container.style.background = "#3a3a4e";
+		};
+		this.container.onmouseleave = function() {
+			_this.container.style.background = "transparent";
+		};
+
+		// Click handler
+		this.container.onclick = function(e) {
+			e.stopPropagation();
+			if (_this.type === "toggle") {
+				_this.checked = !_this.checked;
+				_this.updatecheck();
+			}
+			if (typeof _this.callback === "function") {
+				_this.callback(_this);
+			}
+		};
+	}
+
+	updatecheck() {
+		if (this.checkSpan) {
+			this.checkSpan.textContent = this.checked ? "\u2713" : "";
+		}
+	}
+
+	getelement() {
+		return this.container;
+	}
+
+	setchecked(val) {
+		this.checked = val;
+		this.updatecheck();
+	}
+
+	getchecked() {
+		return this.checked;
+	}
+
+	setlabel(text) {
+		this.label = text;
+		if (this.labelSpan) this.labelSpan.textContent = text;
+	}
+}
+
+//-----------menubar (horizontal bar with dropdown menus)
+rad.ui.menubar = class extends rad.ui.base {
+	constructor(d) {
+		super(d || {});
+		this.uitype = "menubar";
+		this.menus = {};
+		this.openMenu = null;
+
+		// Create bar container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystylepath(this.container, "menubar.bar");
+
+		// Click-away listener
+		var _this = this;
+		this._clickAway = function(e) {
+			if (!_this.container.contains(e.target)) {
+				_this.closeall();
+			}
+		};
+		document.addEventListener('mousedown', this._clickAway);
+	}
+
+	addmenu(id, label) {
+		var _this = this;
+
+		// Wrapper div (position:relative for dropdown positioning)
+		var wrapper = document.createElement("DIV");
+		wrapper.style.position = "relative";
+
+		// Button label
+		var btn = document.createElement("DIV");
+		this.applystylepath(btn, "menubar.menu_button");
+		btn.textContent = label;
+
+		// Dropdown container
+		var dropdown = document.createElement("DIV");
+		this.applystylepath(dropdown, "menubar.dropdown");
+		dropdown.style.display = "none";
+
+		wrapper.appendChild(btn);
+		wrapper.appendChild(dropdown);
+		this.container.appendChild(wrapper);
+
+		var menuData = {
+			id: id,
+			label: label,
+			button: btn,
+			dropdown: dropdown,
+			wrapper: wrapper,
+			items: []
+		};
+		this.menus[id] = menuData;
+
+		// Click to open/close
+		btn.onclick = function(e) {
+			e.stopPropagation();
+			if (_this.openMenu === id) {
+				_this.closeall();
+			} else {
+				_this.openmenu(id);
+			}
+		};
+
+		// Hover-to-switch when another menu is open
+		btn.onmouseenter = function() {
+			btn.style.background = "#333";
+			if (_this.openMenu !== null && _this.openMenu !== id) {
+				_this.openmenu(id);
+			}
+		};
+		btn.onmouseleave = function() {
+			if (_this.openMenu !== id) {
+				btn.style.background = "transparent";
+			}
+		};
+
+		// Return a handle for adding items
+		var handle = {
+			additem: function(opts) {
+				// Wrap callback to auto-close dropdown for action items
+				if (opts.type !== "toggle" && opts.type !== "separator") {
+					var origCb = opts.callback;
+					opts.callback = function(item) {
+						_this.closeall();
+						if (typeof origCb === "function") origCb(item);
+					};
+				}
+				var item = new rad.ui.menuitem(opts);
+				dropdown.appendChild(item.getelement());
+				menuData.items.push(item);
+				return item;
+			},
+			addseparator: function() {
+				var sep = new rad.ui.menuitem({ type: "separator" });
+				dropdown.appendChild(sep.getelement());
+				menuData.items.push(sep);
+				return sep;
+			}
+		};
+		return handle;
+	}
+
+	openmenu(id) {
+		// Close current
+		this.closeall();
+
+		var menu = this.menus[id];
+		if (!menu) return;
+
+		menu.dropdown.style.display = "block";
+		menu.button.style.background = "#333";
+		this.openMenu = id;
+	}
+
+	closeall() {
+		for (var id in this.menus) {
+			this.menus[id].dropdown.style.display = "none";
+			this.menus[id].button.style.background = "transparent";
+		}
+		this.openMenu = null;
+	}
+
+	attachto(parent) {
+		(parent || document.body).appendChild(this.container);
+	}
+
+	detach() {
+		if (this.container.parentNode) {
+			this.container.parentNode.removeChild(this.container);
+		}
+	}
+
+	show() {
+		this.container.style.display = "flex";
+	}
+
+	hide() {
+		this.container.style.display = "none";
+	}
+
+	getelement() {
+		return this.container;
+	}
+
+	destroy() {
+		document.removeEventListener('mousedown', this._clickAway);
+		this.detach();
 	}
 }
 
