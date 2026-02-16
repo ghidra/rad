@@ -105,6 +105,9 @@ rad.chainsaw=class{
 	uploadSpriteBuffer(program_index,buffer_index="tiles"){
 		this.spriteBuffers[buffer_index].upload(this.gl,this.programs[program_index],this.buffers[buffer_index]);
 	}
+	uploadSpriteBufferForQuads(program_index,buffer_index="tiles"){
+		this.spriteBuffers[buffer_index].uploadForQuads(this.gl,this.programs[program_index],this.buffers[buffer_index]);
+	}
 	loadTexture(program,texture,uniform,index=0){
 		this.gl.activeTexture(this.gl.TEXTURE0+index);
   		this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
@@ -430,10 +433,47 @@ rad.chainsaw.spriteBuffer=class{
 		gl.enableVertexAttribArray(instSize);
 		gl.vertexAttribPointer(instSize, 1, gl.FLOAT, false, stride*byte, 4*byte);
 		gl.vertexAttribDivisor(instSize, 1); // Advance once per instance
-		
+
 		gl.enableVertexAttribArray(instId);
 		gl.vertexAttribPointer(instId, 2, gl.FLOAT, false, stride*byte, 5*byte);
 		gl.vertexAttribDivisor(instId, 1); // Advance once per instance*/
+	}
+	uploadForQuads(gl,program,buffer){
+		const loc = program.attributeMap.get("aSpritePosition");
+		const ssz = program.attributeMap.get("aSpriteSize");
+		const sid = program.attributeMap.get("aSpriteID");
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+		gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW);
+
+		const byte = 4;
+		const stride = this.stride;
+		gl.enableVertexAttribArray(loc);
+		gl.vertexAttribPointer(loc, 4, gl.FLOAT, false, stride*byte, 0);
+		gl.vertexAttribDivisor(loc, 1); // Advance per instance (per sprite)
+
+		gl.enableVertexAttribArray(ssz);
+		gl.vertexAttribPointer(ssz, 1, gl.FLOAT, false, stride*byte, 4*byte);
+		gl.vertexAttribDivisor(ssz, 1);
+
+		gl.enableVertexAttribArray(sid);
+		gl.vertexAttribPointer(sid, 2, gl.FLOAT, false, stride*byte, 5*byte);
+		gl.vertexAttribDivisor(sid, 1);
+	}
+	expandForQuads(){
+		const newArray = new Float32Array(this.count * 6 * this.stride);
+		for(var i=0; i<this.count; i++){
+			for(var v=0; v<6; v++){
+				const src = i * this.stride;
+				const dst = (i * 6 + v) * this.stride;
+				for(var j=0; j<this.stride; j++){
+					newArray[dst + j] = this.array[src + j];
+				}
+			}
+		}
+		this.array = newArray;
+		this.count = this.count * 6;
+		this.size = newArray.length;
 	}
 }
 //
