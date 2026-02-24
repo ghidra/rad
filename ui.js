@@ -386,6 +386,89 @@ rad.ui.themes.default = {
 				"pointerEvents": "none"
 			}
 		}
+	},
+	"textarea": {
+		"style": {
+			"width": "100%",
+			"background": "#1a1a1a",
+			"color": "#ccc",
+			"border": "1px solid #444",
+			"borderRadius": "3px",
+			"padding": "4px",
+			"fontFamily": "monospace",
+			"fontSize": "11px",
+			"resize": "vertical",
+			"boxSizing": "border-box"
+		}
+	},
+	"colorpicker": {
+		"style": {
+			"padding": "6px",
+			"background": "#2a2a2a",
+			"border": "1px solid #444",
+			"borderRadius": "3px"
+		},
+		"canvas": {
+			"style": {
+				"borderRadius": "3px",
+				"cursor": "crosshair"
+			}
+		},
+		"huebar": {
+			"style": {
+				"marginTop": "6px",
+				"borderRadius": "3px",
+				"cursor": "crosshair"
+			}
+		},
+		"alphabar": {
+			"style": {
+				"marginTop": "4px",
+				"borderRadius": "3px",
+				"cursor": "crosshair"
+			}
+		},
+		"swatch": {
+			"style": {
+				"width": "22px",
+				"height": "22px",
+				"borderRadius": "3px",
+				"border": "1px solid #555",
+				"display": "inline-block",
+				"flexShrink": "0"
+			}
+		},
+		"hex_input": {
+			"style": {
+				"background": "#1a1a1a",
+				"color": "#ccc",
+				"border": "1px solid #444",
+				"borderRadius": "3px",
+				"padding": "2px 4px",
+				"fontSize": "11px",
+				"fontFamily": "monospace",
+				"width": "66px"
+			}
+		},
+		"channel_input": {
+			"style": {
+				"background": "#1a1a1a",
+				"color": "#ccc",
+				"border": "1px solid #444",
+				"borderRadius": "3px",
+				"padding": "2px 2px",
+				"fontSize": "10px",
+				"fontFamily": "monospace",
+				"width": "34px"
+			}
+		},
+		"channel_label": {
+			"style": {
+				"color": "#888",
+				"fontSize": "10px",
+				"fontFamily": "monospace"
+			}
+		}
 	}
 };
 
@@ -2162,6 +2245,480 @@ rad.ui.menubar = class extends rad.ui.base {
 	destroy() {
 		document.removeEventListener('mousedown', this._clickAway);
 		this.detach();
+	}
+}
+
+//-----------textarea
+rad.ui.textarea = class extends rad.ui.base {
+	constructor(d) {
+		super(d);
+		this.uitype = "textarea";
+		this.rows = (d.rows != undefined) ? d.rows : 4;
+		this.placeholder = (d.placeholder != undefined) ? d.placeholder : "";
+
+		// Create container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystyle(this.container, "style", d.style);
+
+		// Create label if width > 0
+		var labelStyle = rad.defaults.ui.label.style || {};
+		var labelWidth = (d.style_label && d.style_label.width !== undefined) ? d.style_label.width : labelStyle.width;
+		if (labelWidth > 0) {
+			this.label_container = document.createElement("DIV");
+			this.label_container.innerHTML = "&nbsp;" + this.label;
+			this.applystylepath(this.label_container, "label", d.style_label);
+			this.container.appendChild(this.label_container);
+		}
+
+		// Create textarea element
+		this.textarea = document.createElement("TEXTAREA");
+		this.textarea.id = "ta_" + this.id + "_" + this.label;
+		this.textarea.rows = this.rows;
+		this.textarea.placeholder = this.placeholder;
+		this.textarea.value = this.value;
+		this.applystyle(this.textarea, "textarea", d.style_textarea);
+
+		// Callback
+		var _this = this;
+		if (typeof d.callback === "function") {
+			this.textarea.oninput = function(e) { d.callback(_this); };
+		}
+
+		this.container.appendChild(this.textarea);
+	}
+
+	getelement() {
+		return this.container;
+	}
+
+	getvalue() {
+		return this.textarea.value;
+	}
+
+	setvalue(v) {
+		this.value = v;
+		this.textarea.value = v;
+	}
+
+	getguielement() {
+		return this.textarea;
+	}
+}
+
+//-----------colorpicker
+rad.ui.colorpicker = class extends rad.ui.base {
+	constructor(d) {
+		super(d);
+		this.uitype = "colorpicker";
+		this.showAlpha   = (d.showAlpha != undefined) ? d.showAlpha : false;
+		this.showHex     = (d.showHex != undefined) ? d.showHex : true;
+		this.showInputs  = (d.showInputs != undefined) ? d.showInputs : true;
+		this.canvasHeight = (d.canvasHeight != undefined) ? d.canvasHeight : 120;
+
+		// Internal state
+		var init = this._parseValue(d.value);
+		this._hsv   = this._rgbToHsv(init.r, init.g, init.b);
+		this._alpha = init.a;
+
+		// Container
+		this.container = document.createElement("DIV");
+		this.container.id = this.id;
+		this.applystyle(this.container, "colorpicker", d.style);
+
+		// Saturation/Value 2-D canvas
+		this._svCanvas = document.createElement("CANVAS");
+		this._svCanvas.width  = 200;
+		this._svCanvas.height = this.canvasHeight;
+		this._svCanvas.style.display = "block";
+		this._svCanvas.style.width   = "100%";
+		this._svCanvas.style.height  = this.canvasHeight + "px";
+		this.applystylepath(this._svCanvas, "colorpicker.canvas", d.style_canvas);
+		this.container.appendChild(this._svCanvas);
+
+		// Hue strip
+		this._hueCanvas = document.createElement("CANVAS");
+		this._hueCanvas.width  = 360;
+		this._hueCanvas.height = 16;
+		this._hueCanvas.style.display = "block";
+		this._hueCanvas.style.width   = "100%";
+		this._hueCanvas.style.height  = "16px";
+		this.applystylepath(this._hueCanvas, "colorpicker.huebar", d.style_huebar);
+		this.container.appendChild(this._hueCanvas);
+
+		// Alpha strip (optional)
+		if (this.showAlpha) {
+			this._alphaCanvas = document.createElement("CANVAS");
+			this._alphaCanvas.width  = 200;
+			this._alphaCanvas.height = 16;
+			this._alphaCanvas.style.display = "block";
+			this._alphaCanvas.style.width   = "100%";
+			this._alphaCanvas.style.height  = "16px";
+			this.applystylepath(this._alphaCanvas, "colorpicker.alphabar", d.style_alphabar);
+			this.container.appendChild(this._alphaCanvas);
+		}
+
+		// Bottom row: swatch + text inputs
+		if (this.showHex || this.showInputs) {
+			this._inputRow = document.createElement("DIV");
+			this._inputRow.style.cssText = "display:flex;align-items:center;gap:4px;margin-top:6px;flex-wrap:wrap;";
+
+			// Color preview swatch
+			this._swatch = document.createElement("DIV");
+			this.applystylepath(this._swatch, "colorpicker.swatch", d.style_swatch);
+			this._inputRow.appendChild(this._swatch);
+
+			if (this.showHex) {
+				var hexHash = document.createElement("SPAN");
+				hexHash.textContent = "#";
+				this.applystylepath(hexHash, "colorpicker.channel_label");
+				this._inputRow.appendChild(hexHash);
+
+				this._hexInput = document.createElement("INPUT");
+				this._hexInput.type = "text";
+				this._hexInput.maxLength = 6;
+				this.applystylepath(this._hexInput, "colorpicker.hex_input", d.style_hex);
+				this._inputRow.appendChild(this._hexInput);
+			}
+
+			if (this.showInputs) {
+				var channels = this.showAlpha
+					? [["R", 0], ["G", 1], ["B", 2], ["A", 3]]
+					: [["R", 0], ["G", 1], ["B", 2]];
+				this._channelInputs = [];
+				var _this = this;
+				channels.forEach(function(ch) {
+					var lbl = document.createElement("SPAN");
+					lbl.textContent = ch[0];
+					_this.applystylepath(lbl, "colorpicker.channel_label");
+					_this._inputRow.appendChild(lbl);
+
+					var inp = document.createElement("INPUT");
+					inp.type = "number";
+					inp.min  = "0";
+					inp.max  = "255";
+					_this.applystylepath(inp, "colorpicker.channel_input", d.style_channel);
+					_this._inputRow.appendChild(inp);
+					_this._channelInputs.push({ input: inp, channel: ch[1] });
+				});
+			}
+
+			this.container.appendChild(this._inputRow);
+		}
+
+		// Initial draw
+		this._drawHue();
+		this._drawSV();
+		if (this.showAlpha) this._drawAlpha();
+		this._updateDisplays();
+
+		// Drag events on canvases
+		this._setupSVEvents();
+		this._setupHueEvents();
+		if (this.showAlpha) this._setupAlphaEvents();
+
+		// Hex input change
+		var _this = this;
+		if (this._hexInput) {
+			this._hexInput.onchange = function() {
+				var rgb = _this._hexToRgb(_this._hexInput.value);
+				if (rgb) {
+					_this._hsv = _this._rgbToHsv(rgb.r, rgb.g, rgb.b);
+					_this._drawSV();
+					_this._updateDisplays(false, -1);
+					if (typeof _this.callback === "function") _this.callback(_this);
+				}
+			};
+		}
+
+		// Channel input changes
+		if (this._channelInputs) {
+			this._channelInputs.forEach(function(item) {
+				item.input.onchange = function() {
+					var rgb = _this._hsvToRgb(_this._hsv.h, _this._hsv.s, _this._hsv.v);
+					var val = Math.round(Math.max(0, Math.min(255, parseFloat(item.input.value) || 0)));
+					if (item.channel === 3) {
+						_this._alpha = val;
+						if (_this.showAlpha) _this._drawAlpha();
+					} else {
+						var c = [rgb.r, rgb.g, rgb.b];
+						c[item.channel] = val;
+						_this._hsv = _this._rgbToHsv(c[0], c[1], c[2]);
+						_this._drawSV();
+					}
+					_this._updateDisplays(true, item.channel);
+					if (typeof _this.callback === "function") _this.callback(_this);
+				};
+			});
+		}
+	}
+
+	// ---- Canvas drawing ----
+
+	_drawSV() {
+		var canvas = this._svCanvas;
+		var ctx    = canvas.getContext("2d");
+		var w = canvas.width, h = canvas.height;
+
+		// Base hue color at full saturation/value
+		var hue    = this._hsvToRgb(this._hsv.h, 1, 1);
+		var hueStr = "rgb(" + hue.r + "," + hue.g + "," + hue.b + ")";
+
+		// Horizontal gradient: white → hue color
+		var gH = ctx.createLinearGradient(0, 0, w, 0);
+		gH.addColorStop(0, "#fff");
+		gH.addColorStop(1, hueStr);
+		ctx.fillStyle = gH;
+		ctx.fillRect(0, 0, w, h);
+
+		// Vertical overlay: transparent → black
+		var gV = ctx.createLinearGradient(0, 0, 0, h);
+		gV.addColorStop(0, "rgba(0,0,0,0)");
+		gV.addColorStop(1, "rgba(0,0,0,1)");
+		ctx.fillStyle = gV;
+		ctx.fillRect(0, 0, w, h);
+
+		// Crosshair indicator
+		var ix = this._hsv.s * w;
+		var iy = (1 - this._hsv.v) * h;
+		ctx.beginPath();
+		ctx.arc(ix, iy, 5, 0, Math.PI * 2);
+		ctx.strokeStyle = (this._hsv.v > 0.4 && this._hsv.s < 0.8) ? "#000" : "#fff";
+		ctx.lineWidth = 1.5;
+		ctx.stroke();
+	}
+
+	_drawHue() {
+		var canvas = this._hueCanvas;
+		var ctx    = canvas.getContext("2d");
+		var w = canvas.width, h = canvas.height;
+
+		// Full rainbow gradient
+		var g = ctx.createLinearGradient(0, 0, w, 0);
+		for (var i = 0; i <= 6; i++) {
+			var rgb = this._hsvToRgb(i * 60, 1, 1);
+			g.addColorStop(i / 6, "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")");
+		}
+		ctx.fillStyle = g;
+		ctx.fillRect(0, 0, w, h);
+
+		// Position marker line
+		var x = Math.round((this._hsv.h / 360) * w);
+		ctx.strokeStyle = "rgba(255,255,255,0.9)";
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.moveTo(x, 0);
+		ctx.lineTo(x, h);
+		ctx.stroke();
+	}
+
+	_drawAlpha() {
+		var canvas = this._alphaCanvas;
+		var ctx    = canvas.getContext("2d");
+		var w = canvas.width, h = canvas.height;
+
+		// Checkerboard background
+		var sz = 6;
+		for (var ax = 0; ax < w; ax += sz) {
+			for (var ay = 0; ay < h; ay += sz) {
+				ctx.fillStyle = ((Math.floor(ax / sz) + Math.floor(ay / sz)) % 2 === 0) ? "#bbb" : "#888";
+				ctx.fillRect(ax, ay, Math.min(sz, w - ax), Math.min(sz, h - ay));
+			}
+		}
+
+		// Gradient overlay: transparent → current color
+		var rgb = this._hsvToRgb(this._hsv.h, this._hsv.s, this._hsv.v);
+		var ga  = ctx.createLinearGradient(0, 0, w, 0);
+		ga.addColorStop(0, "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",0)");
+		ga.addColorStop(1, "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",1)");
+		ctx.fillStyle = ga;
+		ctx.fillRect(0, 0, w, h);
+
+		// Position marker line
+		var x = Math.round((this._alpha / 255) * w);
+		ctx.strokeStyle = "rgba(255,255,255,0.9)";
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.moveTo(x, 0);
+		ctx.lineTo(x, h);
+		ctx.stroke();
+	}
+
+	_updateDisplays(skipHex, skipChannel) {
+		var rgb = this._hsvToRgb(this._hsv.h, this._hsv.s, this._hsv.v);
+
+		// Swatch
+		if (this._swatch) {
+			this._swatch.style.background = this.showAlpha
+				? "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + "," + (this._alpha / 255).toFixed(2) + ")"
+				: "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
+		}
+
+		// Hex field
+		if (this._hexInput && !skipHex) {
+			this._hexInput.value = this._rgbToHex(rgb.r, rgb.g, rgb.b);
+		}
+
+		// Channel inputs
+		if (this._channelInputs) {
+			var vals = [rgb.r, rgb.g, rgb.b, this._alpha];
+			this._channelInputs.forEach(function(item) {
+				if (skipChannel !== item.channel) item.input.value = vals[item.channel];
+			});
+		}
+	}
+
+	// ---- Drag event setup ----
+
+	_setupSVEvents() {
+		var _this = this;
+		this._svCanvas.onmousedown = function(e) {
+			_this._onSVMouse(e);
+			var move = function(e) { _this._onSVMouse(e); };
+			var up   = function()  { rad.removedragevent(move, up); };
+			rad.dragevent(move, up);
+		};
+	}
+
+	_onSVMouse(e) {
+		var rect = this._svCanvas.getBoundingClientRect();
+		this._hsv.s = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+		this._hsv.v = Math.max(0, Math.min(1, 1 - (e.clientY - rect.top) / rect.height));
+		this._drawSV();
+		this._updateDisplays();
+		if (typeof this.callback === "function") this.callback(this);
+	}
+
+	_setupHueEvents() {
+		var _this = this;
+		this._hueCanvas.onmousedown = function(e) {
+			_this._onHueMouse(e);
+			var move = function(e) { _this._onHueMouse(e); };
+			var up   = function()  { rad.removedragevent(move, up); };
+			rad.dragevent(move, up);
+		};
+	}
+
+	_onHueMouse(e) {
+		var rect    = this._hueCanvas.getBoundingClientRect();
+		this._hsv.h = Math.max(0, Math.min(360, ((e.clientX - rect.left) / rect.width) * 360));
+		this._drawHue();
+		this._drawSV();
+		if (this.showAlpha) this._drawAlpha();
+		this._updateDisplays();
+		if (typeof this.callback === "function") this.callback(this);
+	}
+
+	_setupAlphaEvents() {
+		var _this = this;
+		this._alphaCanvas.onmousedown = function(e) {
+			_this._onAlphaMouse(e);
+			var move = function(e) { _this._onAlphaMouse(e); };
+			var up   = function()  { rad.removedragevent(move, up); };
+			rad.dragevent(move, up);
+		};
+	}
+
+	_onAlphaMouse(e) {
+		var rect   = this._alphaCanvas.getBoundingClientRect();
+		this._alpha = Math.round(Math.max(0, Math.min(255, ((e.clientX - rect.left) / rect.width) * 255)));
+		this._drawAlpha();
+		this._updateDisplays();
+		if (typeof this.callback === "function") this.callback(this);
+	}
+
+	// ---- Color conversion helpers ----
+
+	_hsvToRgb(h, s, v) {
+		var i = Math.floor(h / 60) % 6;
+		var f = h / 60 - Math.floor(h / 60);
+		var p = v * (1 - s);
+		var q = v * (1 - f * s);
+		var t = v * (1 - (1 - f) * s);
+		var r, g, b;
+		switch (i) {
+			case 0: r = v; g = t; b = p; break;
+			case 1: r = q; g = v; b = p; break;
+			case 2: r = p; g = v; b = t; break;
+			case 3: r = p; g = q; b = v; break;
+			case 4: r = t; g = p; b = v; break;
+			case 5: r = v; g = p; b = q; break;
+			default: r = 0; g = 0; b = 0;
+		}
+		return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+	}
+
+	_rgbToHsv(r, g, b) {
+		r /= 255; g /= 255; b /= 255;
+		var max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+		var h, s = (max === 0) ? 0 : d / max, v = max;
+		if (max === min) {
+			h = 0;
+		} else if (max === r) {
+			h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+		} else if (max === g) {
+			h = ((b - r) / d + 2) / 6;
+		} else {
+			h = ((r - g) / d + 4) / 6;
+		}
+		return { h: h * 360, s: s, v: v };
+	}
+
+	_rgbToHex(r, g, b) {
+		return ("0" + r.toString(16)).slice(-2) +
+		       ("0" + g.toString(16)).slice(-2) +
+		       ("0" + b.toString(16)).slice(-2);
+	}
+
+	_hexToRgb(hex) {
+		hex = (hex || "").replace(/^#/, "").trim();
+		if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+		if (hex.length !== 6) return null;
+		var n = parseInt(hex, 16);
+		if (isNaN(n)) return null;
+		return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+	}
+
+	_parseValue(v) {
+		if (v == null) return { r: 255, g: 0, b: 0, a: 255 };
+		if (typeof v === "string") {
+			var rgb = this._hexToRgb(v);
+			return rgb ? { r: rgb.r, g: rgb.g, b: rgb.b, a: 255 } : { r: 255, g: 0, b: 0, a: 255 };
+		}
+		if (typeof v === "object") {
+			return {
+				r: (v.r != null) ? v.r : 0,
+				g: (v.g != null) ? v.g : 0,
+				b: (v.b != null) ? v.b : 0,
+				a: (v.a != null) ? v.a : 255
+			};
+		}
+		return { r: 255, g: 0, b: 0, a: 255 };
+	}
+
+	// ---- Public interface ----
+
+	getelement() {
+		return this.container;
+	}
+
+	getvalue() {
+		var rgb = this._hsvToRgb(this._hsv.h, this._hsv.s, this._hsv.v);
+		return { r: rgb.r, g: rgb.g, b: rgb.b, a: this._alpha };
+	}
+
+	setvalue(v) {
+		var init = this._parseValue(v);
+		this._hsv   = this._rgbToHsv(init.r, init.g, init.b);
+		this._alpha = init.a;
+		this._drawHue();
+		this._drawSV();
+		if (this.showAlpha) this._drawAlpha();
+		this._updateDisplays();
+	}
+
+	getguielement() {
+		return this._svCanvas;
 	}
 }
 
