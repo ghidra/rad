@@ -13,7 +13,7 @@ rad.includes={
 		io:["localstorage","ajax","mysqlstorage","dom","object"],
 		mouse:["vector"],
 		noise:["vector"],
-		layout:["element"],
+		layout:["element","mouse","math","array"],
 		panels:["array","object", "dom", "element","drag"],
 		ui:["mouse","object","element"],
 		matrix:["vector"],
