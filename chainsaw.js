@@ -83,7 +83,7 @@ rad.chainsaw=class{
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER,null);
 	}
 	//sprite buffer methods
-	newSpriteBuffer(id,size=146,poweroftwo=false,stride=7){
+	newSpriteBuffer(id,size=146,poweroftwo=false,stride=11){
 		var nsprites = size*stride;
 		if(poweroftwo){
 			nsprites = rad.nextpoweroftwo(nsprites);
@@ -93,8 +93,8 @@ rad.chainsaw=class{
 		this.setBufferFloatData(id,sb.array);
 		this.spriteBuffers[id]=sb;
 	}
-	modifySpriteBuffer(BufferIndex,SpriteIndex,x,y,z=0,w=0,size=64,sid=0,tid=0){
-		this.spriteBuffers[BufferIndex].modify(SpriteIndex,x,y,z,w,size,sid,tid);
+	modifySpriteBuffer(BufferIndex,SpriteIndex,x,y,z=0,w=0,size=64,sid=0,tid=0,rx=0,ry=0,rw=0,rh=0){
+		this.spriteBuffers[BufferIndex].modify(SpriteIndex,x,y,z,w,size,sid,tid,rx,ry,rw,rh);
 	}
 	getSpriteBufferValue(BufferIndex,SpriteIndex){
 		return this.spriteBuffers[BufferIndex].getValue(SpriteIndex);
@@ -351,7 +351,7 @@ rad.chainsaw.program=class{
 	}
 }
 rad.chainsaw.spriteBuffer=class{
-	constructor(id,size=1024,stride=7){
+	constructor(id,size=1024,stride=11){
 		this.id = id;
 		this.array = new Float32Array(size);  // allow for 512 sprites
 		//sb.array_standard = [];///a basic array for easy removal and changes
@@ -359,7 +359,7 @@ rad.chainsaw.spriteBuffer=class{
 		this.size=size;
 		this.stride = stride;//how many elements per sprite
 	}
-	modify(SpriteIndex,x=0,y=0,z=0,w=0,size=64,sid=0,tid=0){
+	modify(SpriteIndex,x=0,y=0,z=0,w=0,size=64,sid=0,tid=0,rx=0,ry=0,rw=0,rh=0){
 		const s = this.stride*SpriteIndex;
 		this.array[s] = x;  // x-value
 		this.array[s+1] = y;  // y-value
@@ -368,6 +368,10 @@ rad.chainsaw.spriteBuffer=class{
 		this.array[s+4] = size; //size
 		this.array[s+5] = sid; //sprite sheet sprite id
 		this.array[s+6] = tid; //texture id
+		this.array[s+7] = rx;  //aSpriteRect: atlas cell x (texture px)
+		this.array[s+8] = ry;  //aSpriteRect: atlas cell y (texture px)
+		this.array[s+9] = rw;  //aSpriteRect: atlas cell width (texture px)
+		this.array[s+10] = rh; //aSpriteRect: atlas cell height (texture px)
 	}
 	getValue(SpriteIndex){
 		const s = this.stride*SpriteIndex;
@@ -378,7 +382,11 @@ rad.chainsaw.spriteBuffer=class{
 			'w' : this.array[s+3],
 			'size' : this.array[s+4],
 			'sid' : this.array[s+5],
-			'tid' : this.array[s+6]
+			'tid' : this.array[s+6],
+			'rx' : this.array[s+7],
+			'ry' : this.array[s+8],
+			'rw' : this.array[s+9],
+			'rh' : this.array[s+10]
 		};
 	}
 	refresh(floatArray){
@@ -459,6 +467,14 @@ rad.chainsaw.spriteBuffer=class{
 		gl.enableVertexAttribArray(sid);
 		gl.vertexAttribPointer(sid, 2, gl.FLOAT, false, stride*byte, 5*byte);
 		gl.vertexAttribDivisor(sid, 1);
+
+		// aSpriteRect (atlas cell x,y,w,h in texture px) — only on rect-aware quad programs
+		const rect = program.attributeMap.get("aSpriteRect");
+		if(rect !== undefined){
+			gl.enableVertexAttribArray(rect);
+			gl.vertexAttribPointer(rect, 4, gl.FLOAT, false, stride*byte, 7*byte);
+			gl.vertexAttribDivisor(rect, 1);
+		}
 	}
 	expandForQuads(){
 		const newArray = new Float32Array(this.count * 6 * this.stride);
