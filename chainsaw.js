@@ -83,7 +83,7 @@ rad.chainsaw=class{
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER,null);
 	}
 	//sprite buffer methods
-	newSpriteBuffer(id,size=146,poweroftwo=false,stride=11){
+	newSpriteBuffer(id,size=146,poweroftwo=false,stride=12){
 		var nsprites = size*stride;
 		if(poweroftwo){
 			nsprites = rad.nextpoweroftwo(nsprites);
@@ -93,8 +93,8 @@ rad.chainsaw=class{
 		this.setBufferFloatData(id,sb.array);
 		this.spriteBuffers[id]=sb;
 	}
-	modifySpriteBuffer(BufferIndex,SpriteIndex,x,y,z=0,w=0,size=64,sid=0,tid=0,rx=0,ry=0,rw=0,rh=0){
-		this.spriteBuffers[BufferIndex].modify(SpriteIndex,x,y,z,w,size,sid,tid,rx,ry,rw,rh);
+	modifySpriteBuffer(BufferIndex,SpriteIndex,x,y,z=0,w=0,size=64,sid=0,tid=0,rx=0,ry=0,rw=0,rh=0,vol=0){
+		this.spriteBuffers[BufferIndex].modify(SpriteIndex,x,y,z,w,size,sid,tid,rx,ry,rw,rh,vol);
 	}
 	getSpriteBufferValue(BufferIndex,SpriteIndex){
 		return this.spriteBuffers[BufferIndex].getValue(SpriteIndex);
@@ -351,7 +351,7 @@ rad.chainsaw.program=class{
 	}
 }
 rad.chainsaw.spriteBuffer=class{
-	constructor(id,size=1024,stride=11){
+	constructor(id,size=1024,stride=12){
 		this.id = id;
 		this.array = new Float32Array(size);  // allow for 512 sprites
 		//sb.array_standard = [];///a basic array for easy removal and changes
@@ -359,7 +359,7 @@ rad.chainsaw.spriteBuffer=class{
 		this.size=size;
 		this.stride = stride;//how many elements per sprite
 	}
-	modify(SpriteIndex,x=0,y=0,z=0,w=0,size=64,sid=0,tid=0,rx=0,ry=0,rw=0,rh=0){
+	modify(SpriteIndex,x=0,y=0,z=0,w=0,size=64,sid=0,tid=0,rx=0,ry=0,rw=0,rh=0,vol=0){
 		const s = this.stride*SpriteIndex;
 		this.array[s] = x;  // x-value
 		this.array[s+1] = y;  // y-value
@@ -372,6 +372,7 @@ rad.chainsaw.spriteBuffer=class{
 		this.array[s+8] = ry;  //aSpriteRect: atlas cell y (texture px)
 		this.array[s+9] = rw;  //aSpriteRect: atlas cell width (texture px)
 		this.array[s+10] = rh; //aSpriteRect: atlas cell height (texture px)
+		this.array[s+11] = vol; //aSpriteVolume: SDF volume dim N in grid units (0 = unknown -> legacy P scaling)
 	}
 	getValue(SpriteIndex){
 		const s = this.stride*SpriteIndex;
@@ -386,7 +387,8 @@ rad.chainsaw.spriteBuffer=class{
 			'rx' : this.array[s+7],
 			'ry' : this.array[s+8],
 			'rw' : this.array[s+9],
-			'rh' : this.array[s+10]
+			'rh' : this.array[s+10],
+			'vol' : this.array[s+11]
 		};
 	}
 	refresh(floatArray){
@@ -474,6 +476,14 @@ rad.chainsaw.spriteBuffer=class{
 			gl.enableVertexAttribArray(rect);
 			gl.vertexAttribPointer(rect, 4, gl.FLOAT, false, stride*byte, 7*byte);
 			gl.vertexAttribDivisor(rect, 1);
+		}
+
+		// aSpriteVolume (SDF volume dim N in grid units, 0 = legacy) — only on volume-aware quad programs
+		const vol = program.attributeMap.get("aSpriteVolume");
+		if(vol !== undefined){
+			gl.enableVertexAttribArray(vol);
+			gl.vertexAttribPointer(vol, 1, gl.FLOAT, false, stride*byte, 11*byte);
+			gl.vertexAttribDivisor(vol, 1);
 		}
 	}
 	expandForQuads(){
