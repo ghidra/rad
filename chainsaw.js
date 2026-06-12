@@ -502,6 +502,73 @@ rad.chainsaw.spriteBuffer=class{
 		this.size = newArray.length;
 	}
 }
+// Offscreen render target: FBO + N color textures + optional sampleable depth texture.
+// Built for the post-process stack but generic — supports MRT (colorCount) and float
+// formats (format:'RGBA16F') from day one so HDR/aux-buffer work is additive later.
+rad.chainsaw.renderTarget=class{
+	constructor(gl,width,height,options={}){
+		this.gl=gl;
+		this.width=width;
+		this.height=height;
+		this.colorCount=options.colorCount||1;
+		this.format=options.format||'RGBA8';//key into gl[...] so callers don't touch GL enums
+		this.useDepth=options.depth!==false;
+		this.fbo=null;
+		this.colorTextures=[];
+		this.depthTexture=null;
+		this.allocate();
+	}
+	allocate(){
+		const gl=this.gl;
+		this.dispose();
+		this.fbo=gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER,this.fbo);
+		const drawBuffers=[];
+		for(let i=0;i<this.colorCount;i++){
+			const tex=gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D,tex);
+			gl.texStorage2D(gl.TEXTURE_2D,1,gl[this.format],this.width,this.height);
+			gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+			gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0+i,gl.TEXTURE_2D,tex,0);
+			this.colorTextures.push(tex);
+			drawBuffers.push(gl.COLOR_ATTACHMENT0+i);
+		}
+		if(this.colorCount>1) gl.drawBuffers(drawBuffers);
+		if(this.useDepth){
+			this.depthTexture=gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D,this.depthTexture);
+			gl.texStorage2D(gl.TEXTURE_2D,1,gl.DEPTH_COMPONENT24,this.width,this.height);
+			gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+			gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.TEXTURE_2D,this.depthTexture,0);
+		}
+		const status=gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+		if(status!==gl.FRAMEBUFFER_COMPLETE) console.log("renderTarget incomplete: "+status);
+		gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+	}
+	bind(){
+		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER,this.fbo);
+		this.gl.viewport(0,0,this.width,this.height);
+	}
+	resize(width,height){
+		if(width===this.width&&height===this.height) return;
+		this.width=width;
+		this.height=height;
+		this.allocate();
+	}
+	dispose(){
+		const gl=this.gl;
+		for(let i=0;i<this.colorTextures.length;i++) gl.deleteTexture(this.colorTextures[i]);
+		this.colorTextures=[];
+		if(this.depthTexture){ gl.deleteTexture(this.depthTexture); this.depthTexture=null; }
+		if(this.fbo){ gl.deleteFramebuffer(this.fbo); this.fbo=null; }
+	}
+}
 //
 rad.chainsaw.imageData=class{
 	constructor(path,w,h,sw=32,sh=32){
