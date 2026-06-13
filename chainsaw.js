@@ -119,6 +119,14 @@ rad.chainsaw=class{
 		//this.gl.uniform1i(this.gl.getUniformLocation(this.shaderPrograms[program_index], uniform_name), 0);
 		this.gl.uniform1i(this.programs[program].uniformMap.get(uniform), index);	
 	}
+	//bind a 3D texture (TEXTURE_3D) to a sampler3D uniform — used by the GI probe grid
+	loadTexture3D(program,texture,uniform,index=0){
+		const loc=this.programs[program].uniformMap.get(uniform);
+		if(loc===undefined) return;
+		this.gl.activeTexture(this.gl.TEXTURE0+index);
+		this.gl.bindTexture(this.gl.TEXTURE_3D, texture);
+		this.gl.uniform1i(loc, index);
+	}
 	////This is from a DOM example
 	setDomTexture(dom_element,uniform_name){
 		///this will break if you call it now
