@@ -366,6 +366,9 @@ rad.chainsaw.spriteBuffer=class{
 		this.count=0;
 		this.size=size;
 		this.stride = stride;//how many elements per sprite
+		this.dirty = true;//needs a GPU upload; set on modify/refresh, cleared after upload. Lets
+		//static scene buffers (tiles) skip the per-frame bufferData re-upload — only dynamic
+		//buffers (player/NPCs, modified every frame) re-upload.
 	}
 	modify(SpriteIndex,x=0,y=0,z=0,w=0,size=64,sid=0,tid=0,rx=0,ry=0,rw=0,rh=0,vol=0){
 		const s = this.stride*SpriteIndex;
@@ -381,6 +384,7 @@ rad.chainsaw.spriteBuffer=class{
 		this.array[s+9] = rw;  //aSpriteRect: atlas cell width (texture px)
 		this.array[s+10] = rh; //aSpriteRect: atlas cell height (texture px)
 		this.array[s+11] = vol; //aSpriteVolume: SDF volume dim N in grid units (0 = unknown -> legacy P scaling)
+		this.dirty = true;//data changed -> needs re-upload
 	}
 	getValue(SpriteIndex){
 		const s = this.stride*SpriteIndex;
@@ -405,6 +409,7 @@ rad.chainsaw.spriteBuffer=class{
 			this.array[i] = floatArray[i];
 		}
 		this.count=floatArray.length/this.stride;
+		this.dirty = true;//data replaced -> needs re-upload
 		//console.log("loaded buffer array "+this.count+" sprites");
 	}
 	upload(gl,program,buffer){
@@ -413,7 +418,7 @@ rad.chainsaw.spriteBuffer=class{
 		const sid = program.attributeMap.get("aSpriteID");
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-		gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW);  // upload data
+		if(this.dirty){ gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW); this.dirty=false; }//only re-upload changed data
 
 		const byte = 4;//this is here specifically for ease of understanding offset
 		const stride = this.stride;//this.spriteBufferStride;
@@ -437,7 +442,7 @@ rad.chainsaw.spriteBuffer=class{
 		
 		// Now bind the instance buffer and set up instance attributes
 		gl.bindBuffer(gl.ARRAY_BUFFER, instanceBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW);
+		if(this.dirty){ gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW); this.dirty=false; }//only re-upload changed data
 
 		const instLoc = program.attributeMap.get("aInstancePosition");
 		//const instSize = program.attributeMap.get("aInstanceSize");
@@ -462,7 +467,7 @@ rad.chainsaw.spriteBuffer=class{
 		const sid = program.attributeMap.get("aSpriteID");
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-		gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW);
+		if(this.dirty){ gl.bufferData(gl.ARRAY_BUFFER, this.array, gl.STATIC_DRAW); this.dirty=false; }//only re-upload changed data
 
 		const byte = 4;
 		const stride = this.stride;

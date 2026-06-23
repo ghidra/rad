@@ -48,7 +48,9 @@ rad.includes={
 		this.include();
 	},
 	insert:function(src){
-		document.write('<script type="text/javascript" language="Javascript" src="'+src+'"></script>')
+		//dev cache-bust: append a per-load token so edited source never serves stale from cache
+		//(no bundler here; this keeps reloads always-fresh). Drop the query for a production build.
+		document.write('<script type="text/javascript" language="Javascript" src="'+src+'?_cb='+Date.now()+'"></script>')
 	},
 	include:function(){
 		var all = this.use_modules.concat(this.use_files);
