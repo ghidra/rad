@@ -77,10 +77,19 @@ rad.chainsaw=class{
 		this.gl.enableVertexAttribArray(attribLocation);
 		this.gl.vertexAttribPointer(attribLocation, size, this.gl.FLOAT, normalize, stride, offset);
 	}
+	//(re)allocate a uniform buffer's store. DYNAMIC_DRAW = data is rewritten frequently (the lights
+	//UBO is updated every frame), the correct hint for buffers that updateUniformBufferData() mutates.
 	setUniformBufferData(id,data){
 		this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffers[id]);
-		this.gl.bufferData(this.gl.UNIFORM_BUFFER, data, this.gl.STATIC_DRAW);
-		this.gl.bindBuffer(this.gl.ARRAY_BUFFER,null);
+		this.gl.bufferData(this.gl.UNIFORM_BUFFER, data, this.gl.DYNAMIC_DRAW);
+		this.gl.bindBuffer(this.gl.UNIFORM_BUFFER,null);
+	}
+	//update an already-allocated uniform buffer in place (no reallocation). bufferSubData reuses the
+	//existing store, avoiding the per-frame realloc/orphan stalls that bufferData() triggers.
+	updateUniformBufferData(id,data){
+		this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffers[id]);
+		this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 0, data);
+		this.gl.bindBuffer(this.gl.UNIFORM_BUFFER,null);
 	}
 	//sprite buffer methods
 	newSpriteBuffer(id,size=146,poweroftwo=false,stride=12){

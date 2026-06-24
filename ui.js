@@ -826,214 +826,154 @@ rad.ui.textbox = class extends rad.ui.base {
 }
 
 //-----------slider
+// Slider: a native <input type="range"> paired with a number input.
+//   settings.lower/upper  - the initial range
+//   settings.clamped      - true: range is FIXED at [lower,upper].
+//                           false (default): range is DYNAMIC — it grows to
+//                           contain whatever value you type, so the bar never
+//                           hard-caps you (the number box is the source of truth).
+//   settings.int          - round to integers (range step = 1).
+//   settings.update       - fire callback live while dragging (else only on release).
+// Public API (unchanged): getvalue(), getelement(), refresh(), set_settings(),
+//   set_to_minimum(), set_to_maximum(); callback receives the slider instance.
 rad.ui.slider = class extends rad.ui.base {
 	constructor(d) {
 		super(d);
 		this.uitype = "slider";
-		this.keep = false;
 
-		// Settings
 		this.settings = Object.assign({}, rad.defaults.ui.slider.settings);
 		if (d.settings) {
-			for (var s in d.settings) {
-				this.settings[s] = d.settings[s];
-			}
+			for (var s in d.settings) this.settings[s] = d.settings[s];
 		}
 
-		// Create container
+		this.value = parseFloat(this.value) || 0;
+
+		// live range — seeded from lower/upper, may grow when unclamped
+		this.rmin = (this.settings.lower != undefined) ? this.settings.lower : 0;
+		this.rmax = (this.settings.upper != undefined) ? this.settings.upper : 1;
+		this._fitRange();
+
+		// container (flex row: [label] [range] [number])
 		this.container = document.createElement("DIV");
 		this.container.id = this.id;
-		this.applystyle(this.container, "style", d.style);
-		var containerWidth = this.container.style.width ? parseInt(this.container.style.width) : rad.defaults.ui.style.width;
-		var containerMargin = this.container.style.margin ? parseInt(this.container.style.margin) : rad.defaults.ui.style.margin;
+		this.container.style.cssText = "display:flex;align-items:center;gap:6px;box-sizing:border-box;margin:3px 0;";
+		if (d.style && d.style.width != undefined) {
+			this.container.style.width = (typeof d.style.width === "number") ? d.style.width + "px" : d.style.width;
+		}
 
-		// Create label if width > 0
-		var labelStyle = rad.defaults.ui.label.style || {};
+		// optional label
+		var labelStyle = (this.theme.label && this.theme.label.style) || {};
 		var labelWidth = (d.style_label && d.style_label.width !== undefined) ? d.style_label.width : labelStyle.width;
 		if (labelWidth > 0) {
 			this.label_container = document.createElement("DIV");
-			this.label_container.innerHTML = "&nbsp;" + this.label;
-			this.applystylepath(this.label_container, "label", d.style_label);
+			this.label_container.textContent = this.label;
+			this.label_container.style.cssText = "flex-shrink:0;color:#aaa;font-size:11px;font-family:monospace;";
+			this.label_container.style.width = labelWidth + "px";
 			this.container.appendChild(this.label_container);
 		}
 
-		// Create slider elements
-		this.con = document.createElement("DIV");
-		this.applystylepath(this.con, "slider.slider", d.slider && d.slider.slider ? d.slider.slider.style : null);
+		// the actual slider
+		this.range = document.createElement("INPUT");
+		this.range.type = "range";
+		this.range.style.cssText = "flex:1;min-width:40px;margin:0;cursor:pointer;accent-color:#7ec8e3;";
 
-		this.bg = document.createElement("DIV");
-		this.bg.className = "slider_BG";
-		this.applystylepath(this.bg, "slider.bg", d.slider && d.slider.bg ? d.slider.bg.style : null);
-
-		this.fg = document.createElement("DIV");
-		this.fg.className = "slider_FG";
-		this.applystylepath(this.fg, "slider.fg", d.slider && d.slider.fg ? d.slider.fg.style : null);
-
+		// the value box
 		this.in = document.createElement("INPUT");
-		this.in.type = "text";
+		this.in.type = "number";
 		this.in.className = "slider_IN";
 		this.in.id = "stb_" + this.id + "_" + this.label;
-		this.in.value = (this.settings.int) ? Math.round(this.value) : this.value;
-		this.applystylepath(this.in, "slider.in", d.slider && d.slider.in ? d.slider.in.style : null);
+		this.in.step = this.settings.int ? 1 : "any";
+		this.in.style.cssText = "width:56px;flex-shrink:0;box-sizing:border-box;background:#111;color:#7ec8e3;border:1px solid #444;border-radius:2px;padding:2px 4px;font-size:11px;font-family:monospace;";
 
-		var inputWidth = this.in.style.width ? parseInt(this.in.style.width) : rad.defaults.ui.slider.in.style.width;
-		this.width_max = containerWidth - inputWidth - (containerMargin * 3) - 2;
+		this._syncRangeAttrs();
+		this._syncInputs();
 
-		this.bg.style.width = this.width_max + "px";
-		this.bg.style.marginTop = containerMargin + "px";
-		this.bg.style.marginBottom = containerMargin + "px";
-
-		var fgwidth;
-		if (this.settings.clamped) {
-			fgwidth = rad.remap(this.value, this.settings.lower, this.settings.upper, 0, this.width_max);
-		} else {
-			fgwidth = this.width_max / 2;
-		}
-		this.fg.style.width = fgwidth + "px";
-		this.fg.style.maxWidth = this.width_max + "px";
-
-		// Callback
-		if (typeof d.callback === "function") {
-			this.callback = d.callback;
-		}
-
-		// Assemble
-		this.bg.appendChild(this.fg);
-		this.con.appendChild(this.bg);
+		this.container.appendChild(this.range);
 		this.container.appendChild(this.in);
-		this.container.appendChild(this.con);
 
-		// Events
 		var _this = this;
-		this.bg.onmousedown = function(e) { _this.mousedown(e); };
-		this.in.onchange = function(e) { _this.input_changed(e); };
+		this.range.oninput = function() { _this._commit(parseFloat(_this.range.value), _this.settings.update); };
+		this.range.onchange = function() { if (!_this.settings.update && typeof _this.callback === "function") _this.callback(_this); };
+		this.in.onchange = function() { _this._fromInput(); };
 	}
 
-	getelement() {
-		return this.container;
-	}
+	getelement() { return this.container; }
 
-	getvalue() {
-		return this.value;
-	}
+	getvalue() { return this.value; }
 
 	set_settings(d) {
 		if (d != undefined) {
-			for (var s in d) {
-				this.settings[s] = d[s];
-			}
+			for (var s in d) this.settings[s] = d[s];
 		}
+		if (this.settings.lower != undefined) this.rmin = this.settings.lower;
+		if (this.settings.upper != undefined) this.rmax = this.settings.upper;
+		this._fitRange();
+		this._syncRangeAttrs();
+		this._syncInputs();
 	}
 
-	mousedown(e) {
-		if (!this.keep) {
-			this.value = this.in.value;
-			this.keep = true;
-		}
-		this.update(e);
-		var _this = this;
-		this.tmp_updater = function(e) { _this.update(e); };
-		this.tmp_release = function(e) { _this.release(e); };
-		rad.dragevent(this.tmp_updater, this.tmp_release);
-	}
-
-	input_changed(e) {
-		var new_value = parseFloat(this.in.value);
-		var rval;
-		if (isNaN(new_value)) {
-			this.in.value = this.value;
-		} else {
-			if (this.settings.clamped) {
-				if (new_value > this.settings.max_upper) {
-					new_value = this.settings.max_upper;
-					this.settings.upper = this.settings.max_upper;
-				}
-				if (new_value < this.settings.max_lower) {
-					new_value = this.settings.max_lower;
-					this.settings.lower = this.settings.max_lower;
-				}
-				rval = (this.settings.int) ? Math.round(new_value) : new_value;
-				this.fg.style.width = rad.remap(rval, this.settings.lower, this.settings.upper, 0, this.width_max) + "px";
-			} else {
-				var bounds = this.bounds(new_value);
-				rval = (this.settings.int) ? Math.round(new_value) : new_value;
-				this.fg.style.width = rad.remap(rval, this.settings.lower, this.settings.upper, 0, this.width_max / 2) + "px";
-			}
-			this.value = rval;
-			if (this.settings.int) {
-				this.in.value = rval;
-			}
-			if (typeof this.callback === "function") {
-				this.callback(this);
-			}
-		}
-	}
-
-	update(e) {
-		var c = rad.mouseposition(e);
-		var p = rad.domposition(this.bg);
-
-		var mouse_offset = c.x - p.x;
-		var new_position = rad.clamp(mouse_offset, 1, this.width_max);
-		var new_val;
+	// grow the live range to contain the value (no-op when clamped)
+	_fitRange() {
 		if (this.settings.clamped) {
-			new_val = rad.remap(new_position, 1, this.width_max, this.settings.lower, this.settings.upper);
-		} else {
-			var bounds = this.bounds(this.value);
-			new_val = rad.remap(new_position, 1, this.width_max, bounds.min, bounds.max);
+			this.rmin = this.settings.lower;
+			this.rmax = this.settings.upper;
+			this.value = rad.clamp(this.value, this.rmin, this.rmax);
+			return;
 		}
-		this.fg.style.width = new_position + "px";
+		if (this.value > this.rmax) this.rmax = this._headroom(this.value, 1);
+		if (this.value < this.rmin) this.rmin = this._headroom(this.value, -1);
+		if (this.rmax <= this.rmin) this.rmax = this.rmin + 1;
+	}
 
-		var rval = (this.settings.int) ? Math.round(new_val) : new_val.toFixed(2);
-		this.in.value = rval;
+	// push a bound ~10% of |value| past the value so there's room to keep dragging
+	_headroom(v, dir) {
+		var pad = Math.max(Math.abs(v) * 0.1, 1);
+		return v + dir * pad;
+	}
 
-		if (typeof this.callback === "function" && this.settings.update) {
-			if (this.settings.int) {
-				if (rval != this.value) {
-					this.callback(this);
-				}
-			} else {
-				this.callback(this);
-			}
-			this.value = rval;
-		}
+	_step() {
+		if (this.settings.int) return 1;
+		var span = this.rmax - this.rmin;
+		return span > 0 ? span / 1000 : "any";
+	}
+
+	_syncRangeAttrs() {
+		this.range.min = this.rmin;
+		this.range.max = this.rmax;
+		this.range.step = this._step();
+	}
+
+	_syncInputs() {
+		this.range.value = this.value;
+		this.in.value = this.settings.int ? Math.round(this.value) : +(+this.value).toFixed(4);
+	}
+
+	// adopt a new value, refit/redraw, and optionally fire the callback
+	_commit(v, fire) {
+		if (isNaN(v)) { this._syncInputs(); return; }
+		this.value = this.settings.int ? Math.round(v) : v;
+		this._fitRange();
+		this._syncRangeAttrs();
+		this._syncInputs();
+		if (fire && typeof this.callback === "function") this.callback(this);
+	}
+
+	_fromInput() {
+		var v = parseFloat(this.in.value);
+		if (isNaN(v)) { this._syncInputs(); return; }// reject garbage, restore last good
+		this._commit(v, true);// typing always commits + fires
 	}
 
 	refresh() {
-		var new_position = rad.remap(this.value, this.settings.lower, this.settings.upper, 0, this.width_max);
-		this.fg.style.width = new_position + "px";
-		this.in.value = this.value;
+		this.value = parseFloat(this.value) || 0;
+		this._fitRange();
+		this._syncRangeAttrs();
+		this._syncInputs();
 	}
 
-	release(e) {
-		rad.removedragevent(this.tmp_updater, this.tmp_release);
+	set_to_minimum() { this._commit(this.rmin, true); }
 
-		var rval = parseFloat(document.getElementById("stb_" + this.id + "_" + this.label).value);
-		this.value = (this.settings.int) ? Math.round(rval) : rval;
-		if (this.settings.int) {
-			this.fg.style.width = rad.remap(this.value, this.settings.lower, this.settings.upper, 0, this.width_max) + "px";
-		}
-		if (typeof this.callback === "function") {
-			this.callback(this);
-		}
-	}
-
-	bounds(val) {
-		val = parseFloat(val);
-		var span = (val == 0) ? 10 : val;
-		var v = Math.abs(span);
-		return { min: val - v, max: val + v };
-	}
-
-	set_to_minimum() {
-		this.value = this.settings.lower;
-		this.refresh();
-	}
-
-	set_to_maximum() {
-		this.value = this.settings.upper;
-		this.refresh();
-	}
+	set_to_maximum() { this._commit(this.rmax, true); }
 }
 
 //-----------button
