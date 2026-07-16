@@ -76,6 +76,11 @@ rad.chainsaw=class{
 		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers[buffer]);
 		this.gl.enableVertexAttribArray(attribLocation);
 		this.gl.vertexAttribPointer(attribLocation, size, this.gl.FLOAT, normalize, stride, offset);
+		//per-vertex non-instanced data: force divisor 0. vertexAttribDivisor is GLOBAL per-location
+		//state and the quad sprite path leaves it at 1 on this location — without this reset the shadow
+		//mesh draw (which uses this fn) inherits divisor 1 and collapses every vertex to position[0],
+		//silently emptying the shadow map whenever a quad drew last (e.g. the transparent pass).
+		this.gl.vertexAttribDivisor(attribLocation, 0);
 	}
 	//(re)allocate a uniform buffer's store. DYNAMIC_DRAW = data is rewritten frequently (the lights
 	//UBO is updated every frame), the correct hint for buffers that updateUniformBufferData() mutates.
